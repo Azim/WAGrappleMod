@@ -3,6 +3,7 @@ package icu.azim.wagrapple.entity;
 import java.util.UUID;
 
 import icu.azim.wagrapple.WAGrappleMod;
+import net.minecraft.client.render.entity.FishingBobberEntityRenderer;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
@@ -39,7 +40,7 @@ public class GrappleLine extends Entity {
 
 	@Override
 	protected void initDataTracker() {
-		//FishingBobberEntity
+		//FishingBobberEntityRenderer
 	}
 
 	@Override
