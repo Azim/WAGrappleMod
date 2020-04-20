@@ -118,25 +118,16 @@ public class GrappleLineRenderer extends EntityRenderer<GrappleLineEntity>{
 	    
 	         
 
-	         consumer.vertex(matrix4f2, 0, 0, 0).color(0, 0, 0, 255).next();
-	         for(int i = 1; i<entity.getPieces().size();i++) {
+	         consumer.vertex(matrix4f2, 0, 0, 0).color(0, 0, 0, 255).next(); //the part at the very start of it
+	         
+	         for(int i = 1; i<entity.getPieces().size();i++) { //skip the very start of it, cuz we already added it above
 	        	 Vec3d piece = entity.getPieces().get(i).subtract(entity.getPos());
-		         consumer.vertex(matrix4f2, (float)piece.x, (float)piece.y, (float)piece.z).color(0, 0, 0, 255).next();
-		         consumer.vertex(matrix4f2, (float)piece.x, (float)piece.y, (float)piece.z).color(0, 0, 0, 255).next();
+		         consumer.vertex(matrix4f2, (float)piece.x, (float)piece.y, (float)piece.z).color(0, 0, 0, 255).next(); //end line
+		         consumer.vertex(matrix4f2, (float)piece.x, (float)piece.y, (float)piece.z).color(0, 0, 0, 255).next(); //start next one
 	         }
 	         
+	         consumer.vertex(matrix4f2, xpart, ypart, zpart).color(0, 0, 0, 255).next(); //end the last line in player's hand
 	         
-	         //consumer.vertex(matrix4f2, xpart*0.33f, ypart*0.33f, zpart*0.33f).color(0, 255, 0, 255).next();
-	         //consumer.vertex(matrix4f2, xpart*0.66f, ypart*0.66f, zpart*0.66f).color(0, 0, 255, 255).next();
-	         consumer.vertex(matrix4f2, xpart, ypart, zpart).color(0, 0, 0, 255).next();
-	         /*
-	         for(int counter = 0; counter < 16; ++counter) {
-	        	int part = counter/16;
-	        	consumer.vertex(matrix4f2, xpart*part, ypart* part/*(part*part+part) * 0.5F, zpart*part).color(0,0,0,255).next(); 
-	        	part = (counter+1)/16;
-	        	consumer.vertex(matrix4f2, xpart*part, ypart*part, zpart*part).color(0,0,0,255).next(); 
-	         }*/
-
 	         matrixStack.pop();
 		}
 		
