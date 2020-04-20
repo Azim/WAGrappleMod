@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import icu.azim.wagrapple.WAGrappleMod;
-import icu.azim.wagrapple.entity.GrappleLine;
+import icu.azim.wagrapple.entity.GrappleLineEntity;
 
 @Mixin(ClientPlayNetworkHandler.class)
 public class MixinClientPlayNetworkHandler {
@@ -29,7 +29,7 @@ public class MixinClientPlayNetworkHandler {
             Entity owner = world.getEntityById(packet.getEntityData());
 
             if (owner instanceof PlayerEntity) {
-            	GrappleLine toSpawn = new GrappleLine(world, (PlayerEntity) owner, 0, new Vec3d(x,y,z));
+            	GrappleLineEntity toSpawn = new GrappleLineEntity(world, (PlayerEntity) owner, 0, new Vec3d(x,y,z));
                 int id = packet.getId();
                 toSpawn.updateTrackedPosition(x, y, z);
                 toSpawn.pitch = (float)(packet.getPitch() * 360) / 256.0F;

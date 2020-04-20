@@ -1,6 +1,6 @@
 package icu.azim.wagrapple;
 
-import icu.azim.wagrapple.entity.GrappleLine;
+import icu.azim.wagrapple.entity.GrappleLineEntity;
 import icu.azim.wagrapple.item.GrappleItem;
 import icu.azim.wagrapple.render.GrappleLineRenderer;
 import net.fabricmc.api.ClientModInitializer;
@@ -8,6 +8,7 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
 import net.fabricmc.fabric.api.client.rendereregistry.v1.EntityRendererRegistry;
 import net.fabricmc.fabric.api.entity.FabricEntityTypeBuilder;
+import net.minecraft.client.render.entity.FishingBobberEntityRenderer;
 import net.minecraft.entity.EntityCategory;
 import net.minecraft.entity.EntityDimensions;
 import net.minecraft.entity.EntityType;
@@ -21,13 +22,13 @@ import net.minecraft.util.registry.Registry;
 public class WAGrappleMod implements ModInitializer,ClientModInitializer {
 	public static final String modid = "wagrapple";
 	
-	public static final EntityType<GrappleLine> GRAPPLE_LINE =
+	public static final EntityType<GrappleLineEntity> GRAPPLE_LINE =
 		    Registry.register(
 		        Registry.ENTITY_TYPE,
 		        new Identifier(modid, "grapple_line"),
 		        FabricEntityTypeBuilder.create(
 		        		EntityCategory.MISC,
-		        		(EntityType.EntityFactory<GrappleLine>) GrappleLine::new)
+		        		(EntityType.EntityFactory<GrappleLineEntity>) GrappleLineEntity::new)
 		        .size(EntityDimensions.fixed(0.2F, 0.2F))
 		        .build()
 		    );
@@ -41,6 +42,7 @@ public class WAGrappleMod implements ModInitializer,ClientModInitializer {
 	@Override
 	public void onInitialize() {
 		Registry.register(Registry.ITEM, new Identifier(modid, "grapple"), GRAPPLE_ITEM);
+		//FishingBobberEntityRenderer
 	}
 
 	@Override

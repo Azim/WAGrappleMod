@@ -1,6 +1,6 @@
 package icu.azim.wagrapple.item;
 
-import icu.azim.wagrapple.entity.GrappleLine;
+import icu.azim.wagrapple.entity.GrappleLineEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -27,7 +27,7 @@ public class GrappleItem extends Item{
 		if(result.getType()==Type.BLOCK) {
 			world.playSound(playerEntity, result.getPos().x,result.getPos().y,result.getPos().z, SoundEvents.BLOCK_BEACON_ACTIVATE, SoundCategory.PLAYERS, 1.0F, 1.0F);
 			if(!world.isClient) {
-				world.spawnEntity(new GrappleLine(world, playerEntity, 0, result.getPos()));
+				world.spawnEntity(new GrappleLineEntity(world, playerEntity, 0, result.getPos()));
 				System.out.println("server - spawned");
 			}
 		}else {
