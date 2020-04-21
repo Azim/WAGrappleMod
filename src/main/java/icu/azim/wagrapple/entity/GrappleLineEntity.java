@@ -131,11 +131,11 @@ public class GrappleLineEntity extends Entity {
 		}*/
 		return new Vec3d(
 				pos.x+((pos.x>0?1:-1)*
-						Math.abs(pos.x-(int)pos.x)>0.5?+0.05:-0.05),
+						(Math.abs(pos.x-(int)pos.x)>0.5?0.05:-0.05)),
 				pos.y+((pos.y>0?1:-1)*
-						Math.abs(pos.y-(int)pos.y)>0.5?+0.05:-0.05),
+						(Math.abs(pos.y-(int)pos.y)>0.5?0.05:-0.05)),
 				pos.z+((pos.z>0?1:-1)*
-						Math.abs(pos.z-(int)pos.z)>0.5?+0.05:-0.05)
+						(Math.abs(pos.z-(int)pos.z)>0.5?0.05:-0.05))
 				);
 	}
 	

@@ -15,6 +15,7 @@ import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.client.render.entity.EntityRenderer;
+import net.minecraft.client.render.entity.LeashKnotEntityRenderer;
 import net.minecraft.client.util.math.Matrix4f;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.util.math.Vector3f;
@@ -112,7 +113,7 @@ public class GrappleLineRenderer extends EntityRenderer<GrappleLineEntity>{
 	        				 }, () -> {
 	        					 RenderSystem.disableBlend();
 	        				 }))
-	        		 .writeMaskState(new RenderPhase.WriteMaskState(true, false)).build(false))
+	        		 .writeMaskState(new RenderPhase.WriteMaskState(true, true)).build(false))
 	         );
 	         Matrix4f matrix4f2 = matrixStack.peek().getModel();
 	         
@@ -124,6 +125,7 @@ public class GrappleLineRenderer extends EntityRenderer<GrappleLineEntity>{
 	         
 	         for(int i = 1; i<entity.getHandler().size();i++) { //skip the very start of it, cuz we already added it above
 	        	 Vec3d piece = entity.getHandler().getDrawPieces(i).subtract(entity.getPos());
+	        	 ///LeashKnotEntityRenderer
 		         consumer.vertex(matrix4f2, (float)round(piece.x,2), (float)round(piece.y,2), (float)round(piece.z,2)).color(0, 0, 0, 255).next(); //end line
 		         consumer.vertex(matrix4f2, (float)round(piece.x,2), (float)round(piece.y,2), (float)round(piece.z,2)).color(0, 0, 0, 255).next(); //start next one
 	         }
