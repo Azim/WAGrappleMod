@@ -1,5 +1,7 @@
 package icu.azim.wagrapple.render;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.OptionalDouble;
 
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -120,10 +122,10 @@ public class GrappleLineRenderer extends EntityRenderer<GrappleLineEntity>{
 
 	         consumer.vertex(matrix4f2, 0, 0, 0).color(0, 0, 0, 255).next(); //the part at the very start of it
 	         
-	         for(int i = 1; i<entity.getPieces().size();i++) { //skip the very start of it, cuz we already added it above
-	        	 Vec3d piece = entity.getPieces().get(i).subtract(entity.getPos());
-		         consumer.vertex(matrix4f2, (float)piece.x, (float)piece.y, (float)piece.z).color(0, 0, 0, 255).next(); //end line
-		         consumer.vertex(matrix4f2, (float)piece.x, (float)piece.y, (float)piece.z).color(0, 0, 0, 255).next(); //start next one
+	         for(int i = 1; i<entity.getHandler().size();i++) { //skip the very start of it, cuz we already added it above
+	        	 Vec3d piece = entity.getHandler().getDrawPieces(i).subtract(entity.getPos());
+		         consumer.vertex(matrix4f2, (float)round(piece.x,2), (float)round(piece.y,2), (float)round(piece.z,2)).color(0, 0, 0, 255).next(); //end line
+		         consumer.vertex(matrix4f2, (float)round(piece.x,2), (float)round(piece.y,2), (float)round(piece.z,2)).color(0, 0, 0, 255).next(); //start next one
 	         }
 	         
 	         consumer.vertex(matrix4f2, xpart, ypart, zpart).color(0, 0, 0, 255).next(); //end the last line in player's hand
@@ -131,7 +133,19 @@ public class GrappleLineRenderer extends EntityRenderer<GrappleLineEntity>{
 	         matrixStack.pop();
 		}
 		
+
 		
+		
+	}
+	private double round(double x, int i) {
+		if(x-(int)x>0.5) {
+			x+=0.03;
+		}else {
+			x-=0.03;
+		}
+		BigDecimal bd = BigDecimal.valueOf(x);
+	    bd = bd.setScale(i, RoundingMode.HALF_UP);
+	    return bd.doubleValue();
 	}
 	
 }
