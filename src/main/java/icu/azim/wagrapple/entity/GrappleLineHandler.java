@@ -8,12 +8,20 @@ import net.minecraft.util.math.Vec3d;
 public class GrappleLineHandler {
 	private List<Vec3d> toDraw;
 	private List<Vec3d> pieces;
-	public GrappleLineHandler() {
+	private double maxLen;
+	private double piecesLen;
+	
+	public GrappleLineHandler(double maxLen) {
 		toDraw = new ArrayList<Vec3d>();
 		pieces = new ArrayList<Vec3d>();
+		this.maxLen = maxLen;
+		this.piecesLen = 0;
 	}
 	
 	public void add(Vec3d piece, Vec3d drawPiece) {
+		if(pieces.size()>0) {
+			piecesLen+= piece.distanceTo(getLastPiece());
+		}
 		pieces.add(piece);
 		toDraw.add(drawPiece);
 	}
@@ -21,8 +29,16 @@ public class GrappleLineHandler {
 	public void add(int index, Vec3d piece, Vec3d drawPiece) {
 		pieces.add(index, piece);
 		toDraw.add(index, drawPiece);
+		recalcLen();
 	}
 	
+	private void recalcLen() {
+		piecesLen = 0;
+		for(int i = 0; i < pieces.size()-1;i++) {
+			piecesLen += pieces.get(i).distanceTo(pieces.get(i+1));
+		}
+	}
+
 	public Vec3d getPiece(int index) {
 		return pieces.get(index);
 	}
@@ -32,5 +48,21 @@ public class GrappleLineHandler {
 
 	public int size() {
 		return pieces.size();
+	}
+	
+	public Vec3d getLastPiece() {
+		return pieces.get(pieces.size()-1);
+	}
+	
+	public Vec3d getLastDrawPiece() {
+		return toDraw.get(toDraw.size()-1);
+	}
+
+	public double getPiecesLen() {
+		return piecesLen;
+	}
+
+	public double getMaxLen() {
+		return maxLen;
 	}
 }

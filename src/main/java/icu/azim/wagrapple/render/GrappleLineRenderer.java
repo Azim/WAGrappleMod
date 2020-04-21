@@ -13,6 +13,7 @@ import net.minecraft.client.render.RenderPhase;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.VertexFormats;
+import net.minecraft.client.render.block.entity.BeaconBlockEntityRenderer;
 import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.client.render.entity.EntityRenderer;
 import net.minecraft.client.util.math.Matrix4f;
@@ -107,16 +108,16 @@ public class GrappleLineRenderer extends EntityRenderer<GrappleLineEntity> {
 			Matrix4f matrix4f2 = matrixStack.peek().getModel();
 
 			consumer.vertex(matrix4f2, 0, 0, 0).color(0, 0, 0, 255).next(); // the part at the very start of it
-
+			
 			for (int i = 1; i < entity.getHandler().size(); i++) { // skip the very start of it, cuz we already added it above
 				Vec3d piece = entity.getHandler().getDrawPieces(i).subtract(entity.getPos());
 				/// LeashKnotEntityRenderer
+				//BeaconBlockEntityRenderer
 				consumer.vertex(matrix4f2, (float) round(piece.x, 2), (float) round(piece.y, 2), (float) round(piece.z, 2)).color(0, 0, 0, 255).next(); // end line
 				consumer.vertex(matrix4f2, (float) round(piece.x, 2), (float) round(piece.y, 2), (float) round(piece.z, 2)).color(0, 0, 0, 255).next(); // start next one
 			}
 
 			consumer.vertex(matrix4f2, xpart, ypart, zpart).color(0, 0, 0, 255).next(); // end the last line in player's hand
-
 			matrixStack.pop();
 		}
 

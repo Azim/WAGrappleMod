@@ -27,6 +27,9 @@ public class GrappleLineEntity extends Entity {
 	private PlayerEntity player;
 	private Vec3d hitPos;
 	private float length = 0;
+	private double plVel =0;
+	private double plAcc =0;
+	private double gravity = -0.01;
 	
 	private GrappleLineHandler lineHandler;
 	//private List<Vec3d> pieces;
@@ -40,10 +43,10 @@ public class GrappleLineEntity extends Entity {
 		this.updatePosition(pos.x, pos.y, pos.z);
 		this.hitPos = pos;
 		this.player = player;
-		this.setLength(length);
+		this.setLength(16);
 		this.ignoreCameraFrustum = true;
-		lineHandler= new GrappleLineHandler();
-		lineHandler.add(pos, pos);
+		lineHandler= new GrappleLineHandler(16);
+		lineHandler.add(0, pos, pos);
 	}
 
 	@Override
@@ -72,6 +75,7 @@ public class GrappleLineEntity extends Entity {
 	public void tick() {
 		if(player==null) {
 			this.remove();
+			return;
 		}
 		if(world.isClient) {
 			BlockHitResult res = this.world.rayTrace(new RayTraceContext(new Vec3d(player.getX(),player.getEyeY(),player.getZ()),lineHandler.getPiece(lineHandler.size()-1), ShapeType.OUTLINE, FluidHandling.NONE, player));
@@ -81,18 +85,43 @@ public class GrappleLineEntity extends Entity {
 				Box shape = world.getBlockState(res.getBlockPos()).getOutlineShape(world, res.getBlockPos()).getBoundingBox();
 				
 				
-				if(lineHandler.getPiece(lineHandler.size()-1) != pos) {
-					Vec3d draw = getToDraw(pos,shape);
-					lineHandler.add(pos,draw);
-					System.out.println(lineHandler.size()+":"+pos.toString()+":"+draw.toString());
+				if(!isSamePos( lineHandler.getPiece(lineHandler.size()-1), pos)) {
+					if(lineHandler.size()>1) {
+						if(!isSamePos( lineHandler.getPiece(lineHandler.size()-2), pos)) {
+							Vec3d draw = getToDraw(pos,shape);
+							lineHandler.add(pos,draw);
+							System.out.println(lineHandler.size()+":"+pos.toString()+":"+draw.toString());
+						}
+					}else {
+						Vec3d draw = getToDraw(pos,shape);
+						lineHandler.add(pos,draw);
+						System.out.println(lineHandler.size()+":"+pos.toString()+":"+draw.toString());
+					}
 				}
-			}else {
-				
+			}
+			
+		}
+		double totalLen = player.getPos().distanceTo(lineHandler.getLastPiece())+lineHandler.getPiecesLen();
+		if(totalLen>lineHandler.getMaxLen()) {
+			Vec3d direction = lineHandler.getLastPiece().subtract(player.getPos()).normalize().multiply(totalLen-lineHandler.getMaxLen());//.multiply(0.5);
+			player.addVelocity(direction.x,direction.y,direction.z);
+			double angle = getAngle(new Vec3d(0,1,0),direction);
+			if(angle*180/Math.PI>70) {
+				plAcc = gravity*Math.sin(angle);
+				plVel+=plAcc;
+				int xdir = player.getVelocity().x>0?1:-1;
+				int zdir = player.getVelocity().z>0?1:-1;
+				player.addVelocity(plVel*xdir, 0, plVel*zdir);
+				System.out.println(angle*180/Math.PI+" - angle");
 			}
 		}
 		
-		
 		super.tick();
+	}
+	
+	private static double getAngle(Vec3d a, Vec3d b) {
+		double part = (a.x*b.x+a.y*b.y+a.z*b.z)/(a.length()*b.length());
+		return Math.acos(part);
 	}
 	
 	private Vec3d getToDraw(Vec3d pos, Box shape) {
