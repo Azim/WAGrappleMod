@@ -159,20 +159,19 @@ public class GrappleLineRenderer extends EntityRenderer<GrappleLineEntity> {
 		Vec3d b3 = end.subtract(perp);
 		Vec3d b4 = end.subtract(perpRotated);
 		
-		drawQuad(a1, a2, b1, b2, consumer, matrix, 255, 0, 0);
-		drawQuad(a2, a3, b2, b3, consumer, matrix, 0, 255, 0);
-		drawQuad(a3, a4, b3, b4, consumer, matrix, 0, 0, 255);
-		drawQuad(a4, a1, b4, b1, consumer, matrix, 0, 0, 0);
-		drawQuad(a1, a2, a3, a4, consumer, matrix, 255, 255, 0);
-		drawQuad(b1, b2, b3, b4, consumer, matrix, 0, 255, 255);
+		drawQuad(a1, a2, b1, b2, consumer, matrix, 20, 20, 20, 255);
+		drawQuad(a2, a3, b2, b3, consumer, matrix, 10, 10, 10, 255);
+		drawQuad(a3, a4, b3, b4, consumer, matrix, 20, 20, 20, 255);
+		drawQuad(a4, a1, b4, b1, consumer, matrix, 10, 10, 10, 255);
+		drawQuad(a1, a2, a4, a3, consumer, matrix, 0, 0, 0, 255);
+		drawQuad(b1, b2, b4, b3, consumer, matrix, 0, 0, 0, 255);
 	}
 	
-	private void drawQuad(Vec3d a1, Vec3d a2, Vec3d b1, Vec3d b2, VertexConsumer consumer, Matrix4f matrix, int r, int g, int b) {
-		consumer.vertex(matrix, (float)a1.x, (float)a1.y, (float)a1.z).color(r, g, b, 255).texture(0, 1).next();
-		consumer.vertex(matrix, (float)a2.x, (float)a2.y, (float)a2.z).color(r, g, b, 255).texture(1, 1).next();
-		consumer.vertex(matrix, (float)b1.x, (float)b1.y, (float)b1.z).color(r, g, b, 255).texture(0, 1).next();
-		consumer.vertex(matrix, (float)b2.x, (float)b2.y, (float)b2.z).color(r, g, b, 255).texture(1, 1).next();
-		
+	private void drawQuad(Vec3d a1, Vec3d a2, Vec3d b1, Vec3d b2, VertexConsumer consumer, Matrix4f matrix, int r, int g, int b, int a) {
+		consumer.vertex(matrix, (float)a1.x, (float)a1.y, (float)a1.z).color(r, g, b, a).next();
+		consumer.vertex(matrix, (float)a2.x, (float)a2.y, (float)a2.z).color(r, g, b, a).next();
+		consumer.vertex(matrix, (float)b2.x, (float)b2.y, (float)b2.z).color(r, g, b, a).next();
+		consumer.vertex(matrix, (float)b1.x, (float)b1.y, (float)b1.z).color(r, g, b, a).next();
 	}
 	
 
