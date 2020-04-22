@@ -114,8 +114,8 @@ public class GrappleLineRenderer extends EntityRenderer<GrappleLineEntity> {
 			//consumer.vertex(matrix4f2, 0.001f, 0.001f, 0.001f).color(0, 0, 0, 255).next();
 			
 			Vec3d begin = new Vec3d(0,0,0);
-			if(entity.getHandler().size()>1) {
-				drawPiece(begin, entity.getHandler().getDrawPieces(1).subtract(entity.getPos()), consumer, matrix4f2);
+			if(entity.getHandler().size()>1) { //multiple points - multiple lines
+				drawPiece(begin, entity.getHandler().getDrawPieces(1).subtract(entity.getPos()), consumer, matrix4f2); //draw the line between the entity and the first point
 			
 				for (int i = 1; i < entity.getHandler().size()-1; i++) { // skip the very start of it, cuz we already added it above
 					Vec3d start = entity.getHandler().getDrawPieces(i).subtract(entity.getPos());
@@ -124,17 +124,15 @@ public class GrappleLineRenderer extends EntityRenderer<GrappleLineEntity> {
 				
 				}
 				drawPiece(
-					entity.getHandler().getDrawPieces(entity.getHandler().size()-1).subtract(entity.getPos()),
+					entity.getHandler().getDrawPieces(entity.getHandler().size()-1).subtract(entity.getPos()), //from last piece to player's hand
 					new Vec3d(xpart, ypart, zpart),
 					consumer, matrix4f2);
-			}else {
+			}else { //only have 1 attachment point - direct line from it to the hand
 				drawPiece(
 						begin,
 						new Vec3d(xpart, ypart, zpart),
 						consumer, matrix4f2);
 			}
-			//consumer.vertex(matrix4f2, xpart-0.001f, ypart-0.001f, zpart-0.001f).color(0, 0, 0, 255).next();
-			//consumer.vertex(matrix4f2, xpart+0.001f, ypart+0.001f, zpart+0.001f).color(0, 0, 0, 255).next(); // end the last line in player's hand
 			matrixStack.pop();
 		}
 
@@ -143,12 +141,10 @@ public class GrappleLineRenderer extends EntityRenderer<GrappleLineEntity> {
 	private void drawPiece(Vec3d start, Vec3d end, VertexConsumer consumer, Matrix4f matrix) {
 		double offset = width/2;
 		Vec3d diff = start.subtract(end);
+		Vec3d perp = diff.crossProduct(new Vec3d(1,1,1)).normalize().multiply(offset); //get "any" perpendicular vector to create an offset
+		Vec3d perpRotated = perp.crossProduct(diff).normalize().multiply(offset);      //get vector perpendicular to both of above vectors
 		
-		//double theta = Math.acos(diff.y/diff.length());
-		//double phi = Math.atan(diff.z/diff.x);
-		Vec3d perp = diff.crossProduct(new Vec3d(1,1,1)).normalize().multiply(offset);
-		Vec3d perpRotated = perp.crossProduct(diff).normalize().multiply(offset);
-		
+		//do some offset magic, so the 2d line becomes a cuboid
 		Vec3d a1 = start.add(perp);
 		Vec3d a2 = start.add(perpRotated);
 		Vec3d a3 = start.subtract(perp);
@@ -163,7 +159,7 @@ public class GrappleLineRenderer extends EntityRenderer<GrappleLineEntity> {
 		drawQuad(a2, a3, b2, b3, consumer, matrix, 10, 10, 10, 255);
 		drawQuad(a3, a4, b3, b4, consumer, matrix, 20, 20, 20, 255);
 		drawQuad(a4, a1, b4, b1, consumer, matrix, 10, 10, 10, 255);
-		drawQuad(a1, a2, a4, a3, consumer, matrix, 0, 0, 0, 255);
+		drawQuad(a1, a2, a4, a3, consumer, matrix, 0, 0, 0, 255);    //draw the squares at the start and the end of the line
 		drawQuad(b1, b2, b4, b3, consumer, matrix, 0, 0, 0, 255);
 	}
 	
