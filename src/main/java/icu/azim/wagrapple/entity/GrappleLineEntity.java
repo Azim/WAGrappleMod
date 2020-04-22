@@ -29,7 +29,8 @@ public class GrappleLineEntity extends Entity {
 	private float length = 0;
 	private double plVel =0;
 	private double plAcc =0;
-	private double gravity = -0.01;
+	private Vec3d motion;
+	private static Vec3d gravity = new Vec3d(0, -0.05, 0);
 	
 	private GrappleLineHandler lineHandler;
 	//private List<Vec3d> pieces;
@@ -47,6 +48,7 @@ public class GrappleLineEntity extends Entity {
 		this.ignoreCameraFrustum = true;
 		lineHandler= new GrappleLineHandler(16);
 		lineHandler.add(0, pos, pos);
+		motion = new Vec3d(0,0,0);
 	}
 
 	@Override
@@ -78,34 +80,56 @@ public class GrappleLineEntity extends Entity {
 			return;
 		}
 		if(world.isClient) {
-			BlockHitResult res = this.world.rayTrace(new RayTraceContext(new Vec3d(player.getX(),player.getEyeY(),player.getZ()),lineHandler.getPiece(lineHandler.size()-1), ShapeType.OUTLINE, FluidHandling.NONE, player));
+			grapplePhysicsTick();
+			movementPhysicsTick();
+		}
+		
+		
+		super.tick();
+	}
+	
+	public void grapplePhysicsTick() {
+		BlockHitResult res = this.world.rayTrace(new RayTraceContext(new Vec3d(player.getX(),player.getEyeY(),player.getZ()),lineHandler.getPiece(lineHandler.size()-1), ShapeType.OUTLINE, FluidHandling.NONE, player));
+		
+		if(res.getType()==Type.BLOCK) {
+			Vec3d pos = res.getPos();
+			Box shape = world.getBlockState(res.getBlockPos()).getOutlineShape(world, res.getBlockPos()).getBoundingBox();
 			
-			if(res.getType()==Type.BLOCK) {
-				Vec3d pos = res.getPos();
-				Box shape = world.getBlockState(res.getBlockPos()).getOutlineShape(world, res.getBlockPos()).getBoundingBox();
-				
-				
-				if(!isSamePos( lineHandler.getPiece(lineHandler.size()-1), pos)) {
-					if(lineHandler.size()>1) {
-						if(!isSamePos( lineHandler.getPiece(lineHandler.size()-2), pos)) {
-							Vec3d draw = getToDraw(pos,shape);
-							lineHandler.add(pos,draw);
-							System.out.println(lineHandler.size()+":"+pos.toString()+":"+draw.toString());
-						}
-					}else {
+			
+			if(!isSamePos( lineHandler.getPiece(lineHandler.size()-1), pos)) {
+				if(lineHandler.size()>1) {
+					if(!isSamePos( lineHandler.getPiece(lineHandler.size()-2), pos)) {
 						Vec3d draw = getToDraw(pos,shape);
 						lineHandler.add(pos,draw);
 						System.out.println(lineHandler.size()+":"+pos.toString()+":"+draw.toString());
 					}
+				}else {
+					Vec3d draw = getToDraw(pos,shape);
+					lineHandler.add(pos,draw);
+					System.out.println(lineHandler.size()+":"+pos.toString()+":"+draw.toString());
 				}
 			}
+		}else {
 			
 		}
+	}
+	
+	public void movementPhysicsTick() {
 		double totalLen = player.getPos().distanceTo(lineHandler.getLastPiece())+lineHandler.getPiecesLen();
+		motion = motion.add(gravity);
 		if(totalLen>lineHandler.getMaxLen()) {
 			Vec3d direction = lineHandler.getLastPiece().subtract(player.getPos()).normalize().multiply(totalLen-lineHandler.getMaxLen());//.multiply(0.5);
-			player.addVelocity(direction.x,direction.y,direction.z);
+			//motion.add(direction);
+			System.out.println("1 - motion pre "+motion.toString());
+			motion = motion.add(removealong(motion, lineHandler.getLastPiece())).multiply(-0.3);
 			double angle = getAngle(new Vec3d(0,1,0),direction);
+			System.out.println("2 - motion     "+motion.toString());
+			
+			
+			//player.setVelocity(player.getVelocity().multiply(Math.sin(angle)));
+			/*
+			player.addVelocity(direction.x,direction.y,direction.z);
+			
 			if(angle*180/Math.PI>70) {
 				plAcc = gravity*Math.sin(angle);
 				plVel+=plAcc;
@@ -113,16 +137,26 @@ public class GrappleLineEntity extends Entity {
 				int zdir = player.getVelocity().z>0?1:-1;
 				player.addVelocity(plVel*xdir, 0, plVel*zdir);
 				System.out.println(angle*180/Math.PI+" - angle");
-			}
+			}*/
+			player.setVelocity(motion.x, motion.y, motion.z);
 		}
-		
-		super.tick();
 	}
+	
 	
 	private static double getAngle(Vec3d a, Vec3d b) {
 		double part = (a.x*b.x+a.y*b.y+a.z*b.z)/(a.length()*b.length());
 		return Math.acos(part);
 	}
+	
+	private Vec3d removealong(Vec3d motion, Vec3d origin) {
+		Vec3d normalized = origin.normalize();
+		double dot = motion.x*normalized.x+motion.y*normalized.y+motion.z*normalized.z;
+		double change = dot/normalized.length();
+		Vec3d proj = normalized.multiply(change);
+		
+		return motion.subtract(proj);
+	}
+	
 	
 	private Vec3d getToDraw(Vec3d pos, Box shape) {
 		/*

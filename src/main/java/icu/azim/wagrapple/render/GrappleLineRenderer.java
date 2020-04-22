@@ -26,7 +26,9 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 
 public class GrappleLineRenderer extends EntityRenderer<GrappleLineEntity> {
-
+	
+	public static final double width = 0.05;
+	
 	public GrappleLineRenderer(EntityRenderDispatcher dispatcher) {
 		super(dispatcher);
 	}
@@ -87,7 +89,7 @@ public class GrappleLineRenderer extends EntityRenderer<GrappleLineEntity> {
 			float zpart = (float) (v - z);
 			VertexConsumer consumer = vertexConsumerProvider
 					.getBuffer(RenderLayer.of(
-							"line", VertexFormats.POSITION_COLOR, 1, 256,
+							"grapple_line", VertexFormats.POSITION_COLOR, 7, 256,
 							RenderLayer.MultiPhaseParameters.builder()
 									.lineWidth(new RenderPhase.LineWidth(OptionalDouble.of(10)))
 									.layering(new RenderPhase.Layering("projection_layering", () -> {
@@ -107,21 +109,71 @@ public class GrappleLineRenderer extends EntityRenderer<GrappleLineEntity> {
 									})).writeMaskState(new RenderPhase.WriteMaskState(true, true)).build(false)));
 			Matrix4f matrix4f2 = matrixStack.peek().getModel();
 
-			consumer.vertex(matrix4f2, 0, 0, 0).color(0, 0, 0, 255).next(); // the part at the very start of it
+			consumer.vertex(matrix4f2, -0.001f, -0.001f, -0.001f).color(0, 0, 0, 255).next(); // the part at the very start of it
+			consumer.vertex(matrix4f2, 0.001f, 0.001f, 0.001f).color(0, 0, 0, 255).next();
+			Vec3d begin = new Vec3d(0,0,0);
+			if(entity.getHandler().size()>1) {
+				drawPiece(begin, entity.getHandler().getDrawPieces(1).subtract(entity.getPos()), consumer, matrix4f2);
 			
-			for (int i = 1; i < entity.getHandler().size(); i++) { // skip the very start of it, cuz we already added it above
-				Vec3d piece = entity.getHandler().getDrawPieces(i).subtract(entity.getPos());
-				/// LeashKnotEntityRenderer
-				//BeaconBlockEntityRenderer
-				consumer.vertex(matrix4f2, (float) round(piece.x, 2), (float) round(piece.y, 2), (float) round(piece.z, 2)).color(0, 0, 0, 255).next(); // end line
-				consumer.vertex(matrix4f2, (float) round(piece.x, 2), (float) round(piece.y, 2), (float) round(piece.z, 2)).color(0, 0, 0, 255).next(); // start next one
+				for (int i = 1; i < entity.getHandler().size()-1; i++) { // skip the very start of it, cuz we already added it above
+					Vec3d start = entity.getHandler().getDrawPieces(i).subtract(entity.getPos());
+					Vec3d end = entity.getHandler().getDrawPieces(i+1).subtract(entity.getPos());
+					drawPiece(start, end,  consumer, matrix4f2);
+					//consumer.vertex(matrix4f2, (float) round(piece.x, 2)-0.001f, (float) round(piece.y, 2)-0.001f, (float) round(piece.z, 2)-0.001f).color(0, 0, 0, 255).next(); // end line
+					//consumer.vertex(matrix4f2, (float) round(piece.x, 2)+0.001f, (float) round(piece.y, 2)+0.001f, (float) round(piece.z, 2)+0.001f).color(0, 0, 0, 255).next(); // start next one
+				}
+				drawPiece(
+					entity.getHandler().getDrawPieces(entity.getHandler().size()-1).subtract(entity.getPos()),
+					new Vec3d(xpart, ypart, zpart),
+					consumer, matrix4f2);
+			}else {
+				drawPiece(
+						begin,
+						new Vec3d(xpart, ypart, zpart),
+						consumer, matrix4f2);
 			}
-
-			consumer.vertex(matrix4f2, xpart, ypart, zpart).color(0, 0, 0, 255).next(); // end the last line in player's hand
+			//consumer.vertex(matrix4f2, xpart-0.001f, ypart-0.001f, zpart-0.001f).color(0, 0, 0, 255).next();
+			//consumer.vertex(matrix4f2, xpart+0.001f, ypart+0.001f, zpart+0.001f).color(0, 0, 0, 255).next(); // end the last line in player's hand
 			matrixStack.pop();
 		}
 
 	}
+	
+	private void drawPiece(Vec3d start, Vec3d end, VertexConsumer consumer, Matrix4f matrix) {
+		double offset = width/2;
+		Vec3d diff = start.subtract(end);
+		
+		//double theta = Math.acos(diff.y/diff.length());
+		//double phi = Math.atan(diff.z/diff.x);
+		Vec3d perp = diff.crossProduct(new Vec3d(1,1,1)).normalize().multiply(offset);
+		Vec3d perpRotated = perp.crossProduct(diff).normalize().multiply(offset);
+		
+		Vec3d a1 = start.add(perp);
+		Vec3d a2 = start.add(perpRotated);
+		Vec3d a3 = start.subtract(perp);
+		Vec3d a4 = start.subtract(perpRotated);
+		
+		Vec3d b1 = end.add(perp);
+		Vec3d b2 = end.add(perpRotated);
+		Vec3d b3 = end.subtract(perp);
+		Vec3d b4 = end.subtract(perpRotated);
+		
+		drawQuad(a1, a2, b1, b2, consumer, matrix, 255, 0, 0);
+		drawQuad(a2, a3, b2, b3, consumer, matrix, 0, 255, 0);
+		drawQuad(a3, a4, b3, b4, consumer, matrix, 0, 0, 255);
+		drawQuad(a4, a1, b4, b1, consumer, matrix, 0, 0, 0);
+		drawQuad(a1, a2, a3, a4, consumer, matrix, 255, 255, 0);
+		drawQuad(b1, b2, b3, b4, consumer, matrix, 0, 255, 255);
+	}
+	
+	private void drawQuad(Vec3d a1, Vec3d a2, Vec3d b1, Vec3d b2, VertexConsumer consumer, Matrix4f matrix, int r, int g, int b) {
+		consumer.vertex(matrix, (float)a1.x, (float)a1.y, (float)a1.z).color(r, g, b, 255).next();
+		consumer.vertex(matrix, (float)a2.x, (float)a2.y, (float)a2.z).color(r, g, b, 255).next();
+		consumer.vertex(matrix, (float)b1.x, (float)b1.y, (float)b1.z).color(r, g, b, 255).next();
+		consumer.vertex(matrix, (float)b2.x, (float)b2.y, (float)b2.z).color(r, g, b, 255).next();
+		
+	}
+	
 
 	private double round(double x, int i) {
 		if (x - (int) x > 0.5) {
