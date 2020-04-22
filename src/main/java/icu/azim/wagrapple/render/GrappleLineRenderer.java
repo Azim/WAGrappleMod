@@ -16,6 +16,7 @@ import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.render.block.entity.BeaconBlockEntityRenderer;
 import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.client.render.entity.EntityRenderer;
+import net.minecraft.client.render.entity.TridentEntityRenderer;
 import net.minecraft.client.util.math.Matrix4f;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.util.math.Vector3f;
@@ -109,8 +110,9 @@ public class GrappleLineRenderer extends EntityRenderer<GrappleLineEntity> {
 									})).writeMaskState(new RenderPhase.WriteMaskState(true, true)).build(false)));
 			Matrix4f matrix4f2 = matrixStack.peek().getModel();
 
-			consumer.vertex(matrix4f2, -0.001f, -0.001f, -0.001f).color(0, 0, 0, 255).next(); // the part at the very start of it
-			consumer.vertex(matrix4f2, 0.001f, 0.001f, 0.001f).color(0, 0, 0, 255).next();
+			//consumer.vertex(matrix4f2, -0.001f, -0.001f, -0.001f).color(0, 0, 0, 255).next(); // the part at the very start of it
+			//consumer.vertex(matrix4f2, 0.001f, 0.001f, 0.001f).color(0, 0, 0, 255).next();
+			
 			Vec3d begin = new Vec3d(0,0,0);
 			if(entity.getHandler().size()>1) {
 				drawPiece(begin, entity.getHandler().getDrawPieces(1).subtract(entity.getPos()), consumer, matrix4f2);
@@ -119,8 +121,7 @@ public class GrappleLineRenderer extends EntityRenderer<GrappleLineEntity> {
 					Vec3d start = entity.getHandler().getDrawPieces(i).subtract(entity.getPos());
 					Vec3d end = entity.getHandler().getDrawPieces(i+1).subtract(entity.getPos());
 					drawPiece(start, end,  consumer, matrix4f2);
-					//consumer.vertex(matrix4f2, (float) round(piece.x, 2)-0.001f, (float) round(piece.y, 2)-0.001f, (float) round(piece.z, 2)-0.001f).color(0, 0, 0, 255).next(); // end line
-					//consumer.vertex(matrix4f2, (float) round(piece.x, 2)+0.001f, (float) round(piece.y, 2)+0.001f, (float) round(piece.z, 2)+0.001f).color(0, 0, 0, 255).next(); // start next one
+				
 				}
 				drawPiece(
 					entity.getHandler().getDrawPieces(entity.getHandler().size()-1).subtract(entity.getPos()),
@@ -167,10 +168,10 @@ public class GrappleLineRenderer extends EntityRenderer<GrappleLineEntity> {
 	}
 	
 	private void drawQuad(Vec3d a1, Vec3d a2, Vec3d b1, Vec3d b2, VertexConsumer consumer, Matrix4f matrix, int r, int g, int b) {
-		consumer.vertex(matrix, (float)a1.x, (float)a1.y, (float)a1.z).color(r, g, b, 255).next();
-		consumer.vertex(matrix, (float)a2.x, (float)a2.y, (float)a2.z).color(r, g, b, 255).next();
-		consumer.vertex(matrix, (float)b1.x, (float)b1.y, (float)b1.z).color(r, g, b, 255).next();
-		consumer.vertex(matrix, (float)b2.x, (float)b2.y, (float)b2.z).color(r, g, b, 255).next();
+		consumer.vertex(matrix, (float)a1.x, (float)a1.y, (float)a1.z).color(r, g, b, 255).texture(0, 1).next();
+		consumer.vertex(matrix, (float)a2.x, (float)a2.y, (float)a2.z).color(r, g, b, 255).texture(1, 1).next();
+		consumer.vertex(matrix, (float)b1.x, (float)b1.y, (float)b1.z).color(r, g, b, 255).texture(0, 1).next();
+		consumer.vertex(matrix, (float)b2.x, (float)b2.y, (float)b2.z).color(r, g, b, 255).texture(1, 1).next();
 		
 	}
 	
