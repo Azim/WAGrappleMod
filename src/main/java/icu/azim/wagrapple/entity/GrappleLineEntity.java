@@ -115,11 +115,11 @@ public class GrappleLineEntity extends Entity {
 	}
 	
 	public void movementPhysicsTick() {
-		/*
+		
 		if(true) {
 			return;
 		}
-		*/
+		
 		double totalLen = player.getPos().distanceTo(lineHandler.getLastPiece())+lineHandler.getPiecesLen();
 		motion = motion.add(gravity);
 		if(totalLen>lineHandler.getMaxLen()) {

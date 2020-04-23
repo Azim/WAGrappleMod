@@ -16,6 +16,7 @@ import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.render.block.entity.BeaconBlockEntityRenderer;
 import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.client.render.entity.EntityRenderer;
+import net.minecraft.client.render.entity.FishingBobberEntityRenderer;
 import net.minecraft.client.render.entity.TridentEntityRenderer;
 import net.minecraft.client.util.math.Matrix4f;
 import net.minecraft.client.util.math.MatrixStack;
@@ -112,7 +113,7 @@ public class GrappleLineRenderer extends EntityRenderer<GrappleLineEntity> {
 
 			//consumer.vertex(matrix4f2, -0.001f, -0.001f, -0.001f).color(0, 0, 0, 255).next(); // the part at the very start of it
 			//consumer.vertex(matrix4f2, 0.001f, 0.001f, 0.001f).color(0, 0, 0, 255).next();
-			
+			//FishingBobberEntityRenderer
 			Vec3d begin = new Vec3d(0,0,0);
 			if(entity.getHandler().size()>1) { //multiple points - multiple lines
 				drawPiece(begin, entity.getHandler().getDrawPieces(1).subtract(entity.getPos()), consumer, matrix4f2); //draw the line between the entity and the first point
@@ -134,6 +135,7 @@ public class GrappleLineRenderer extends EntityRenderer<GrappleLineEntity> {
 						consumer, matrix4f2);
 			}
 			matrixStack.pop();
+			super.render(entity, yaw, tickDelta, matrixStack, vertexConsumerProvider , light);
 		}
 
 	}
