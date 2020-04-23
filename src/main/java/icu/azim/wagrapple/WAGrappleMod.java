@@ -1,17 +1,25 @@
 package icu.azim.wagrapple;
 
+import icu.azim.wagrapple.components.GrappleComponent;
+import icu.azim.wagrapple.components.IGrappleComponent;
 import icu.azim.wagrapple.entity.GrappleLineEntity;
 import icu.azim.wagrapple.item.GrappleItem;
 import icu.azim.wagrapple.render.GrappleLineRenderer;
+
+import nerdhub.cardinal.components.api.ComponentRegistry;
+import nerdhub.cardinal.components.api.ComponentType;
+import nerdhub.cardinal.components.api.event.EntityComponentCallback;
+import nerdhub.cardinal.components.api.util.EntityComponents;
+import nerdhub.cardinal.components.api.util.RespawnCopyStrategy;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
 import net.fabricmc.fabric.api.client.rendereregistry.v1.EntityRendererRegistry;
 import net.fabricmc.fabric.api.entity.FabricEntityTypeBuilder;
-import net.minecraft.client.render.entity.FishingBobberEntityRenderer;
 import net.minecraft.entity.EntityCategory;
 import net.minecraft.entity.EntityDimensions;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
@@ -33,16 +41,23 @@ public class WAGrappleMod implements ModInitializer,ClientModInitializer {
 		        .build()
 		    );
 	
+	
 	public static final ItemGroup ITEM_GROUP = FabricItemGroupBuilder.build(
 			new Identifier(modid, "general"),
 			() -> new ItemStack(Items.LEAD));
 	
+	
 	public static final GrappleItem GRAPPLE_ITEM = new GrappleItem(new Item.Settings().group(ITEM_GROUP));
+	
+	public static final ComponentType<IGrappleComponent> GRAPPLE_COMPONENT = 
+	        ComponentRegistry.INSTANCE.registerIfAbsent(new Identifier(modid,"grapple_component"), IGrappleComponent.class)
+	        .attach(EntityComponentCallback.event(PlayerEntity.class), player->new GrappleComponent());
+	
 	
 	@Override
 	public void onInitialize() {
 		Registry.register(Registry.ITEM, new Identifier(modid, "grapple"), GRAPPLE_ITEM);
-		//FishingBobberEntityRenderer
+		EntityComponents.setRespawnCopyStrategy(GRAPPLE_COMPONENT, RespawnCopyStrategy.NEVER_COPY);
 	}
 
 	@Override

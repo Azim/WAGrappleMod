@@ -1,5 +1,6 @@
 package icu.azim.wagrapple.item;
 
+import icu.azim.wagrapple.WAGrappleMod;
 import icu.azim.wagrapple.entity.GrappleLineEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
@@ -18,24 +19,36 @@ public class GrappleItem extends Item{
 	public GrappleItem(Settings settings) {
 		super(settings);
 	}
-
+	
 	@Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity playerEntity, Hand hand)
     {
-		HitResult result = playerEntity.rayTrace(32, 0, false);
+		if(!WAGrappleMod.GRAPPLE_COMPONENT.get(playerEntity).isGrappled()) {
 		
-		if(result.getType()==Type.BLOCK) {
-			world.playSound(playerEntity, result.getPos().x,result.getPos().y,result.getPos().z, SoundEvents.BLOCK_BEACON_ACTIVATE, SoundCategory.PLAYERS, 1.0F, 1.0F);
-			if(!world.isClient) {
-				world.spawnEntity(new GrappleLineEntity(world, playerEntity, 0, result.getPos()));
-				System.out.println("server - spawned");
+			HitResult result = playerEntity.rayTrace(16, 0, false);
+		
+			if(result.getType()==Type.BLOCK) {
+				world.playSound(playerEntity, result.getPos().x,result.getPos().y,result.getPos().z, SoundEvents.BLOCK_BEACON_ACTIVATE, SoundCategory.PLAYERS, 1.0F, 1.0F);
+				if(!world.isClient) {
+					GrappleLineEntity entity = new GrappleLineEntity(world, playerEntity, 0, result.getPos());
+					world.spawnEntity(entity);
+					WAGrappleMod.GRAPPLE_COMPONENT.get(playerEntity).setLineId(entity.getEntityId());
+					WAGrappleMod.GRAPPLE_COMPONENT.get(playerEntity).setGrappled(true);
+					System.out.println("server - spawned");
+				}
+			}else {
+				playerEntity.playSound(SoundEvents.BLOCK_WOOL_BREAK, 1.0F, 1.0F);
 			}
+			playerEntity.swingHand(hand);
+			
 		}else {
-			playerEntity.playSound(SoundEvents.BLOCK_WOOL_BREAK, 1.0F, 1.0F);
+			world.getEntityById(WAGrappleMod.GRAPPLE_COMPONENT.get(playerEntity).getLineId()).remove();
+			WAGrappleMod.GRAPPLE_COMPONENT.get(playerEntity).setLineId(-1);
+			WAGrappleMod.GRAPPLE_COMPONENT.get(playerEntity).setGrappled(false);
+			
 		}
 		
 		
-		playerEntity.swingHand(hand);
         return new TypedActionResult<>(ActionResult.SUCCESS, playerEntity.getStackInHand(hand));
     }
 }
