@@ -55,6 +55,8 @@ public class GrappleItem extends Item{
 			WAGrappleMod.GRAPPLE_COMPONENT.get(playerEntity).setLineId(-1);
 			WAGrappleMod.GRAPPLE_COMPONENT.get(playerEntity).setGrappled(false);
 			WAGrappleMod.GRAPPLE_COMPONENT.get(playerEntity).sync();
+
+			playerEntity.playSound(SoundEvents.BLOCK_WOOL_BREAK, 1.0F, 1.0F);
 		}
 		
 		

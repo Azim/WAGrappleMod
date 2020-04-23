@@ -178,15 +178,5 @@ public class GrappleLineRenderer extends EntityRenderer<GrappleLineEntity> {
 	}
 	
 
-	private double round(double x, int i) {
-		if (x - (int) x > 0.5) {
-			x += 0.03;
-		} else {
-			x -= 0.03;
-		}
-		BigDecimal bd = BigDecimal.valueOf(x);
-		bd = bd.setScale(i, RoundingMode.HALF_UP);
-		return bd.doubleValue();
-	}
 
 }

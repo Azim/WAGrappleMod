@@ -1,15 +1,18 @@
 package icu.azim.wagrapple.entity;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 import icu.azim.wagrapple.WAGrappleMod;
+import net.minecraft.block.CommandBlock;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.options.KeyBinding;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Packet;
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult.Type;
 import net.minecraft.util.math.Box;
@@ -26,7 +29,6 @@ public class GrappleLineEntity extends Entity {
 	private Vec3d hitPos;
 	private float length = 0;
 	private Vec3d motion;
-	private static Vec3d gravity = new Vec3d(0, -0.05, 0);
 	
 	private GrappleLineHandler lineHandler;
 	//private List<Vec3d> pieces;
@@ -42,7 +44,7 @@ public class GrappleLineEntity extends Entity {
 		this.player = player;
 		this.setLength(16);
 		this.ignoreCameraFrustum = true;
-		lineHandler= new GrappleLineHandler(16);
+		lineHandler= new GrappleLineHandler(this, 16);
 		lineHandler.add(0, pos, pos);
 		motion = new Vec3d(0,0,0);
 	}
@@ -115,9 +117,12 @@ public class GrappleLineEntity extends Entity {
 			return;
 		}//*/
 		
-		double totalLen = player.getPos().distanceTo(lineHandler.getLastPiece())+lineHandler.getPiecesLen();
-		if(totalLen>lineHandler.getMaxLen() && player.getPos().squaredDistanceTo(lineHandler.getLastPiece())>9) {
-			Vec3d originToPlayer = lineHandler.getLastPiece().subtract(player.getPos());
+		Vec3d origin = lineHandler.getLastPiece();
+		double distanceToOrigin = player.getPos().distanceTo(origin);
+		double totalLen = distanceToOrigin+lineHandler.getPiecesLen();
+		if(totalLen>lineHandler.getMaxLen()) {
+			
+			Vec3d originToPlayer = origin.subtract(player.getPos());
 			
 			Vec3d projection = project(player.getVelocity(),originToPlayer);
 			
@@ -131,14 +136,33 @@ public class GrappleLineEntity extends Entity {
 			}
 			motion = newSpeed;//.add(direction);
 			
-			if(MinecraftClient.getInstance().options.keyForward.isPressed() && player.getPos().y<lineHandler.getLastPiece().y) {
+			if(MinecraftClient.getInstance().options.keyForward.isPressed() && player.getPos().y<origin.y) {
 				motion = motion.add(player.getRotationVector().normalize().multiply(0.1));
 			}
-			
-			
+			if(motion.lengthSquared()>6.25) {
+				motion = motion.normalize().multiply(2.5);
+			}
+			System.out.println(round(motion.length(),2)+" - "+round(totalLen-lineHandler.getMaxLen(),2));
 			player.setVelocity(motion.x, motion.y, motion.z);
 		}
 	}
+	
+	
+	public void detachLine() {
+		WAGrappleMod.GRAPPLE_COMPONENT.get(player).setLineId(-1);
+		WAGrappleMod.GRAPPLE_COMPONENT.get(player).setGrappled(false);
+		WAGrappleMod.GRAPPLE_COMPONENT.get(player).sync();
+		player.playSound(SoundEvents.ENTITY_ITEM_BREAK, 1, 1);
+		this.remove();
+	}
+	
+
+	private double round(double x, int i) {
+		BigDecimal bd = BigDecimal.valueOf(x);
+		bd = bd.setScale(i, RoundingMode.HALF_UP);
+		return bd.doubleValue();
+	}
+	
 	private Vec3d project(Vec3d a, Vec3d b) {
 		return b.multiply(a.dotProduct(b)/b.dotProduct(b));
 	}

@@ -10,17 +10,23 @@ public class GrappleLineHandler {
 	private List<Vec3d> pieces;
 	private double maxLen;
 	private double piecesLen;
+	private GrappleLineEntity line;
 	
-	public GrappleLineHandler(double maxLen) {
+	public GrappleLineHandler(GrappleLineEntity line, double maxLen) {
 		toDraw = new ArrayList<Vec3d>();
 		pieces = new ArrayList<Vec3d>();
 		this.maxLen = maxLen;
 		this.piecesLen = 0;
+		this.line = line;
 	}
 	
 	public void add(Vec3d piece, Vec3d drawPiece) {
 		if(pieces.size()>0) {
 			piecesLen+= piece.distanceTo(getLastPiece());
+			//System.out.println("new length: "+piecesLen+" ("+pieces.size()+" items)");
+		}
+		if(piecesLen>maxLen) {
+			line.detachLine();
 		}
 		pieces.add(piece);
 		toDraw.add(drawPiece);
@@ -30,6 +36,9 @@ public class GrappleLineHandler {
 		pieces.add(index, piece);
 		toDraw.add(index, drawPiece);
 		recalcLen();
+		if(piecesLen>maxLen) {
+			line.detachLine();
+		}
 	}
 	
 	private void recalcLen() {
