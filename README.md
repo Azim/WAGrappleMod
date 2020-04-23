@@ -9,6 +9,7 @@ TODO:
 * reeling in and out
 * supersonic speed when too close to the latest bend fix
 * fix line not rendering when player is 16 blocks away from the origin
+* get som models
 * make it work properly in multiplayer (no clue if it already does or not)
 * publish on cursedforge
 
