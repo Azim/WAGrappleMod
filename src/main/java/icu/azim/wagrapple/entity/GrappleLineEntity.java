@@ -1,10 +1,9 @@
 package icu.azim.wagrapple.entity;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.ArrayList;
-import java.util.List;
 import icu.azim.wagrapple.WAGrappleMod;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.options.KeyBinding;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
@@ -15,7 +14,6 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult.Type;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.RayTraceContext;
 import net.minecraft.world.World;
 import net.minecraft.world.RayTraceContext.FluidHandling;
@@ -27,8 +25,6 @@ public class GrappleLineEntity extends Entity {
 	private PlayerEntity player;
 	private Vec3d hitPos;
 	private float length = 0;
-	private double plVel =0;
-	private double plAcc =0;
 	private Vec3d motion;
 	private static Vec3d gravity = new Vec3d(0, -0.05, 0);
 	
@@ -93,20 +89,19 @@ public class GrappleLineEntity extends Entity {
 		
 		if(res.getType()==Type.BLOCK) {
 			Vec3d pos = res.getPos();
-			Box shape = world.getBlockState(res.getBlockPos()).getOutlineShape(world, res.getBlockPos()).getBoundingBox();
-			
+			Box shape = world.getBlockState(res.getBlockPos()).getCollisionShape(world, res.getBlockPos()).getBoundingBox();
+			System.out.println(shape.toString());
 			
 			if(!isSamePos( lineHandler.getPiece(lineHandler.size()-1), pos)) {
 				if(lineHandler.size()>1) {
 					if(!isSamePos( lineHandler.getPiece(lineHandler.size()-2), pos)) {
 						Vec3d draw = getToDraw(pos,shape);
 						lineHandler.add(pos,draw);
-						System.out.println(lineHandler.size()+":"+pos.toString()+":"+draw.toString());
+						//System.out.println(lineHandler.size()+":"+pos.toString()+":"+draw.toString());
 					}
 				}else {
 					Vec3d draw = getToDraw(pos,shape);
 					lineHandler.add(pos,draw);
-					System.out.println(lineHandler.size()+":"+pos.toString()+":"+draw.toString());
 				}
 			}
 		}else {
@@ -121,14 +116,13 @@ public class GrappleLineEntity extends Entity {
 		}//*/
 		
 		double totalLen = player.getPos().distanceTo(lineHandler.getLastPiece())+lineHandler.getPiecesLen();
-		motion = motion.add(gravity);
-		if(totalLen>lineHandler.getMaxLen()) {
+		if(totalLen>lineHandler.getMaxLen() && player.getPos().squaredDistanceTo(lineHandler.getLastPiece())>9) {
 			Vec3d originToPlayer = lineHandler.getLastPiece().subtract(player.getPos());
 			
 			Vec3d projection = project(player.getVelocity(),originToPlayer);
 			
 			Vec3d newSpeed = player.getVelocity().subtract(projection);
-			newSpeed = newSpeed.multiply(player.getVelocity().length()/newSpeed.length());
+			newSpeed = newSpeed.multiply((player.getVelocity().length()+0.01)/newSpeed.length());
 			
 			Vec3d direction = originToPlayer.normalize().multiply(totalLen-lineHandler.getMaxLen());
 			
@@ -137,6 +131,11 @@ public class GrappleLineEntity extends Entity {
 			}
 			motion = newSpeed;//.add(direction);
 			
+			if(MinecraftClient.getInstance().options.keyForward.isPressed() && player.getPos().y<lineHandler.getLastPiece().y) {
+				motion = motion.add(player.getRotationVector().normalize().multiply(0.1));
+			}
+			
+			
 			player.setVelocity(motion.x, motion.y, motion.z);
 		}
 	}
@@ -144,6 +143,7 @@ public class GrappleLineEntity extends Entity {
 		return b.multiply(a.dotProduct(b)/b.dotProduct(b));
 	}
 	
+	@SuppressWarnings("unused")
 	private static double getAngle(Vec3d a, Vec3d b) {
 		double part = (a.x*b.x+a.y*b.y+a.z*b.z)/(a.length()*b.length());
 		return Math.acos(part);

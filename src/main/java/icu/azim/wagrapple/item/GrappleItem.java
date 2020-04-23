@@ -2,6 +2,7 @@ package icu.azim.wagrapple.item;
 
 import icu.azim.wagrapple.WAGrappleMod;
 import icu.azim.wagrapple.entity.GrappleLineEntity;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -23,6 +24,7 @@ public class GrappleItem extends Item{
 	@Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity playerEntity, Hand hand)
     {
+		
 		if(!WAGrappleMod.GRAPPLE_COMPONENT.get(playerEntity).isGrappled()) {
 		
 			HitResult result = playerEntity.rayTrace(16, 0, false);
@@ -34,6 +36,7 @@ public class GrappleItem extends Item{
 					world.spawnEntity(entity);
 					WAGrappleMod.GRAPPLE_COMPONENT.get(playerEntity).setLineId(entity.getEntityId());
 					WAGrappleMod.GRAPPLE_COMPONENT.get(playerEntity).setGrappled(true);
+					WAGrappleMod.GRAPPLE_COMPONENT.get(playerEntity).sync();
 					System.out.println("server - spawned");
 				}
 			}else {
@@ -42,10 +45,16 @@ public class GrappleItem extends Item{
 			playerEntity.swingHand(hand);
 			
 		}else {
-			world.getEntityById(WAGrappleMod.GRAPPLE_COMPONENT.get(playerEntity).getLineId()).remove();
+			int id = WAGrappleMod.GRAPPLE_COMPONENT.get(playerEntity).getLineId();
+			if(id>0) {
+				Entity e = world.getEntityById(id);
+				if(e!=null) {
+					e.remove();
+				}
+			}
 			WAGrappleMod.GRAPPLE_COMPONENT.get(playerEntity).setLineId(-1);
 			WAGrappleMod.GRAPPLE_COMPONENT.get(playerEntity).setGrappled(false);
-			
+			WAGrappleMod.GRAPPLE_COMPONENT.get(playerEntity).sync();
 		}
 		
 		

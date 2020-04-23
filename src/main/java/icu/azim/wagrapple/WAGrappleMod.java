@@ -1,7 +1,6 @@
 package icu.azim.wagrapple;
 
 import icu.azim.wagrapple.components.GrappleComponent;
-import icu.azim.wagrapple.components.IGrappleComponent;
 import icu.azim.wagrapple.entity.GrappleLineEntity;
 import icu.azim.wagrapple.item.GrappleItem;
 import icu.azim.wagrapple.render.GrappleLineRenderer;
@@ -49,9 +48,9 @@ public class WAGrappleMod implements ModInitializer,ClientModInitializer {
 	
 	public static final GrappleItem GRAPPLE_ITEM = new GrappleItem(new Item.Settings().group(ITEM_GROUP));
 	
-	public static final ComponentType<IGrappleComponent> GRAPPLE_COMPONENT = 
-	        ComponentRegistry.INSTANCE.registerIfAbsent(new Identifier(modid,"grapple_component"), IGrappleComponent.class)
-	        .attach(EntityComponentCallback.event(PlayerEntity.class), player->new GrappleComponent());
+	public static final ComponentType<GrappleComponent> GRAPPLE_COMPONENT = 
+	        ComponentRegistry.INSTANCE.registerIfAbsent(new Identifier(modid,"grapple_component"), GrappleComponent.class)
+	        .attach(EntityComponentCallback.event(PlayerEntity.class), player->new GrappleComponent(player));
 	
 	
 	@Override
