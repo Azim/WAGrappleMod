@@ -139,6 +139,14 @@ public class GrappleLineRenderer extends EntityRenderer<GrappleLineEntity> {
 	}
 	
 	private void drawPiece(Vec3d start, Vec3d end, VertexConsumer consumer, Matrix4f matrix) {
+		if(start.squaredDistanceTo(end)>64) {
+			Vec3d ba = end.subtract(start);
+			ba = ba.normalize().multiply(8);
+			drawPiece(start, end.subtract(ba), consumer, matrix);
+			start = end.subtract(ba);
+		}
+		
+		
 		double offset = width/2;
 		Vec3d diff = start.subtract(end);
 		Vec3d perp = diff.crossProduct(new Vec3d(1,1,1)).normalize().multiply(offset); //get "any" perpendicular vector to create an offset

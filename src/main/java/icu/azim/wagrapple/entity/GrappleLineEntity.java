@@ -115,33 +115,30 @@ public class GrappleLineEntity extends Entity {
 	}
 	
 	public void movementPhysicsTick() {
+		/*
+		if(true) {
+			return;
+		}
+		*/
 		double totalLen = player.getPos().distanceTo(lineHandler.getLastPiece())+lineHandler.getPiecesLen();
 		motion = motion.add(gravity);
 		if(totalLen>lineHandler.getMaxLen()) {
-			Vec3d direction = lineHandler.getLastPiece().subtract(player.getPos()).normalize().multiply(totalLen-lineHandler.getMaxLen());//.multiply(0.5);
-			//motion.add(direction);
-			System.out.println("1 - motion pre "+motion.toString());
-			motion = motion.add(removealong(motion, lineHandler.getLastPiece())).multiply(-0.3);
-			double angle = getAngle(new Vec3d(0,1,0),direction);
-			System.out.println("2 - motion     "+motion.toString());
+			Vec3d originToPlayer = lineHandler.getLastPiece().subtract(player.getPos());
 			
+			Vec3d projection = project(player.getVelocity(),originToPlayer);
 			
-			//player.setVelocity(player.getVelocity().multiply(Math.sin(angle)));
-			/*
-			player.addVelocity(direction.x,direction.y,direction.z);
+			Vec3d newSpeed = player.getVelocity().subtract(projection);
+			newSpeed = newSpeed.multiply(player.getVelocity().length()/newSpeed.length());
 			
-			if(angle*180/Math.PI>70) {
-				plAcc = gravity*Math.sin(angle);
-				plVel+=plAcc;
-				int xdir = player.getVelocity().x>0?1:-1;
-				int zdir = player.getVelocity().z>0?1:-1;
-				player.addVelocity(plVel*xdir, 0, plVel*zdir);
-				System.out.println(angle*180/Math.PI+" - angle");
-			}*/
+			Vec3d direction = originToPlayer.normalize().multiply(totalLen-lineHandler.getMaxLen());
+			motion = newSpeed;//.add(direction);
+			
 			player.setVelocity(motion.x, motion.y, motion.z);
 		}
 	}
-	
+	private Vec3d project(Vec3d a, Vec3d b) {
+		return b.multiply(a.dotProduct(b)/b.dotProduct(b));
+	}
 	
 	private static double getAngle(Vec3d a, Vec3d b) {
 		double part = (a.x*b.x+a.y*b.y+a.z*b.z)/(a.length()*b.length());
