@@ -2,6 +2,8 @@
 
 A grappling hook inspired by the one from the [Worlds Adrift](https://www.worldsadrift.com/) game.
 
+Requires fabric. Mc version 1.15.2
+
 TODO:
 * line unwrapping
 * line adjusting when blocks are destroyed
