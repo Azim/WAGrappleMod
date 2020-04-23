@@ -1,7 +1,7 @@
 package icu.azim.wagrapple.components;
 
-//interface IStatusComponent extends Component
+import nerdhub.cardinal.components.api.component.Component;
 
-public class StatusComponent {
+interface IStatusComponent extends Component{
 
 }

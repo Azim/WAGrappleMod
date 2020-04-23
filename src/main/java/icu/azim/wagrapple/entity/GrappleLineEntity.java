@@ -115,10 +115,10 @@ public class GrappleLineEntity extends Entity {
 	}
 	
 	public void movementPhysicsTick() {
-		
+		/*
 		if(true) {
 			return;
-		}
+		}//*/
 		
 		double totalLen = player.getPos().distanceTo(lineHandler.getLastPiece())+lineHandler.getPiecesLen();
 		motion = motion.add(gravity);
@@ -131,6 +131,10 @@ public class GrappleLineEntity extends Entity {
 			newSpeed = newSpeed.multiply(player.getVelocity().length()/newSpeed.length());
 			
 			Vec3d direction = originToPlayer.normalize().multiply(totalLen-lineHandler.getMaxLen());
+			
+			if(newSpeed.lengthSquared()<direction.lengthSquared()) { //outside of the radius, but not swinging
+				newSpeed = newSpeed.add(direction);
+			}
 			motion = newSpeed;//.add(direction);
 			
 			player.setVelocity(motion.x, motion.y, motion.z);
@@ -145,50 +149,7 @@ public class GrappleLineEntity extends Entity {
 		return Math.acos(part);
 	}
 	
-	private Vec3d removealong(Vec3d motion, Vec3d origin) {
-		Vec3d normalized = origin.normalize();
-		double dot = motion.x*normalized.x+motion.y*normalized.y+motion.z*normalized.z;
-		double change = dot/normalized.length();
-		Vec3d proj = normalized.multiply(change);
-		
-		return motion.subtract(proj);
-	}
-	
-	
 	private Vec3d getToDraw(Vec3d pos, Box shape) {
-		/*
-		int ix = (int)pos.x;
-		double px = pos.x-ix;
-		double cx = getClosest(shape.x1,shape.x2,px);
-		double dx = Math.abs(cx-px);
-		
-		int iy = (int)pos.y;
-		double py = pos.y-iy;
-		double cy = getClosest(shape.y1,shape.y2,py);
-		double dy = Math.abs(cy-py);
-		
-		int iz = (int)pos.z;
-		double pz = pos.z-iz;
-		double cz = getClosest(shape.z1,shape.z2,pz);
-		double dz = Math.abs(cz-pz);
-		
-		if(dx<=dz && dy<=dz) {
-			return new Vec3d(
-					ix+(ix>0?cx:-cx),
-					iy+(iy>0?cy:-cy),
-					pos.z);
-					
-		}else if(dx<=dy && dz<=dy) {
-			return new Vec3d(
-					ix+(ix>0?cx:-cx),
-					pos.y,
-					iz+(iz>0?cz:-cz));
-		}else {
-			return new Vec3d(
-					pos.x,
-					iy+(iy>0?cy:-cy),
-					iz+(iz>0?cz:-cz));
-		}*/
 		return new Vec3d(
 				pos.x+((pos.x>0?1:-1)*
 						(Math.abs(pos.x-(int)pos.x)>0.5?0.05:-0.05)),
@@ -199,20 +160,6 @@ public class GrappleLineEntity extends Entity {
 				);
 	}
 	
-	
-	private double getClosest(double a, double b, double x) {
-		if(Math.abs(b-x)>Math.abs(a-x)) {
-			return a;
-		}else {
-			return b;
-		}
-	}
-	
-	private double round(double x, int i) {
-		BigDecimal bd = BigDecimal.valueOf(x);
-	    bd = bd.setScale(i, RoundingMode.HALF_UP);
-	    return bd.doubleValue();
-	}
 
 	private boolean isSamePos(Vec3d a, Vec3d b) {
 		if(Math.round(a.getX())==Math.round(b.getX())&&Math.round(a.getY())==Math.round(b.getY())&&Math.round(a.getZ())==Math.round(b.getZ())) {
