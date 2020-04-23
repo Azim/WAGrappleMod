@@ -137,7 +137,7 @@ public class GrappleLineEntity extends Entity {
 			motion = newSpeed;//.add(direction);
 			
 			if(MinecraftClient.getInstance().options.keyForward.isPressed() && player.getPos().y<origin.y) {
-				motion = motion.add(player.getRotationVector().normalize().multiply(0.1));
+				motion = motion.add(player.getRotationVector().normalize().multiply(0.05));
 			}
 			if(motion.lengthSquared()>6.25) {
 				motion = motion.normalize().multiply(2.5);
