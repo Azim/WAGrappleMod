@@ -1,11 +1,7 @@
 package icu.azim.wagrapple.render;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.OptionalDouble;
-
 import com.mojang.blaze3d.systems.RenderSystem;
-
 import icu.azim.wagrapple.entity.GrappleLineEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.RenderLayer;

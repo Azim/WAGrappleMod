@@ -36,8 +36,7 @@ public class GrappleLinePiece {
 	public boolean blockTick() {
 		if(world.getBlockState(blockPos)==blockState) {
 			return true;
-		}
-		System.out.println("block changed");		
+		}	
 		return false;
 	}
 	

@@ -6,19 +6,21 @@ import java.math.RoundingMode;
 import icu.azim.wagrapple.WAGrappleMod;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
+import net.minecraft.block.piston.PistonBehavior;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.options.KeyBinding;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Packet;
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.PacketByteBuf;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult.Type;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RayTraceContext;
 import net.minecraft.world.World;
@@ -33,7 +35,8 @@ public class GrappleLineEntity extends Entity {
 	private Vec3d motion;
 	
 	private GrappleLineHandler lineHandler;
-	//private List<Vec3d> pieces;
+	private KeyBinding ascend;
+	private KeyBinding descend;
 
 	public GrappleLineEntity(EntityType<?> type, World world) {
 		super(type, world);
@@ -55,6 +58,8 @@ public class GrappleLineEntity extends Entity {
 		}
 		
 		motion = new Vec3d(0,0,0);
+		ascend = MinecraftClient.getInstance().options.keySneak;
+		descend = MinecraftClient.getInstance().options.keySprint;
 	}
 
 	@Override
@@ -85,9 +90,18 @@ public class GrappleLineEntity extends Entity {
 			this.remove();
 			return;
 		}
+
+		if(!player.onGround) {
+			player.setSprinting(false);
+			player.setSneaking(false);
+		}
+		
 		if(world.isClient) {
+			lineHandler.tick();
+			handlePlayerInput();
 			grapplePhysicsTick();
 			movementPhysicsTick();
+			
 		}else {
 			if(!WAGrappleMod.GRAPPLE_COMPONENT.get(player).isGrappled()) {
 				this.remove();
@@ -98,14 +112,30 @@ public class GrappleLineEntity extends Entity {
 		super.tick();
 	}
 	
+	public void handlePlayerInput() {
+		if(ascend.isPressed()&&descend.isPressed()) {
+			return; //not moving anywhere
+		}
+		if(ascend.isPressed()) {
+			if(lineHandler.getMaxLen()-lineHandler.getPiecesLen()>1) {
+				lineHandler.setMaxLen(lineHandler.getMaxLen()-0.1);
+			}
+		}
+		
+		if(descend.isPressed()) {
+			lineHandler.setMaxLen(lineHandler.getMaxLen()+0.1);
+		}
+	}
+	
+	
 	public void grapplePhysicsTick() {
 		BlockHitResult res = this.world.rayTrace(new RayTraceContext(new Vec3d(player.getX(),player.getEyeY(),player.getZ()),lineHandler.getPiece(lineHandler.size()-1), ShapeType.OUTLINE, FluidHandling.NONE, player));
 		
 		if(res.getType()==Type.BLOCK) {
 			Vec3d pos = res.getPos();
 			BlockPos blockPos = res.getBlockPos();
-			Box shape = world.getBlockState(blockPos).getCollisionShape(world, blockPos).getBoundingBox();
-			System.out.println(shape.toString());
+			//Box shape = world.getBlockState(blockPos).getCollisionShape(world, blockPos).getBoundingBox();
+			//System.out.println(shape.toString());
 			
 			if(!isSamePos( lineHandler.getPiece(lineHandler.size()-1), pos)) {
 				if(lineHandler.size()>1) {
@@ -128,19 +158,23 @@ public class GrappleLineEntity extends Entity {
 			return;
 		}//*/
 		
+		
 		Vec3d origin = lineHandler.getLastPiece();
 		double distanceToOrigin = player.getPos().distanceTo(origin);
 		double totalLen = distanceToOrigin+lineHandler.getPiecesLen();
 		if(totalLen>lineHandler.getMaxLen()) {
 			
 			Vec3d originToPlayer = origin.subtract(player.getPos());
-			
+			Vec3d direction = originToPlayer.normalize().multiply(totalLen-lineHandler.getMaxLen());
 			Vec3d projection = project(player.getVelocity(),originToPlayer);
 			
+
 			Vec3d newSpeed = player.getVelocity().subtract(projection);
-			newSpeed = newSpeed.multiply((player.getVelocity().length()+0.01)/newSpeed.length());
 			
-			Vec3d direction = originToPlayer.normalize().multiply(totalLen-lineHandler.getMaxLen());
+			//double angle = getAngle(new Vec3d(0, 1,0), direction.normalize())*180/Math.PI;
+			newSpeed = newSpeed.multiply((player.getVelocity().length()-0.001)/newSpeed.length());
+			
+			
 			
 			if(newSpeed.lengthSquared()<direction.lengthSquared()) { //outside of the radius, but not swinging
 				newSpeed = newSpeed.add(direction);
@@ -210,5 +244,12 @@ public class GrappleLineEntity extends Entity {
 	public void setLength(float length) {
 		this.length = length;
 	}
+	
 
+	@Override
+	public PistonBehavior getPistonBehavior() {
+		return PistonBehavior.IGNORE;
+	}
+	
+	
 }

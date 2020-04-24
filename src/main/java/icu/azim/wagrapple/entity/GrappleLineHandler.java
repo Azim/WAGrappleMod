@@ -71,4 +71,17 @@ public class GrappleLineHandler {
 	public double getMaxLen() {
 		return maxLen;
 	}
+	public void setMaxLen(double maxLen) {
+		this.maxLen = maxLen;
+	}
+	
+	public void tick() {
+		for(GrappleLinePiece piece:pieces) {
+			if(!piece.blockTick()) {
+				System.out.println("block changed!");
+				line.detachLine();
+			}
+		}
+	}
+
 }
