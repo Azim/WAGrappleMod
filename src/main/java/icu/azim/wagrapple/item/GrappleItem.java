@@ -45,6 +45,7 @@ public class GrappleItem extends Item{
 			playerEntity.swingHand(hand);
 			
 		}else {
+			
 			int id = WAGrappleMod.GRAPPLE_COMPONENT.get(playerEntity).getLineId();
 			if(id>0) {
 				Entity e = world.getEntityById(id);
@@ -52,6 +53,7 @@ public class GrappleItem extends Item{
 					e.remove();
 				}
 			}
+			
 			WAGrappleMod.GRAPPLE_COMPONENT.get(playerEntity).setLineId(-1);
 			WAGrappleMod.GRAPPLE_COMPONENT.get(playerEntity).setGrappled(false);
 			WAGrappleMod.GRAPPLE_COMPONENT.get(playerEntity).sync();

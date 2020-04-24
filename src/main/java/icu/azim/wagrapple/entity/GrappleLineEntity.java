@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 import icu.azim.wagrapple.WAGrappleMod;
-import net.minecraft.block.CommandBlock;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -15,6 +14,7 @@ import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult.Type;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RayTraceContext;
@@ -26,7 +26,6 @@ public class GrappleLineEntity extends Entity {
 	
 
 	private PlayerEntity player;
-	private Vec3d hitPos;
 	private float length = 0;
 	private Vec3d motion;
 	
@@ -40,12 +39,18 @@ public class GrappleLineEntity extends Entity {
 	public GrappleLineEntity(World world, PlayerEntity player, float length, Vec3d pos) {
 		this(WAGrappleMod.GRAPPLE_LINE, world);
 		this.updatePosition(pos.x, pos.y, pos.z);
-		this.hitPos = pos;
 		this.player = player;
 		this.setLength(16);
 		this.ignoreCameraFrustum = true;
 		lineHandler= new GrappleLineHandler(this, 16);
-		lineHandler.add(0, pos, pos);
+		
+		BlockHitResult result = (BlockHitResult) player.rayTrace(16, 0, false);
+		if(result==null) {
+			this.detachLine();
+		}else {
+			lineHandler.add(0, pos, result.getBlockPos());
+		}
+		
 		motion = new Vec3d(0,0,0);
 	}
 
@@ -80,6 +85,10 @@ public class GrappleLineEntity extends Entity {
 		if(world.isClient) {
 			grapplePhysicsTick();
 			movementPhysicsTick();
+		}else {
+			if(!WAGrappleMod.GRAPPLE_COMPONENT.get(player).isGrappled()) {
+				this.remove();
+			}
 		}
 		
 		
@@ -91,19 +100,18 @@ public class GrappleLineEntity extends Entity {
 		
 		if(res.getType()==Type.BLOCK) {
 			Vec3d pos = res.getPos();
-			Box shape = world.getBlockState(res.getBlockPos()).getCollisionShape(world, res.getBlockPos()).getBoundingBox();
+			BlockPos blockPos = res.getBlockPos();
+			Box shape = world.getBlockState(blockPos).getCollisionShape(world, blockPos).getBoundingBox();
 			System.out.println(shape.toString());
 			
 			if(!isSamePos( lineHandler.getPiece(lineHandler.size()-1), pos)) {
 				if(lineHandler.size()>1) {
 					if(!isSamePos( lineHandler.getPiece(lineHandler.size()-2), pos)) {
-						Vec3d draw = getToDraw(pos,shape);
-						lineHandler.add(pos,draw);
+						lineHandler.add(pos,blockPos);
 						//System.out.println(lineHandler.size()+":"+pos.toString()+":"+draw.toString());
 					}
 				}else {
-					Vec3d draw = getToDraw(pos,shape);
-					lineHandler.add(pos,draw);
+					lineHandler.add(pos,blockPos);
 				}
 			}
 		}else {
@@ -173,17 +181,6 @@ public class GrappleLineEntity extends Entity {
 		return Math.acos(part);
 	}
 	
-	private Vec3d getToDraw(Vec3d pos, Box shape) {
-		return new Vec3d(
-				pos.x+((pos.x>0?1:-1)*
-						(Math.abs(pos.x-(int)pos.x)>0.5?0.05:-0.05)),
-				pos.y+((pos.y>0?1:-1)*
-						(Math.abs(pos.y-(int)pos.y)>0.5?0.05:-0.05)),
-				pos.z+((pos.z>0?1:-1)*
-						(Math.abs(pos.z-(int)pos.z)>0.5?0.05:-0.05))
-				);
-	}
-	
 
 	private boolean isSamePos(Vec3d a, Vec3d b) {
 		if(Math.round(a.getX())==Math.round(b.getX())&&Math.round(a.getY())==Math.round(b.getY())&&Math.round(a.getZ())==Math.round(b.getZ())) {
@@ -195,14 +192,6 @@ public class GrappleLineEntity extends Entity {
 	
 	public PlayerEntity getPlayer() {
 		return player;
-	}
-
-	public Vec3d getHitPos() {
-		return hitPos;
-	}
-
-	public void setHitPos(Vec3d hitPos) {
-		this.hitPos = hitPos;
 	}
 
 	public float getLength() {
