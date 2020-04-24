@@ -31,6 +31,7 @@ import net.minecraft.util.registry.Registry;
 public class WAGrappleMod implements ModInitializer,ClientModInitializer {
 	public static final String modid = "wagrapple";
 	
+	//TODO sort all that stuff so it looks more presentable
 	public static final EntityType<GrappleLineEntity> GRAPPLE_LINE =
 		    Registry.register(
 		        Registry.ENTITY_TYPE,
@@ -61,7 +62,7 @@ public class WAGrappleMod implements ModInitializer,ClientModInitializer {
 	public void onInitialize() {
 		Registry.register(Registry.ITEM, new Identifier(modid, "grapple"), GRAPPLE_ITEM);
 		EntityComponents.setRespawnCopyStrategy(GRAPPLE_COMPONENT, RespawnCopyStrategy.NEVER_COPY);
-		
+		//TODO separate this logic into it's own class
 		ServerSidePacketRegistry.INSTANCE.register(DETACH_LINE_PACKET_ID, (packetContext, attachedData) -> {
             // Get the BlockPos we put earlier in the IO thread
             boolean detach = attachedData.readBoolean();

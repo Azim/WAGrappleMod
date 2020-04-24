@@ -15,7 +15,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Packet;
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.PacketByteBuf;
 import net.minecraft.util.hit.BlockHitResult;
@@ -251,5 +250,14 @@ public class GrappleLineEntity extends Entity {
 		return PistonBehavior.IGNORE;
 	}
 	
+	@Override
+	public boolean shouldRender(double distance) {
+		return true;
+	}
+	
+	@Override
+	public boolean shouldRender(double cameraX, double cameraY, double cameraZ) {
+		return true;
+	}
 	
 }

@@ -33,6 +33,8 @@ public class GrappleLineRenderer extends EntityRenderer<GrappleLineEntity> {
 		return new Identifier("wagrapple:textures/entity/scanner_line.png");
 	}
 
+	
+	//TODO fix disappearing bug
 	@Override
 	public void render(GrappleLineEntity entity, float yaw, float tickDelta, MatrixStack matrixStack,
 			VertexConsumerProvider vertexConsumerProvider, int light) {
@@ -134,7 +136,8 @@ public class GrappleLineRenderer extends EntityRenderer<GrappleLineEntity> {
 	}
 	
 	private void drawPiece(Vec3d start, Vec3d end, VertexConsumer consumer, Matrix4f matrix) {
-		if(start.squaredDistanceTo(end)>64) {
+		
+		if(start.squaredDistanceTo(end)>64) { //split each segment onto smaller segments
 			Vec3d ba = end.subtract(start);
 			ba = ba.normalize().multiply(8);
 			drawPiece(start, end.subtract(ba), consumer, matrix);
@@ -144,7 +147,12 @@ public class GrappleLineRenderer extends EntityRenderer<GrappleLineEntity> {
 		
 		double offset = width/2;
 		Vec3d diff = start.subtract(end);
-		Vec3d perp = diff.crossProduct(new Vec3d(1,1,1)).normalize().multiply(offset); //get "any" perpendicular vector to create an offset
+		
+		Vec3d any = new Vec3d(1,1,1);
+		if(isSamePos(any, diff)) {
+			any = new Vec3d(1,1,-1); //gotta check they are in fact different, to not break the rossProduct result
+		}
+		Vec3d perp = diff.crossProduct(any).normalize().multiply(offset); //get "any" perpendicular vector to create an offset
 		Vec3d perpRotated = perp.crossProduct(diff).normalize().multiply(offset);      //get vector perpendicular to both of above vectors
 		
 		//do some offset magic, so the 2d line becomes a cuboid
@@ -174,5 +182,11 @@ public class GrappleLineRenderer extends EntityRenderer<GrappleLineEntity> {
 	}
 	
 
+	private boolean isSamePos(Vec3d a, Vec3d b) {
+		if(Math.round(a.getX())==Math.round(b.getX())&&Math.round(a.getY())==Math.round(b.getY())&&Math.round(a.getZ())==Math.round(b.getZ())) {
+			return true;
+		}
+		return false;
+	}
 
 }
