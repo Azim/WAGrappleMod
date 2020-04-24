@@ -15,6 +15,8 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
 import net.fabricmc.fabric.api.client.rendereregistry.v1.EntityRendererRegistry;
 import net.fabricmc.fabric.api.entity.FabricEntityTypeBuilder;
+import net.fabricmc.fabric.api.network.ServerSidePacketRegistry;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityCategory;
 import net.minecraft.entity.EntityDimensions;
 import net.minecraft.entity.EntityType;
@@ -53,10 +55,36 @@ public class WAGrappleMod implements ModInitializer,ClientModInitializer {
 	        .attach(EntityComponentCallback.event(PlayerEntity.class), player->new GrappleComponent(player));
 	
 	
+	public static final Identifier DETACH_LINE_PACKET_ID = new Identifier(modid, "detach_line");
+	
 	@Override
 	public void onInitialize() {
 		Registry.register(Registry.ITEM, new Identifier(modid, "grapple"), GRAPPLE_ITEM);
 		EntityComponents.setRespawnCopyStrategy(GRAPPLE_COMPONENT, RespawnCopyStrategy.NEVER_COPY);
+		
+		ServerSidePacketRegistry.INSTANCE.register(DETACH_LINE_PACKET_ID, (packetContext, attachedData) -> {
+            // Get the BlockPos we put earlier in the IO thread
+            boolean detach = attachedData.readBoolean();
+            PlayerEntity player = packetContext.getPlayer();
+            packetContext.getTaskQueue().execute(() -> {
+                // Execute on the main thread
+            	if(WAGrappleMod.GRAPPLE_COMPONENT.get(player).isGrappled() && detach) {
+            		int id = WAGrappleMod.GRAPPLE_COMPONENT.get(player).getLineId();
+            		if(id>0) {
+        				Entity e = player.world.getEntityById(id);
+        				if(e!=null) {
+        					e.remove();
+        				}
+            		}
+            		WAGrappleMod.GRAPPLE_COMPONENT.get(player).setLineId(-1);
+        			WAGrappleMod.GRAPPLE_COMPONENT.get(player).setGrappled(!detach);
+        			WAGrappleMod.GRAPPLE_COMPONENT.get(player).sync();
+            	}
+ 
+            });
+        });
+		
+		
 	}
 
 	@Override

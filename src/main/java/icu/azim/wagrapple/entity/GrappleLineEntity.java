@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 import icu.azim.wagrapple.WAGrappleMod;
+import io.netty.buffer.Unpooled;
+import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -12,6 +14,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Packet;
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.util.PacketByteBuf;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult.Type;
 import net.minecraft.util.math.BlockPos;
@@ -157,10 +160,16 @@ public class GrappleLineEntity extends Entity {
 	
 	
 	public void detachLine() {
-		WAGrappleMod.GRAPPLE_COMPONENT.get(player).setLineId(-1);
-		WAGrappleMod.GRAPPLE_COMPONENT.get(player).setGrappled(false);
-		WAGrappleMod.GRAPPLE_COMPONENT.get(player).sync();
-		player.playSound(SoundEvents.ENTITY_ITEM_BREAK, 1, 1);
+		if(world.isClient) {
+			//WAGrappleMod.GRAPPLE_COMPONENT.get(player).setLineId(-1);
+			//WAGrappleMod.GRAPPLE_COMPONENT.get(player).setGrappled(false);
+			//WAGrappleMod.GRAPPLE_COMPONENT.get(player).sync();
+			player.playSound(SoundEvents.ENTITY_ITEM_BREAK, 1, 1);
+			
+			PacketByteBuf passedData = new PacketByteBuf(Unpooled.buffer());
+			passedData.writeBoolean(true);
+			ClientSidePacketRegistry.INSTANCE.sendToServer(WAGrappleMod.DETACH_LINE_PACKET_ID, passedData);
+		}
 		this.remove();
 	}
 	
