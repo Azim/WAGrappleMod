@@ -38,7 +38,7 @@ public class MixinClientPlayNetworkHandler {
     		    BlockHitResult result = owner.world.rayTrace(new RayTraceContext(vec3d, vec3d3, RayTraceContext.ShapeType.COLLIDER, RayTraceContext.FluidHandling.NONE, owner));
     		    
     		    Vec3d pos = new Vec3d(x,y,z);
-            	GrappleLineEntity toSpawn = new GrappleLineEntity(world, (PlayerEntity) owner, vec3d.distanceTo(pos)+1, pos, result.getBlockPos());
+            	GrappleLineEntity toSpawn = new GrappleLineEntity(world, (PlayerEntity) owner, owner.getPos().distanceTo(pos)+1, pos, result.getBlockPos());
                 int id = packet.getId();
                 toSpawn.updateTrackedPosition(x, y, z);
                 toSpawn.pitch = (float)(packet.getPitch() * 360) / 256.0F;

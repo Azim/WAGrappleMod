@@ -173,7 +173,7 @@ public class GrappleLineEntity extends Entity {
 			return;
 		}//*/
 		Vec3d origin = lineHandler.getLastPiece();
-		double distanceToOrigin = player.getCameraPosVec(0).distanceTo(origin);
+		double distanceToOrigin = player.getPos().distanceTo(origin);
 		double totalLen = distanceToOrigin+lineHandler.getPiecesLen();
 		if(totalLen>lineHandler.getMaxLen()) {
 			
@@ -194,7 +194,7 @@ public class GrappleLineEntity extends Entity {
 			}
 			motion = newSpeed;//.add(direction);
 			
-			if(MinecraftClient.getInstance().options.keyForward.isPressed() && player.getCameraPosVec(0).y<origin.y) {
+			if(MinecraftClient.getInstance().options.keyForward.isPressed() && player.getPos().y<origin.y) {
 				motion = motion.add(player.getRotationVector().normalize().multiply(0.05));
 			}
 			if(motion.lengthSquared()>6.25) {
