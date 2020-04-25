@@ -1,8 +1,5 @@
 package icu.azim.wagrapple.entity;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-
 import icu.azim.wagrapple.WAGrappleMod;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
@@ -30,35 +27,34 @@ public class GrappleLineEntity extends Entity {
 	
 
 	private PlayerEntity player;
-	private float length = 0;
 	private Vec3d motion;
 	
 	private GrappleLineHandler lineHandler;
 	private KeyBinding ascend;
 	private KeyBinding descend;
+	private KeyBinding boost;
+	private double boostSpeed;
+	private int boostCooldown;
 
 	public GrappleLineEntity(EntityType<?> type, World world) {
 		super(type, world);
 	}
 	
-	public GrappleLineEntity(World world, PlayerEntity player, float length, Vec3d pos) {
+	public GrappleLineEntity(World world, PlayerEntity player, double length, Vec3d pos, BlockPos bpos) {
 		this(WAGrappleMod.GRAPPLE_LINE, world);
 		this.updatePosition(pos.x, pos.y, pos.z);
 		this.player = player;
-		this.setLength(16);
 		this.ignoreCameraFrustum = true;
-		lineHandler= new GrappleLineHandler(this, 16);
-		
-		BlockHitResult result = (BlockHitResult) player.rayTrace(16, 0, false);
-		if(result==null) {
-			this.detachLine();
-		}else {
-			lineHandler.add(0, pos, result.getBlockPos());
-		}
-		
+		lineHandler= new GrappleLineHandler(this, length);
+		lineHandler.add(0, pos, bpos);
 		motion = new Vec3d(0,0,0);
+		boostSpeed = 1;
+		
 		ascend = MinecraftClient.getInstance().options.keySneak;
 		descend = MinecraftClient.getInstance().options.keySprint;
+		boost = MinecraftClient.getInstance().options.keyJump;
+		
+		boostCooldown = 15;
 	}
 
 	@Override
@@ -89,17 +85,26 @@ public class GrappleLineEntity extends Entity {
 			this.remove();
 			return;
 		}
-
-		if(!player.onGround) {
-			player.setSprinting(false);
-			player.setSneaking(false);
-		}
 		
 		if(world.isClient) {
+			if(boostCooldown>0) boostCooldown--;
+
 			lineHandler.tick();
+			if(this.removed) {
+				return;
+			}
 			handlePlayerInput();
+			if(this.removed) {
+				return;
+			}
 			grapplePhysicsTick();
+			if(this.removed) {
+				return;
+			}
 			movementPhysicsTick();
+			if(this.removed) {
+				return;
+			}
 			
 		}else {
 			if(!WAGrappleMod.GRAPPLE_COMPONENT.get(player).isGrappled()) {
@@ -115,6 +120,19 @@ public class GrappleLineEntity extends Entity {
 		if(ascend.isPressed()&&descend.isPressed()) {
 			return; //not moving anywhere
 		}
+		System.out.println(player.abilities.flying+" "+player.onGround);
+		if(player.abilities.flying||player.onGround) {
+			boostCooldown = 15;
+		}
+		
+		if(boost.isPressed() && !player.abilities.flying && (boostCooldown==0)) {
+			Vec3d origin = lineHandler.getLastPiece();
+			Vec3d direction = player.getCameraPosVec(0).subtract(origin).normalize().multiply(-boostSpeed);
+			player.addVelocity(direction.x,direction.y,direction.z);
+			
+			detachLine();
+		}
+		
 		if(ascend.isPressed()) {
 			if(lineHandler.getMaxLen()-lineHandler.getPiecesLen()>1) {
 				lineHandler.setMaxLen(lineHandler.getMaxLen()-0.1);
@@ -128,13 +146,11 @@ public class GrappleLineEntity extends Entity {
 	
 	
 	public void grapplePhysicsTick() {
-		BlockHitResult res = this.world.rayTrace(new RayTraceContext(new Vec3d(player.getX(),player.getEyeY(),player.getZ()),lineHandler.getPiece(lineHandler.size()-1), ShapeType.OUTLINE, FluidHandling.NONE, player));
+		BlockHitResult res = this.world.rayTrace(new RayTraceContext(player.getCameraPosVec(0),lineHandler.getPiece(lineHandler.size()-1), ShapeType.COLLIDER, FluidHandling.NONE, player));
 		
 		if(res.getType()==Type.BLOCK) {
 			Vec3d pos = res.getPos();
 			BlockPos blockPos = res.getBlockPos();
-			//Box shape = world.getBlockState(blockPos).getCollisionShape(world, blockPos).getBoundingBox();
-			//System.out.println(shape.toString());
 			
 			if(!isSamePos( lineHandler.getPiece(lineHandler.size()-1), pos)) {
 				if(lineHandler.size()>1) {
@@ -156,10 +172,8 @@ public class GrappleLineEntity extends Entity {
 		if(true) {
 			return;
 		}//*/
-		
-		
 		Vec3d origin = lineHandler.getLastPiece();
-		double distanceToOrigin = player.getPos().distanceTo(origin);
+		double distanceToOrigin = player.getCameraPosVec(0).distanceTo(origin);
 		double totalLen = distanceToOrigin+lineHandler.getPiecesLen();
 		if(totalLen>lineHandler.getMaxLen()) {
 			
@@ -180,23 +194,23 @@ public class GrappleLineEntity extends Entity {
 			}
 			motion = newSpeed;//.add(direction);
 			
-			if(MinecraftClient.getInstance().options.keyForward.isPressed() && player.getPos().y<origin.y) {
+			if(MinecraftClient.getInstance().options.keyForward.isPressed() && player.getCameraPosVec(0).y<origin.y) {
 				motion = motion.add(player.getRotationVector().normalize().multiply(0.05));
 			}
 			if(motion.lengthSquared()>6.25) {
 				motion = motion.normalize().multiply(2.5);
 			}
-			System.out.println(round(motion.length(),2)+" - "+round(totalLen-lineHandler.getMaxLen(),2));
 			player.setVelocity(motion.x, motion.y, motion.z);
+		}else {
+			if(player.onGround && totalLen<lineHandler.getMaxLen()) { //player moves towards the pivot point on land
+				//do nothing actually, it's not this way in WA
+			}
 		}
 	}
 	
 	
-	public void detachLine() {
+	public void destroyLine() {
 		if(world.isClient) {
-			//WAGrappleMod.GRAPPLE_COMPONENT.get(player).setLineId(-1);
-			//WAGrappleMod.GRAPPLE_COMPONENT.get(player).setGrappled(false);
-			//WAGrappleMod.GRAPPLE_COMPONENT.get(player).sync();
 			player.playSound(SoundEvents.ENTITY_ITEM_BREAK, 1, 1);
 			
 			PacketByteBuf passedData = new PacketByteBuf(Unpooled.buffer());
@@ -206,11 +220,15 @@ public class GrappleLineEntity extends Entity {
 		this.remove();
 	}
 	
-
-	private double round(double x, int i) {
-		BigDecimal bd = BigDecimal.valueOf(x);
-		bd = bd.setScale(i, RoundingMode.HALF_UP);
-		return bd.doubleValue();
+	public void detachLine() {
+		if(world.isClient) {
+			player.playSound(SoundEvents.ENTITY_SPLASH_POTION_BREAK, 1, 1);
+			
+			PacketByteBuf passedData = new PacketByteBuf(Unpooled.buffer());
+			passedData.writeBoolean(true);
+			ClientSidePacketRegistry.INSTANCE.sendToServer(WAGrappleMod.DETACH_LINE_PACKET_ID, passedData);
+		}
+		this.remove();
 	}
 	
 	private Vec3d project(Vec3d a, Vec3d b) {
@@ -234,14 +252,6 @@ public class GrappleLineEntity extends Entity {
 	
 	public PlayerEntity getPlayer() {
 		return player;
-	}
-
-	public float getLength() {
-		return length;
-	}
-
-	public void setLength(float length) {
-		this.length = length;
 	}
 	
 

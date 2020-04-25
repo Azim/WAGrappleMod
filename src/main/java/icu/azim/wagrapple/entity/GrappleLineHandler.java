@@ -25,7 +25,7 @@ public class GrappleLineHandler {
 			//System.out.println("new length: "+piecesLen+" ("+pieces.size()+" items)");
 		}
 		if(piecesLen>maxLen) {
-			line.detachLine();
+			line.destroyLine();
 		}
 		pieces.add(new GrappleLinePiece(piece, blockPos, line.world));
 	}
@@ -34,7 +34,7 @@ public class GrappleLineHandler {
 		pieces.add(new GrappleLinePiece(piece, blockPos, line.world));
 		recalcLen();
 		if(piecesLen>maxLen) {
-			line.detachLine();
+			line.destroyLine();
 		}
 	}
 	
@@ -79,7 +79,7 @@ public class GrappleLineHandler {
 		for(GrappleLinePiece piece:pieces) {
 			if(!piece.blockTick()) {
 				System.out.println("block changed!");
-				line.detachLine();
+				line.destroyLine();
 			}
 		}
 	}

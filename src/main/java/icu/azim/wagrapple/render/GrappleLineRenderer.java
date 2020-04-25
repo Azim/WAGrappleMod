@@ -34,7 +34,6 @@ public class GrappleLineRenderer extends EntityRenderer<GrappleLineEntity> {
 	}
 
 	
-	//TODO fix disappearing bug
 	@Override
 	public void render(GrappleLineEntity entity, float yaw, float tickDelta, MatrixStack matrixStack,
 			VertexConsumerProvider vertexConsumerProvider, int light) {

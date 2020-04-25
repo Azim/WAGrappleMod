@@ -11,8 +11,10 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
-import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult.Type;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.RayTraceContext;
 import net.minecraft.world.World;
 
 public class GrappleItem extends Item{
@@ -27,12 +29,16 @@ public class GrappleItem extends Item{
 		
 		if(!WAGrappleMod.GRAPPLE_COMPONENT.get(playerEntity).isGrappled()) {
 		
-			HitResult result = playerEntity.rayTrace(16, 0, false);
+			Vec3d vec3d = playerEntity.getCameraPosVec(0);
+		    Vec3d vec3d2 = playerEntity.getRotationVec(0);
+		    Vec3d vec3d3 = vec3d.add(vec3d2.x * 16, vec3d2.y * 16, vec3d2.z * 16);
+		    BlockHitResult result = playerEntity.world.rayTrace(new RayTraceContext(vec3d, vec3d3, RayTraceContext.ShapeType.COLLIDER, RayTraceContext.FluidHandling.NONE, playerEntity));
+		   
 		
 			if(result.getType()==Type.BLOCK) {
 				world.playSound(playerEntity, result.getPos().x,result.getPos().y,result.getPos().z, SoundEvents.BLOCK_BEACON_ACTIVATE, SoundCategory.PLAYERS, 1.0F, 1.0F);
 				if(!world.isClient) {
-					GrappleLineEntity entity = new GrappleLineEntity(world, playerEntity, 0, result.getPos());
+					GrappleLineEntity entity = new GrappleLineEntity(world, playerEntity, vec3d.distanceTo(result.getPos())+1, result.getPos(), result.getBlockPos());
 					world.spawnEntity(entity);
 					WAGrappleMod.GRAPPLE_COMPONENT.get(playerEntity).setLineId(entity.getEntityId());
 					WAGrappleMod.GRAPPLE_COMPONENT.get(playerEntity).setGrappled(true);
