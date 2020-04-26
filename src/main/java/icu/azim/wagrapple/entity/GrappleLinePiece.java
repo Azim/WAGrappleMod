@@ -10,7 +10,6 @@ import net.minecraft.world.World;
 
 public class GrappleLinePiece {
 	private Vec3d location;
-	private Vec3d drawLocation;
 	private BlockPos blockPos;
 	private BlockState blockState;
 	private Vec3d direction;
@@ -23,8 +22,6 @@ public class GrappleLinePiece {
 		this.world = world;
 		this.blockState = world.getBlockState(block);
 		this.blockId = Registry.BLOCK.getId(blockState.getBlock());
-		this.drawLocation = location; 
-				//getToDraw(location, blockState.getCollisionShape(world, block).getBoundingBox());
 		this.direction = direction;
 	}
 	
@@ -36,9 +33,6 @@ public class GrappleLinePiece {
 		return location;
 	}
 	
-	public Vec3d getDrawLocation() {
-		return drawLocation;
-	}
 	
 	public boolean blockTick() {
 		if(world.getBlockState(blockPos)==blockState) {

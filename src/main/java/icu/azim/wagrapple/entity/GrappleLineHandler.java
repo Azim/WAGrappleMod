@@ -40,6 +40,10 @@ public class GrappleLineHandler {
 		}
 	}
 	
+	public Vec3d getDirection(int index) {
+		return pieces.get(index).getDirection();
+	}
+	
 	private Vec3d getDirection(Vec3d prev, Vec3d curr, Direction dir) {
 		Vec3d vdir = new Vec3d(dir.getOffsetX(), dir.getOffsetY(), dir.getOffsetZ());
 		Vec3d diff = prev.subtract(curr).normalize();
@@ -48,18 +52,6 @@ public class GrappleLineHandler {
 		return diff.crossProduct(vdir).crossProduct(diff).normalize();
 	}
 	
-	/*
-	public void add(int index, BlockHitResult result) {		
-		Vec3d piece = getSnap(result.getPos(), line.world.getBlockState(result.getBlockPos()).getCollisionShape(line.world, result.getBlockPos()).getBoundingBox());
-		if(this.size()>0) {
-			piecesLen += piece.distanceTo(getLastPiece());
-		}
-		pieces.add(index, new GrappleLinePiece(piece, result.getBlockPos(), result.getSide(), line.world));
-		recalcLen();
-		if(piecesLen>maxLen) {
-			line.destroyLine();
-		}
-	}*/
 	
 	private void recalcLen() {
 		piecesLen = 0;
@@ -89,9 +81,6 @@ public class GrappleLineHandler {
 		double ny = iy + ((iy<0)?-1:1)*(cy);
 		double nz = iz + ((iz<0)?-1:1)*(cz);
 		
-		
-		
-		
 		Vec3d result; //find the one that is further away from the corners - and leave it as was
 		if(dx>=dy && dx>=dz) { 						//leave x as was
 			result = new Vec3d(point.x, ny, nz);
@@ -111,9 +100,6 @@ public class GrappleLineHandler {
 	public Vec3d getPiece(int index) {
 		return pieces.get(index).getLocation();
 	}
-	public Vec3d getDrawPieces(int index) {
-		return pieces.get(index).getDrawLocation();
-	}
 
 	public int size() {
 		return pieces.size();
@@ -123,9 +109,6 @@ public class GrappleLineHandler {
 		return pieces.get(pieces.size()-1).getLocation();
 	}
 	
-	public Vec3d getLastDrawPiece() {
-		return pieces.get(pieces.size()-1).getDrawLocation();
-	}
 
 	public double getPiecesLen() {
 		return piecesLen;
@@ -141,10 +124,11 @@ public class GrappleLineHandler {
 	public void tick() {
 		if(pieces.size()>1) {
 			double angle = pieces.get(pieces.size()-1).compare(getLastPiece().subtract(line.getPlayer().getPos()));
+			/*
 			if(angle>90) {
 				pieces.remove(pieces.size()-1);
 				recalcLen();
-			}
+			}*/
 		}
 		for(GrappleLinePiece piece:pieces) {
 			if(!piece.blockTick()) {

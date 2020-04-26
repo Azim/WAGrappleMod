@@ -105,28 +105,29 @@ public class GrappleLineRenderer extends EntityRenderer<GrappleLineEntity> {
 									})).writeMaskState(new RenderPhase.WriteMaskState(true, true)).build(false)));
 			Matrix4f matrix4f2 = matrixStack.peek().getModel();
 
-			//consumer.vertex(matrix4f2, -0.001f, -0.001f, -0.001f).color(0, 0, 0, 255).next(); // the part at the very start of it
-			//consumer.vertex(matrix4f2, 0.001f, 0.001f, 0.001f).color(0, 0, 0, 255).next();
-			//FishingBobberEntityRenderer
+
 			Vec3d begin = new Vec3d(0,0,0);
 			if(entity.getHandler().size()>1) { //multiple points - multiple lines
-				drawPiece(begin, entity.getHandler().getDrawPieces(1).subtract(entity.getPos()), consumer, matrix4f2); //draw the line between the entity and the first point
+				drawPiece(begin, entity.getHandler().getPiece(1).subtract(entity.getPos()), consumer, matrix4f2, entity.getHandler().getDirection(1)); //draw the line between the entity and the first point
 			
 				for (int i = 1; i < entity.getHandler().size()-1; i++) { // skip the very start of it, cuz we already added it above
-					Vec3d start = entity.getHandler().getDrawPieces(i).subtract(entity.getPos());
-					Vec3d end = entity.getHandler().getDrawPieces(i+1).subtract(entity.getPos());
-					drawPiece(start, end,  consumer, matrix4f2);
+					Vec3d start = entity.getHandler().getPiece(i).subtract(entity.getPos());
+					Vec3d end = entity.getHandler().getPiece(i+1).subtract(entity.getPos());
+					drawPiece(start, end,  consumer, matrix4f2, entity.getHandler().getDirection(i+1));
 				
 				}
 				drawPiece(
-					entity.getHandler().getDrawPieces(entity.getHandler().size()-1).subtract(entity.getPos()), //from last piece to player's hand
+					entity.getHandler().getPiece(entity.getHandler().size()-1).subtract(entity.getPos()), //from last piece to player's hand
 					new Vec3d(xpart, ypart, zpart),
-					consumer, matrix4f2);
+					consumer,
+					matrix4f2,
+					entity.getHandler().getDirection(entity.getHandler().size()-1)
+						);
 			}else { //only have 1 attachment point - direct line from it to the hand
 				drawPiece(
 						begin,
 						new Vec3d(xpart, ypart, zpart),
-						consumer, matrix4f2);
+						consumer, matrix4f2, entity.getHandler().getDirection(0));
 			}
 			matrixStack.pop();
 			super.render(entity, yaw, tickDelta, matrixStack, vertexConsumerProvider , light);
@@ -134,12 +135,17 @@ public class GrappleLineRenderer extends EntityRenderer<GrappleLineEntity> {
 
 	}
 	
-	private void drawPiece(Vec3d start, Vec3d end, VertexConsumer consumer, Matrix4f matrix) {
+	private void drawPiece(Vec3d start, Vec3d end, VertexConsumer consumer, Matrix4f matrix, Vec3d direction) {
+		drawPiece(start,end,consumer,matrix, false);
+		drawPiece(end, end.add(direction), consumer, matrix, true);
+	}
+	
+	private void drawPiece(Vec3d start, Vec3d end, VertexConsumer consumer, Matrix4f matrix, boolean debug) {
 		
 		if(start.squaredDistanceTo(end)>64) { //split each segment onto smaller segments
 			Vec3d ba = end.subtract(start);
 			ba = ba.normalize().multiply(8);
-			drawPiece(start, end.subtract(ba), consumer, matrix);
+			drawPiece(start, end.subtract(ba), consumer, matrix, debug);
 			start = end.subtract(ba);
 		}
 		
@@ -164,13 +170,21 @@ public class GrappleLineRenderer extends EntityRenderer<GrappleLineEntity> {
 		Vec3d b2 = end.add(perpRotated);
 		Vec3d b3 = end.subtract(perp);
 		Vec3d b4 = end.subtract(perpRotated);
-		
-		drawQuad(a1, a2, b1, b2, consumer, matrix, 20, 20, 20, 255);
-		drawQuad(a2, a3, b2, b3, consumer, matrix, 10, 10, 10, 255);
-		drawQuad(a3, a4, b3, b4, consumer, matrix, 20, 20, 20, 255);
-		drawQuad(a4, a1, b4, b1, consumer, matrix, 10, 10, 10, 255);
-		drawQuad(a2, a1, a3, a4, consumer, matrix, 0, 0, 0, 255);    //draw the squares at the start and the end of the line
-		drawQuad(b1, b2, b4, b3, consumer, matrix, 0, 0, 0, 255);
+		if(!debug) {
+			drawQuad(a1, a2, b1, b2, consumer, matrix, 20, 20, 20, 255);
+			drawQuad(a2, a3, b2, b3, consumer, matrix, 10, 10, 10, 255);
+			drawQuad(a3, a4, b3, b4, consumer, matrix, 20, 20, 20, 255);
+			drawQuad(a4, a1, b4, b1, consumer, matrix, 10, 10, 10, 255);
+			drawQuad(a2, a1, a3, a4, consumer, matrix, 0, 0, 0, 255);    //draw the squares at the start and the end of the line
+			drawQuad(b1, b2, b4, b3, consumer, matrix, 0, 0, 0, 255);
+		}else {
+			drawQuad(a1, a2, b1, b2, consumer, matrix, 255, 0, 0, 255);
+			drawQuad(a2, a3, b2, b3, consumer, matrix, 245, 10, 10, 255);
+			drawQuad(a3, a4, b3, b4, consumer, matrix, 255, 0, 0, 255);
+			drawQuad(a4, a1, b4, b1, consumer, matrix, 245, 10, 10, 255);
+			drawQuad(a2, a1, a3, a4, consumer, matrix, 0, 0, 0, 255);    //draw the squares at the start and the end of the line
+			drawQuad(b1, b2, b4, b3, consumer, matrix, 0, 0, 0, 255);
+		}
 	}
 	
 	private void drawQuad(Vec3d a1, Vec3d a2, Vec3d b1, Vec3d b2, VertexConsumer consumer, Matrix4f matrix, int r, int g, int b, int a) {
