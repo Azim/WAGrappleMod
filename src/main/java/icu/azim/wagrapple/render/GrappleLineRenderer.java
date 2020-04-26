@@ -169,7 +169,7 @@ public class GrappleLineRenderer extends EntityRenderer<GrappleLineEntity> {
 		drawQuad(a2, a3, b2, b3, consumer, matrix, 10, 10, 10, 255);
 		drawQuad(a3, a4, b3, b4, consumer, matrix, 20, 20, 20, 255);
 		drawQuad(a4, a1, b4, b1, consumer, matrix, 10, 10, 10, 255);
-		drawQuad(a1, a2, a4, a3, consumer, matrix, 0, 0, 0, 255);    //draw the squares at the start and the end of the line
+		drawQuad(a2, a1, a3, a4, consumer, matrix, 0, 0, 0, 255);    //draw the squares at the start and the end of the line
 		drawQuad(b1, b2, b4, b3, consumer, matrix, 0, 0, 0, 255);
 	}
 	

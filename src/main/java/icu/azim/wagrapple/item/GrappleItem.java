@@ -38,7 +38,7 @@ public class GrappleItem extends Item{
 			if(result.getType()==Type.BLOCK) {
 				world.playSound(playerEntity, result.getPos().x,result.getPos().y,result.getPos().z, SoundEvents.BLOCK_BEACON_ACTIVATE, SoundCategory.PLAYERS, 1.0F, 1.0F);
 				if(!world.isClient) {
-					GrappleLineEntity entity = new GrappleLineEntity(world, playerEntity, playerEntity.getPos().distanceTo(result.getPos())+1, result.getPos(), result.getBlockPos());
+					GrappleLineEntity entity = new GrappleLineEntity(world, playerEntity, playerEntity.getPos().distanceTo(result.getPos())+1, result);
 					world.spawnEntity(entity);
 					WAGrappleMod.GRAPPLE_COMPONENT.get(playerEntity).setLineId(entity.getEntityId());
 					WAGrappleMod.GRAPPLE_COMPONENT.get(playerEntity).setGrappled(true);

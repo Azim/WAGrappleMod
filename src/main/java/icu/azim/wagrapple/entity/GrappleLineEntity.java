@@ -16,7 +16,6 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.PacketByteBuf;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult.Type;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RayTraceContext;
 import net.minecraft.world.World;
@@ -40,13 +39,13 @@ public class GrappleLineEntity extends Entity {
 		super(type, world);
 	}
 	
-	public GrappleLineEntity(World world, PlayerEntity player, double length, Vec3d pos, BlockPos bpos) {
+	public GrappleLineEntity(World world, PlayerEntity player, double length, BlockHitResult res) {
 		this(WAGrappleMod.GRAPPLE_LINE, world);
-		this.updatePosition(pos.x, pos.y, pos.z);
+		this.updatePosition(res.getPos().x, res.getPos().y, res.getPos().z);
 		this.player = player;
 		this.ignoreCameraFrustum = true;
 		lineHandler= new GrappleLineHandler(this, length);
-		lineHandler.add(0, pos, bpos);
+		lineHandler.add(res);
 		motion = new Vec3d(0,0,0);
 		boostSpeed = 1;
 		
@@ -120,7 +119,6 @@ public class GrappleLineEntity extends Entity {
 		if(ascend.isPressed()&&descend.isPressed()) {
 			return; //not moving anywhere
 		}
-		System.out.println(player.abilities.flying+" "+player.onGround);
 		if(player.abilities.flying||player.onGround) {
 			boostCooldown = 15;
 		}
@@ -144,24 +142,11 @@ public class GrappleLineEntity extends Entity {
 		}
 	}
 	
-	
 	public void grapplePhysicsTick() {
 		BlockHitResult res = this.world.rayTrace(new RayTraceContext(player.getCameraPosVec(0),lineHandler.getPiece(lineHandler.size()-1), ShapeType.COLLIDER, FluidHandling.NONE, player));
 		
 		if(res.getType()==Type.BLOCK) {
-			Vec3d pos = res.getPos();
-			BlockPos blockPos = res.getBlockPos();
-			
-			if(!isSamePos( lineHandler.getPiece(lineHandler.size()-1), pos)) {
-				if(lineHandler.size()>1) {
-					if(!isSamePos( lineHandler.getPiece(lineHandler.size()-2), pos)) {
-						lineHandler.add(pos,blockPos);
-						//System.out.println(lineHandler.size()+":"+pos.toString()+":"+draw.toString());
-					}
-				}else {
-					lineHandler.add(pos,blockPos);
-				}
-			}
+			lineHandler.add(res);
 		}else {
 			
 		}
@@ -208,7 +193,6 @@ public class GrappleLineEntity extends Entity {
 		}
 	}
 	
-	
 	public void destroyLine() {
 		if(world.isClient) {
 			player.playSound(SoundEvents.ENTITY_ITEM_BREAK, 1, 1);
@@ -241,33 +225,20 @@ public class GrappleLineEntity extends Entity {
 		return Math.acos(part);
 	}
 	
-
-	private boolean isSamePos(Vec3d a, Vec3d b) {
-		if(Math.round(a.getX())==Math.round(b.getX())&&Math.round(a.getY())==Math.round(b.getY())&&Math.round(a.getZ())==Math.round(b.getZ())) {
-			return true;
-		}
-		return false;
-	}
-	
-	
 	public PlayerEntity getPlayer() {
 		return player;
 	}
 	
-
 	@Override
 	public PistonBehavior getPistonBehavior() {
 		return PistonBehavior.IGNORE;
 	}
-	
 	@Override
 	public boolean shouldRender(double distance) {
 		return true;
 	}
-	
 	@Override
 	public boolean shouldRender(double cameraX, double cameraY, double cameraZ) {
 		return true;
 	}
-	
 }
