@@ -41,11 +41,11 @@ public class GrappleLineHandler {
 	}
 	
 	private Vec3d getDirection(Vec3d prev, Vec3d curr, Direction dir) {
-		System.out.print(dir.toString()+" ");
 		Vec3d vdir = new Vec3d(dir.getOffsetX(), dir.getOffsetY(), dir.getOffsetZ());
 		Vec3d diff = prev.subtract(curr).normalize();
-		
-		return diff.crossProduct(vdir).crossProduct(diff);
+
+		System.out.println(dir.toString()+" "+dir.getVector().toString()+" "+diff.crossProduct(vdir).crossProduct(diff).normalize());
+		return diff.crossProduct(vdir).crossProduct(diff).normalize();
 	}
 	
 	/*
@@ -61,7 +61,6 @@ public class GrappleLineHandler {
 		}
 	}*/
 	
-	@SuppressWarnings("unused")
 	private void recalcLen() {
 		piecesLen = 0;
 		for(int i = 0; i < pieces.size()-1;i++) {
@@ -140,8 +139,13 @@ public class GrappleLineHandler {
 	}
 	
 	public void tick() {
-		pieces.get(pieces.size()-1).compare(getLastPiece().subtract(line.getPlayer().getPos()));
-		
+		if(pieces.size()>1) {
+			double angle = pieces.get(pieces.size()-1).compare(getLastPiece().subtract(line.getPlayer().getPos()));
+			if(angle>90) {
+				pieces.remove(pieces.size()-1);
+				recalcLen();
+			}
+		}
 		for(GrappleLinePiece piece:pieces) {
 			if(!piece.blockTick()) {
 				System.out.println("block changed!");
