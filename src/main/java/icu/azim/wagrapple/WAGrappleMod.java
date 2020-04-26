@@ -58,6 +58,9 @@ public class WAGrappleMod implements ModInitializer,ClientModInitializer {
 	
 	public static final Identifier DETACH_LINE_PACKET_ID = new Identifier(modid, "detach_line");
 	
+	
+	
+	
 	@Override
 	public void onInitialize() {
 		Registry.register(Registry.ITEM, new Identifier(modid, "grapple"), GRAPPLE_ITEM);
