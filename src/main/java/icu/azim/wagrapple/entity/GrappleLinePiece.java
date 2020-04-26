@@ -43,7 +43,6 @@ public class GrappleLinePiece {
 	
 	public double compare(Vec3d vector) {
 		double angle = getAngle(direction,vector)*180/Math.PI;
-		System.out.println("angle - "+angle);
 		return angle;
 	}
 	

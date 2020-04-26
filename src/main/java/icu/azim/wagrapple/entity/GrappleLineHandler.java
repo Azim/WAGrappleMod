@@ -96,13 +96,17 @@ public class GrappleLineHandler {
 		double nz = iz + ((iz<0)?-1:1)*(cz);
 		
 		Vec3d result; //find the one that is further away from the corners - and leave it as was
-		if(dx<=1/8 && dy<=1/8 && dz<=1/8) { 		//corner
-			result = new Vec3d(nx,ny,nz);
+		if((dx<=(1/5)) && (dy<=(1/5)) && (dz<=(1/5))) { 		//corner
+			System.out.println("corner "+dx+" "+dy+" "+dz);
+			result = new Vec3d(nx, ny, nz);
 		}else if(dx>=dy && dx>=dz) { 				//leave x as was
+			System.out.println("X "+dx+" "+dy+" "+dz);
 			result = new Vec3d(point.x, ny, nz);
 		}else if(dy>=dx && dy>=dz) { 				//leave y as was
+			System.out.println("Y "+dx+" "+dy+" "+dz);
 			result = new Vec3d(nx, point.y, nz);
 		}else { 									//leave z as was
+			System.out.println("Z "+dx+" "+dy+" "+dz);
 			result = new Vec3d(nx, ny, point.z);
 		}
 		return result;
