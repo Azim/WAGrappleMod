@@ -33,7 +33,7 @@ public class GrappleLineHandler {
 		Direction dir = result.getSide();
 		Vec3d vdir = new Vec3d(dir.getOffsetX(), dir.getOffsetY(), dir.getOffsetZ());
 		
-		pieces.add(new GrappleLinePiece(piece, result.getBlockPos(), this.size()>0?getDirection(getLastPiece(),piece,dir):vdir, line.world));
+		pieces.add(new GrappleLinePiece(piece, result.getBlockPos(), this.size()>0?getDirection(getLastPiece(),piece,dir, result.getPos()):vdir, line.world));
 		
 		if(piecesLen>maxLen) {
 			line.destroyLine();
@@ -44,12 +44,26 @@ public class GrappleLineHandler {
 		return pieces.get(index).getDirection();
 	}
 	
-	private Vec3d getDirection(Vec3d prev, Vec3d curr, Direction dir) {
+	private Vec3d getDirection(Vec3d prev, Vec3d curr, Direction dir, Vec3d nonsnap) {
+		Vec3d result = null;
 		Vec3d vdir = new Vec3d(dir.getOffsetX(), dir.getOffsetY(), dir.getOffsetZ());
 		Vec3d diff = prev.subtract(curr).normalize();
-
-		System.out.println(dir.toString()+" "+dir.getVector().toString()+" "+diff.crossProduct(vdir).crossProduct(diff).normalize());
-		return diff.crossProduct(vdir).crossProduct(diff).normalize();
+		
+		
+		if(diff.x==0) {
+			double dx = prev.subtract(nonsnap).x;
+			result = new Vec3d(dx,0,0).normalize();
+		}else if(diff.y==0) {
+			double dy = prev.subtract(nonsnap).y;
+			result = new Vec3d(0,dy,0).normalize();
+		}else if(diff.z==0) {
+			double dz = prev.subtract(nonsnap).z;
+			result = new Vec3d(0,0,dz).normalize();
+		}else {
+			result = diff.crossProduct(vdir).crossProduct(diff).normalize();
+		}
+		System.out.println(dir.toString()+" "+dir.getVector().toString()+" "+result);
+		return result;
 	}
 	
 	
@@ -82,7 +96,9 @@ public class GrappleLineHandler {
 		double nz = iz + ((iz<0)?-1:1)*(cz);
 		
 		Vec3d result; //find the one that is further away from the corners - and leave it as was
-		if(dx>=dy && dx>=dz) { 						//leave x as was
+		if(dx<=1/8 && dy<=1/8 && dz<=1/8) { 		//corner
+			result = new Vec3d(nx,ny,nz);
+		}else if(dx>=dy && dx>=dz) { 				//leave x as was
 			result = new Vec3d(point.x, ny, nz);
 		}else if(dy>=dx && dy>=dz) { 				//leave y as was
 			result = new Vec3d(nx, point.y, nz);
@@ -123,12 +139,12 @@ public class GrappleLineHandler {
 	
 	public void tick() {
 		if(pieces.size()>1) {
-			double angle = pieces.get(pieces.size()-1).compare(getLastPiece().subtract(line.getPlayer().getPos()));
-			/*
+			double angle = pieces.get(pieces.size()-1).compare(getLastPiece().subtract(line.getPlayer().getCameraPosVec(0)));
+			
 			if(angle>90) {
 				pieces.remove(pieces.size()-1);
 				recalcLen();
-			}*/
+			}
 		}
 		for(GrappleLinePiece piece:pieces) {
 			if(!piece.blockTick()) {

@@ -23,6 +23,8 @@ import net.minecraft.util.math.Vec3d;
 public class GrappleLineRenderer extends EntityRenderer<GrappleLineEntity> {
 	
 	public static final double width = 0.05;
+	public static boolean debug = false;
+	
 	
 	public GrappleLineRenderer(EntityRenderDispatcher dispatcher) {
 		super(dispatcher);
@@ -137,7 +139,9 @@ public class GrappleLineRenderer extends EntityRenderer<GrappleLineEntity> {
 	
 	private void drawPiece(Vec3d start, Vec3d end, VertexConsumer consumer, Matrix4f matrix, Vec3d direction) {
 		drawPiece(start,end,consumer,matrix, false);
-		drawPiece(end, end.add(direction), consumer, matrix, true);
+		if(debug) {
+			drawPiece(end, end.add(direction), consumer, matrix, true);
+		}
 	}
 	
 	private void drawPiece(Vec3d start, Vec3d end, VertexConsumer consumer, Matrix4f matrix, boolean debug) {

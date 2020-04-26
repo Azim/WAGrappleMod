@@ -1,6 +1,7 @@
 package icu.azim.wagrapple.entity;
 
 import icu.azim.wagrapple.WAGrappleMod;
+import icu.azim.wagrapple.render.GrappleLineRenderer;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
 import net.minecraft.block.piston.PistonBehavior;
@@ -32,8 +33,11 @@ public class GrappleLineEntity extends Entity {
 	private KeyBinding ascend;
 	private KeyBinding descend;
 	private KeyBinding boost;
+	private KeyBinding debug;
+	
 	private double boostSpeed;
 	private int boostCooldown;
+	private int debugc;
 
 	public GrappleLineEntity(EntityType<?> type, World world) {
 		super(type, world);
@@ -52,8 +56,10 @@ public class GrappleLineEntity extends Entity {
 		ascend = MinecraftClient.getInstance().options.keySneak;
 		descend = MinecraftClient.getInstance().options.keySprint;
 		boost = MinecraftClient.getInstance().options.keyJump;
+		debug = MinecraftClient.getInstance().options.keySwapHands;
 		
 		boostCooldown = 15;
+		debugc = 0;
 	}
 
 	@Override
@@ -80,13 +86,14 @@ public class GrappleLineEntity extends Entity {
 	
 	@Override
 	public void tick() {
-		if(player==null) {
+		if(player==null||!player.isAlive()) {
 			this.remove();
 			return;
 		}
 		
 		if(world.isClient) {
 			if(boostCooldown>0) boostCooldown--;
+			if(debugc>0) debugc--;
 
 			lineHandler.tick();
 			if(this.removed) {
@@ -139,6 +146,12 @@ public class GrappleLineEntity extends Entity {
 		
 		if(descend.isPressed()) {
 			lineHandler.setMaxLen(lineHandler.getMaxLen()+0.1);
+		}
+		
+		if(debug.isPressed()&&debugc==0) {
+			System.out.println("debug pressed");
+			GrappleLineRenderer.debug = !GrappleLineRenderer.debug;
+			debugc = 60;
 		}
 	}
 	
