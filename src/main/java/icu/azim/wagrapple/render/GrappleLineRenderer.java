@@ -41,20 +41,20 @@ public class GrappleLineRenderer extends EntityRenderer<GrappleLineEntity> {
 			VertexConsumerProvider vertexConsumerProvider, int light) {
 		PlayerEntity playerEntity = entity.getPlayer();
 		if (playerEntity != null) {
-			matrixStack.push();
+			matrixStack.push(); //woodo magic
 			matrixStack.push();
 			matrixStack.multiply(this.renderManager.getRotation());
 			matrixStack.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(180.0F));
 			matrixStack.pop();
 
-			int j = playerEntity.getMainArm() == Arm.RIGHT ? 1 : -1;
+			int hand = playerEntity.getMainArm() == Arm.RIGHT ? 1 : -1; //get hand
 
-			float h = playerEntity.getHandSwingProgress(tickDelta);
-			float k = MathHelper.sin(MathHelper.sqrt(h) * 3.1415927F);
+			float handSwingProgress = playerEntity.getHandSwingProgress(tickDelta); //and hand offset
+			float k = MathHelper.sin(MathHelper.sqrt(handSwingProgress) * 3.1415927F); //voodo magic again
 			float l = MathHelper.lerp(tickDelta, playerEntity.prevBodyYaw, playerEntity.bodyYaw) * 0.017453292F;
 			double d = (double) MathHelper.sin(l);
 			double e = (double) MathHelper.cos(l);
-			double m = (double) j * 0.35D;
+			double handOffset = (double) hand * 0.35D;
 			double t;
 			double u;
 			double v;
@@ -63,8 +63,8 @@ public class GrappleLineRenderer extends EntityRenderer<GrappleLineEntity> {
 			if ((this.renderManager.gameOptions == null || this.renderManager.gameOptions.perspective <= 0) && playerEntity == MinecraftClient.getInstance().player) {
 				x = this.renderManager.gameOptions.fov;
 				x /= 100.0D;
-				Vec3d vec3d = new Vec3d((double) j * -0.36D * x, -0.045D * x, 0.4D);
-				vec3d = vec3d.rotateX(-MathHelper.lerp(tickDelta, playerEntity.prevPitch, playerEntity.pitch) * 0.017453292F);
+				Vec3d vec3d = new Vec3d((double) hand * -0.36D * x, -0.045D * x, 0.4D);
+				vec3d = vec3d.rotateX(-MathHelper.lerp(tickDelta, playerEntity.prevPitch, playerEntity.pitch) * 0.017453292F); //i have no idea what is going on here
 				vec3d = vec3d.rotateY(-MathHelper.lerp(tickDelta, playerEntity.prevYaw, playerEntity.yaw) * 0.017453292F);
 				vec3d = vec3d.rotateY(k * 0.5F);
 				vec3d = vec3d.rotateX(-k * 0.7F);
@@ -73,16 +73,16 @@ public class GrappleLineRenderer extends EntityRenderer<GrappleLineEntity> {
 				v = MathHelper.lerp((double) tickDelta, playerEntity.prevZ, playerEntity.getZ()) + vec3d.z;
 				w = playerEntity.getStandingEyeHeight();
 			} else {
-				t = MathHelper.lerp((double) tickDelta, playerEntity.prevX, playerEntity.getX()) - e * m - d * 0.8D;
+				t = MathHelper.lerp((double) tickDelta, playerEntity.prevX, playerEntity.getX()) - e * handOffset - d * 0.8D;
 				u = playerEntity.prevY + (double) playerEntity.getStandingEyeHeight() + (playerEntity.getY() - playerEntity.prevY) * (double) tickDelta - 0.45D;
-				v = MathHelper.lerp((double) tickDelta, playerEntity.prevZ, playerEntity.getZ()) - d * m + e * 0.8D;
+				v = MathHelper.lerp((double) tickDelta, playerEntity.prevZ, playerEntity.getZ()) - d * handOffset + e * 0.8D;
 				w = playerEntity.isInSneakingPose() ? -0.1875F : 0.0F;
 			}
 
 			x = MathHelper.lerp((double) tickDelta, entity.prevX, entity.getX());
 			double y = MathHelper.lerp((double) tickDelta, entity.prevY, entity.getY()) + 0.25D;
 			double z = MathHelper.lerp((double) tickDelta, entity.prevZ, entity.getZ());
-			float xpart = (float) (t - x);
+			float xpart = (float) (t - x); //but those are the coordinates of player's hand (almost)
 			float ypart = (float) (u - y) + w;
 			float zpart = (float) (v - z);
 			VertexConsumer consumer = vertexConsumerProvider
@@ -104,8 +104,8 @@ public class GrappleLineRenderer extends EntityRenderer<GrappleLineEntity> {
 										RenderSystem.defaultBlendFunc();
 									}, () -> {
 										RenderSystem.disableBlend();
-									})).writeMaskState(new RenderPhase.WriteMaskState(true, true)).build(false)));
-			Matrix4f matrix4f2 = matrixStack.peek().getModel();
+									})).writeMaskState(new RenderPhase.WriteMaskState(true, true)).build(false)));  //creating custom render layer based off existing layers. adjusting values to fit the needs
+			Matrix4f matrix4f2 = matrixStack.peek().getModel(); //it didnt work without the matrix
 
 
 			Vec3d begin = new Vec3d(0,0,0);

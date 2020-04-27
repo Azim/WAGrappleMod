@@ -1,0 +1,31 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "AAB",
+    " CA",
+    "D A"
+  ],
+  "key": {
+    "A": {
+      "item": "minecraft:iron_ingot"
+    },
+    "B": {
+      "tag": "minecraft:arrows"
+    },
+    "C": {
+      "item": "minecraft:lead"
+    },
+    "D": [
+      {
+        "item": "minecraft:piston"
+      },
+      {
+        "item": "minecraft:sticky_piston"
+      }
+    ]
+  },
+  "result": {
+    "item": "wagrapple:grapple",
+    "count": 1
+  }
+}
