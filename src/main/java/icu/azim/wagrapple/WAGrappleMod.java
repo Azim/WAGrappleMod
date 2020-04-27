@@ -1,5 +1,10 @@
 package icu.azim.wagrapple;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.util.Properties;
+
 import icu.azim.wagrapple.components.GrappleComponent;
 import icu.azim.wagrapple.entity.GrappleLineEntity;
 import icu.azim.wagrapple.item.GrappleItem;
@@ -16,6 +21,7 @@ import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
 import net.fabricmc.fabric.api.client.rendereregistry.v1.EntityRendererRegistry;
 import net.fabricmc.fabric.api.entity.FabricEntityTypeBuilder;
 import net.fabricmc.fabric.api.network.ServerSidePacketRegistry;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityCategory;
 import net.minecraft.entity.EntityDimensions;
@@ -28,8 +34,9 @@ import net.minecraft.item.Items;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
-public class WAGrappleMod implements ModInitializer,ClientModInitializer {
+public class WAGrappleMod implements ModInitializer, ClientModInitializer{
 	public static final String modid = "wagrapple";
+	public static int maxLength = 24;
 	
 	//TODO sort all that stuff so it looks more presentable
 	public static final EntityType<GrappleLineEntity> GRAPPLE_LINE =
@@ -87,7 +94,7 @@ public class WAGrappleMod implements ModInitializer,ClientModInitializer {
  
             });
         });
-		
+		generateDefaultConfig();
 		
 	}
 
@@ -95,6 +102,34 @@ public class WAGrappleMod implements ModInitializer,ClientModInitializer {
 	public void onInitializeClient() {
 		EntityRendererRegistry.INSTANCE.register(GRAPPLE_LINE, (entityRenderDispatcher, context) -> new GrappleLineRenderer(entityRenderDispatcher));
 		System.out.println("init client");
+	}
+
+	public void generateDefaultConfig() {
+		String path = FabricLoader.getInstance().getConfigDirectory().getPath()+File.separator+modid;
+		Properties config = new Properties();
+		try {
+			File folder = new File(path);
+			folder.mkdirs();
+			File f = new File(path+File.separator+"wagrapple.properties");
+			if(!f.exists()) {
+				f.createNewFile();
+			}
+			FileInputStream in = new FileInputStream(f);
+			config.load(in);
+			in.close();
+			if(config.getProperty("maxLength")==null) {
+				WAGrappleMod.maxLength = 24;
+				config.setProperty("maxLength", "24");
+				FileOutputStream out = new FileOutputStream(f);
+				config.store(out, null);
+				out.close();
+			}else{
+				WAGrappleMod.maxLength = Integer.valueOf(config.getProperty("maxLength"));
+			}
+		}catch(Exception ignored) {
+			WAGrappleMod.maxLength = 24;
+			ignored.printStackTrace();
+		}
 	}
 	
 }

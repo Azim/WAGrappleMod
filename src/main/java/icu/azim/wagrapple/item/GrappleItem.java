@@ -37,7 +37,7 @@ public class GrappleItem extends Item{
 		
 			Vec3d vec3d = playerEntity.getCameraPosVec(0);
 		    Vec3d vec3d2 = playerEntity.getRotationVec(0);
-		    Vec3d vec3d3 = vec3d.add(vec3d2.x * 24, vec3d2.y * 24, vec3d2.z * 24);
+		    Vec3d vec3d3 = vec3d.add(vec3d2.x * WAGrappleMod.maxLength, vec3d2.y * WAGrappleMod.maxLength, vec3d2.z * WAGrappleMod.maxLength);
 		    BlockHitResult result = playerEntity.world.rayTrace(new RayTraceContext(vec3d, vec3d3, RayTraceContext.ShapeType.COLLIDER, RayTraceContext.FluidHandling.NONE, playerEntity));
 		    
 		    
