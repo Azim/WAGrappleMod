@@ -54,4 +54,8 @@ public class GrappleLinePiece {
 	public boolean isSameBlock(BlockPos nblock) {
 		return Registry.BLOCK.getId(world.getBlockState(nblock).getBlock()).compareTo(blockId)==0?true:false;
 	}
+
+	public BlockPos getBlockPos() {
+		return this.blockPos;
+	}
 }

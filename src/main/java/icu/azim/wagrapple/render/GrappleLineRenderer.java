@@ -132,7 +132,6 @@ public class GrappleLineRenderer extends EntityRenderer<GrappleLineEntity> {
 						consumer, matrix4f2, entity.getHandler().getDirection(0));
 			}
 			matrixStack.pop();
-			super.render(entity, yaw, tickDelta, matrixStack, vertexConsumerProvider , light);
 		}
 
 	}

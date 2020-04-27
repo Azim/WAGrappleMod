@@ -1,4 +1,4 @@
 {
   "item.wagrapple.grapple": "Grapple",
-  "item.wagrapple.grapple.tooltip": "-------\nControls:\n\n[Sneak] to reel in\n[Sprint] to reel out\n[Jump] to grapple boost"
+  "item.wagrapple.grapple.tooltip": "-------\nControls:\n\n[%s] to reel in\n[%s] to reel out\n[%s] to grapple boost"
 }

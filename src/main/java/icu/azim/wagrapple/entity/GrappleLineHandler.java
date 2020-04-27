@@ -1,9 +1,15 @@
 package icu.azim.wagrapple.entity;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
@@ -120,6 +126,10 @@ public class GrappleLineHandler {
 	public Vec3d getPiece(int index) {
 		return pieces.get(index).getLocation();
 	}
+	
+	public BlockPos getBlock(int index) {
+		return pieces.get(index).getBlockPos();
+	}
 
 	public int size() {
 		return pieces.size();
@@ -155,6 +165,26 @@ public class GrappleLineHandler {
 				System.out.println("block changed!");
 				line.destroyLine();
 			}
+		}
+	}
+	
+	public boolean performCheck() {
+		BlockPos bpos = getBlock(0);
+		Vec3d pos = getPiece(0);
+		if(line.world.isClient) {
+			Collection<Identifier> tags = MinecraftClient.getInstance().getNetworkHandler().getTagManager().blocks().getTagsFor(line.world.getBlockState(bpos).getBlock());
+			if(tags.contains(new Identifier("wagrapple","ungrappable"))) {
+				line.world.playSound(line.getPlayer(), pos.x, pos.y, pos.z, SoundEvents.ITEM_ARMOR_EQUIP_DIAMOND, SoundCategory.PLAYERS, 0.7F, 1.0F);
+				return false;
+			}
+			return true;
+		}else {
+			Collection<Identifier> tags = line.getServer().getTagManager().blocks().getTagsFor(line.world.getBlockState(bpos).getBlock());
+			if(tags.contains(new Identifier("wagrapple","ungrappable"))) {
+				line.world.playSound(line.getPlayer(), pos.x, pos.y, pos.z, SoundEvents.ITEM_ARMOR_EQUIP_DIAMOND, SoundCategory.PLAYERS, 0.7F, 1.0F);
+				return false;
+			}
+			return true;
 		}
 	}
 

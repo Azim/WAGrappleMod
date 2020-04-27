@@ -1,9 +1,9 @@
 package icu.azim.wagrapple.item;
 
 import java.util.List;
-
 import icu.azim.wagrapple.WAGrappleMod;
 import icu.azim.wagrapple.entity.GrappleLineEntity;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.entity.Entity;
@@ -37,13 +37,15 @@ public class GrappleItem extends Item{
 		
 			Vec3d vec3d = playerEntity.getCameraPosVec(0);
 		    Vec3d vec3d2 = playerEntity.getRotationVec(0);
-		    Vec3d vec3d3 = vec3d.add(vec3d2.x * 16, vec3d2.y * 16, vec3d2.z * 16);
+		    Vec3d vec3d3 = vec3d.add(vec3d2.x * 24, vec3d2.y * 24, vec3d2.z * 24);
 		    BlockHitResult result = playerEntity.world.rayTrace(new RayTraceContext(vec3d, vec3d3, RayTraceContext.ShapeType.COLLIDER, RayTraceContext.FluidHandling.NONE, playerEntity));
-		   
-		
+		    
+		    
 			if(result.getType()==Type.BLOCK) {
-				world.playSound(playerEntity, result.getPos().x,result.getPos().y,result.getPos().z, SoundEvents.BLOCK_BEACON_ACTIVATE, SoundCategory.PLAYERS, 1.0F, 1.0F);
-				if(!world.isClient) {
+				if(world.isClient) {
+					
+					world.playSound(playerEntity, result.getPos().x,result.getPos().y,result.getPos().z, SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.PLAYERS, 0.3F, 1.0F);
+				}else {
 					GrappleLineEntity entity = new GrappleLineEntity(world, playerEntity, playerEntity.getPos().distanceTo(result.getPos())+1, result);
 					world.spawnEntity(entity);
 					WAGrappleMod.GRAPPLE_COMPONENT.get(playerEntity).setLineId(entity.getEntityId());
@@ -52,7 +54,7 @@ public class GrappleItem extends Item{
 					System.out.println("server - spawned");
 				}
 			}else {
-				playerEntity.playSound(SoundEvents.BLOCK_WOOL_BREAK, 1.0F, 1.0F);
+				playerEntity.playSound(SoundEvents.ITEM_ARMOR_EQUIP_CHAIN, 1.0F, 1.0F);
 			}
 			playerEntity.swingHand(hand);
 			
@@ -70,7 +72,7 @@ public class GrappleItem extends Item{
 			WAGrappleMod.GRAPPLE_COMPONENT.get(playerEntity).setGrappled(false);
 			WAGrappleMod.GRAPPLE_COMPONENT.get(playerEntity).sync();
 
-			playerEntity.playSound(SoundEvents.BLOCK_WOOL_BREAK, 1.0F, 1.0F);
+			playerEntity.playSound(SoundEvents.ITEM_ARMOR_EQUIP_CHAIN, 1.0F, 1.0F);
 		}
 		
 		
@@ -80,7 +82,10 @@ public class GrappleItem extends Item{
 	@Override
 	public void appendTooltip(ItemStack stack, World world, List<Text> tooltip, TooltipContext context) {
 		//TranslatableText tooltipText = new TranslatableText("item.wagrapple.grapple.tooltip");
-		String text = I18n.translate("item.wagrapple.grapple.tooltip");
+		String text = I18n.translate("item.wagrapple.grapple.tooltip",
+				MinecraftClient.getInstance().options.keySneak.getLocalizedName(),
+				MinecraftClient.getInstance().options.keySprint.getLocalizedName(),
+				MinecraftClient.getInstance().options.keyJump.getLocalizedName());
 		for(String line : text.split("\n")) {
 			tooltip.add(new LiteralText(line));
 		}

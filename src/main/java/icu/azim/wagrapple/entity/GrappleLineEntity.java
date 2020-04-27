@@ -38,6 +38,8 @@ public class GrappleLineEntity extends Entity {
 	private double boostSpeed;
 	private int boostCooldown;
 	private int debugc;
+	
+	private boolean checked = false;
 
 	public GrappleLineEntity(EntityType<?> type, World world) {
 		super(type, world);
@@ -89,6 +91,14 @@ public class GrappleLineEntity extends Entity {
 		if(player==null||!player.isAlive()) {
 			this.remove();
 			return;
+		}
+		if(!checked&&boostCooldown!=10) {
+			if(lineHandler.performCheck()) {
+				checked = true;
+			}else {
+				this.destroyLine();
+				return;
+			}
 		}
 		
 		if(world.isClient) {
