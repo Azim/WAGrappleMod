@@ -5,14 +5,15 @@ import java.util.List;
 import icu.azim.wagrapple.WAGrappleMod;
 import icu.azim.wagrapple.entity.GrappleLineEntity;
 import net.minecraft.client.item.TooltipContext;
+import net.minecraft.client.resource.language.I18n;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
@@ -78,6 +79,10 @@ public class GrappleItem extends Item{
 	
 	@Override
 	public void appendTooltip(ItemStack stack, World world, List<Text> tooltip, TooltipContext context) {
-		tooltip.add(new TranslatableText("item.wagrapple.grapple.tooltip"));
+		//TranslatableText tooltipText = new TranslatableText("item.wagrapple.grapple.tooltip");
+		String text = I18n.translate("item.wagrapple.grapple.tooltip");
+		for(String line : text.split("\n")) {
+			tooltip.add(new LiteralText(line));
+		}
 	}
 }
