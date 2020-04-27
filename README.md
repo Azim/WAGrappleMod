@@ -5,16 +5,12 @@ A grappling hook inspired by the one from the [Worlds Adrift](https://www.worlds
 Requires fabric. Mc version 1.15.2
 
 TODO:
-* line unwrapping
-* line adjusting when blocks are destroyed
-* line detaching when hit certain blocks
-* reeling in and out
+* rope detaching when hit certain blocks
 * supersonic speed when too close to the latest bend fix
-* fix line not rendering when player is 16 blocks away from the origin
 * add translations
 * get som models
+* rope recalculating it's position when blocks destroyed
 * make it work properly in multiplayer (no clue if it already does or not)
-* publish on cursedforge
 
 
 ## License
