@@ -5,9 +5,7 @@ A grappling hook inspired by the one from the [Worlds Adrift](https://www.worlds
 Requires fabric. Mc version 1.15.2
 
 TODO:
-* rope detaching when hit certain blocks
 * supersonic speed when too close to the latest bend fix
-* get som models
 * rope recalculating it's position when blocks destroyed
 * make it work properly in multiplayer (no clue if it already does or not)
 
