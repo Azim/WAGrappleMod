@@ -56,7 +56,6 @@ public class GrappleItem extends Item{
 			}else {
 				playerEntity.playSound(SoundEvents.ITEM_ARMOR_EQUIP_CHAIN, 1.0F, 1.0F);
 			}
-			playerEntity.swingHand(hand);
 			
 		}else {
 			
@@ -76,7 +75,7 @@ public class GrappleItem extends Item{
 		}
 		
 		
-        return new TypedActionResult<>(ActionResult.SUCCESS, playerEntity.getStackInHand(hand));
+        return new TypedActionResult<>(ActionResult.PASS, playerEntity.getStackInHand(hand));
     }
 	
 	@Override
