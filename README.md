@@ -1,7 +1,7 @@
 # WA-like grapple mod
 
 A grappling hook inspired by the one from the [Worlds Adrift](https://www.worldsadrift.com/) game.
-
+![GitHub Logo](https://github.com/Azim-D3Tm/WAGrappleMod/raw/master/src/main/resources/assets/wagrapple/icon.png)
 Requires fabric. Mc version 1.15.2
 
 TODO:
