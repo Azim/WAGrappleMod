@@ -110,16 +110,16 @@ public class GrappleLineRenderer extends EntityRenderer<GrappleLineEntity> {
 
 			Vec3d begin = new Vec3d(0,0,0);
 			if(entity.getHandler().size()>1) { //multiple points - multiple lines
-				drawPiece(begin, entity.getHandler().getPiece(1).subtract(entity.getPos()), consumer, matrix4f2, entity.getHandler().getDirection(1)); //draw the line between the entity and the first point
+				drawPiece(begin, entity.getHandler().getPiecePos(1).subtract(entity.getPos()), consumer, matrix4f2, entity.getHandler().getDirection(1)); //draw the line between the entity and the first point
 			
 				for (int i = 1; i < entity.getHandler().size()-1; i++) { // skip the very start of it, cuz we already added it above
-					Vec3d start = entity.getHandler().getPiece(i).subtract(entity.getPos());
-					Vec3d end = entity.getHandler().getPiece(i+1).subtract(entity.getPos());
+					Vec3d start = entity.getHandler().getPiecePos(i).subtract(entity.getPos());
+					Vec3d end = entity.getHandler().getPiecePos(i+1).subtract(entity.getPos());
 					drawPiece(start, end,  consumer, matrix4f2, entity.getHandler().getDirection(i+1));
 				
 				}
 				drawPiece(
-					entity.getHandler().getPiece(entity.getHandler().size()-1).subtract(entity.getPos()), //from last piece to player's hand
+					entity.getHandler().getPiecePos(entity.getHandler().size()-1).subtract(entity.getPos()), //from last piece to player's hand
 					new Vec3d(xpart, ypart, zpart),
 					consumer,
 					matrix4f2,

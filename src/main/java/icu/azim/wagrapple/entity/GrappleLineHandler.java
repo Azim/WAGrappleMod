@@ -2,19 +2,16 @@ package icu.azim.wagrapple.entity;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
-import com.google.common.collect.Lists;
-
-import net.minecraft.block.Block;
+import icu.azim.wagrapple.util.PacketUnwrapper;
+import icu.azim.wagrapple.util.PacketUnwrapperPiece;
+import icu.azim.wagrapple.util.Util;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
-import net.minecraft.tag.Tag;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.PacketByteBuf;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
@@ -34,30 +31,42 @@ public class GrappleLineHandler {
 		this.line = line;
 	}
 	
+	public void updateFromServer(PacketUnwrapper unwrapped) {
+		this.maxLen = unwrapped.getMaxLength();
+		pieces.clear();
+		List<PacketUnwrapperPiece> ps = unwrapped.getPieces();
+		for(int i = 0; i<unwrapped.getSize(); i++) {
+			PacketUnwrapperPiece p = ps.get(i);
+			pieces.add(new GrappleLinePiece(p.getLocation(), p.getBpos(), p.getDirection(), line.world));
+		}
+		recalcLen();
+	}
+	
 	public void add(BlockHitResult result) {
 		Vec3d piece = getSnap(result.getPos(), line.world.getBlockState(result.getBlockPos()).getCollisionShape(line.world, result.getBlockPos()).getBoundingBox());
 		
 		if(this.size()>0) {
-			if(getLastPiece()==piece) {
+			if(getLastPiecePos()==piece) {
 				return;
 			}
-			piecesLen += piece.distanceTo(getLastPiece());
+			piecesLen += piece.distanceTo(getLastPiecePos());
 		}
 		Direction dir = result.getSide();
 		Vec3d vdir = new Vec3d(dir.getOffsetX(), dir.getOffsetY(), dir.getOffsetZ());
 		
-		pieces.add(new GrappleLinePiece(piece, result.getBlockPos(), this.size()>0?getDirection(getLastPiece(),piece,dir, result.getPos()):vdir, line.world));
+		pieces.add(new GrappleLinePiece(piece, result.getBlockPos(), this.size()>0?calcDirection(getLastPiecePos(),piece,dir, result.getPos()):vdir, line.world));
 		
 		if(piecesLen>maxLen) {
 			line.destroyLine();
 		}
+		line.syncFromClient();
 	}
 	
 	public Vec3d getDirection(int index) {
 		return pieces.get(index).getDirection();
 	}
 	
-	private Vec3d getDirection(Vec3d prev, Vec3d curr, Direction dir, Vec3d nonsnap) {
+	private Vec3d calcDirection(Vec3d prev, Vec3d curr, Direction dir, Vec3d nonsnap) {
 		Vec3d result = null;
 		Vec3d vdir = new Vec3d(dir.getOffsetX(), dir.getOffsetY(), dir.getOffsetZ());
 		Vec3d diff = prev.subtract(curr).normalize();
@@ -79,7 +88,6 @@ public class GrappleLineHandler {
 		return result;
 	}
 	
-	
 	private void recalcLen() {
 		piecesLen = 0;
 		for(int i = 0; i < pieces.size()-1;i++) {
@@ -96,9 +104,9 @@ public class GrappleLineHandler {
 		double y = Math.abs(point.y-(int)point.y);
 		double z = Math.abs(point.z-(int)point.z);
 		
-		double cx = getClosest(shape.x1,shape.x2,x)==1?shape.x1:shape.x2; //get the closest corner
-		double cy = getClosest(shape.y1,shape.y2,y)==1?shape.y1:shape.y2;
-		double cz = getClosest(shape.z1,shape.z2,z)==1?shape.z1:shape.z2;
+		double cx = Util.getClosest(shape.x1,shape.x2,x)==1?shape.x1:shape.x2; //get the closest corner
+		double cy = Util.getClosest(shape.y1,shape.y2,y)==1?shape.y1:shape.y2;
+		double cz = Util.getClosest(shape.z1,shape.z2,z)==1?shape.z1:shape.z2;
 		
 		double dx = Math.abs(cx-x); //get the distance between the point and closest corner
 		double dy = Math.abs(cy-y);
@@ -110,47 +118,32 @@ public class GrappleLineHandler {
 		
 		Vec3d result; //find the one that is further away from the corners - and leave it as was
 		if((dx<=(1/5)) && (dy<=(1/5)) && (dz<=(1/5))) { 		//corner
-			System.out.println("corner "+dx+" "+dy+" "+dz);
 			result = new Vec3d(nx, ny, nz);
 		}else if(dx>=dy && dx>=dz) { 				//leave x as was
-			System.out.println("X "+dx+" "+dy+" "+dz);
 			result = new Vec3d(point.x, ny, nz);
 		}else if(dy>=dx && dy>=dz) { 				//leave y as was
-			System.out.println("Y "+dx+" "+dy+" "+dz);
 			result = new Vec3d(nx, point.y, nz);
 		}else { 									//leave z as was
-			System.out.println("Z "+dx+" "+dy+" "+dz);
 			result = new Vec3d(nx, ny, point.z);
 		}
 		return result;
 	}
-	
-	private int getClosest(double a, double b, double x) {
-		return (Math.abs(a-x)<Math.abs(b-x)?1:2);
-	}
-	
 
-	public Vec3d getPiece(int index) {
+	public Vec3d getPiecePos(int index) {
 		return pieces.get(index).getLocation();
 	}
-	
-	public BlockPos getBlock(int index) {
+	public BlockPos getPieceBlock(int index) {
 		return pieces.get(index).getBlockPos();
 	}
-
 	public int size() {
 		return pieces.size();
 	}
-	
-	public Vec3d getLastPiece() {
+	public Vec3d getLastPiecePos() {
 		return pieces.get(pieces.size()-1).getLocation();
 	}
-	
-
 	public double getPiecesLen() {
 		return piecesLen;
 	}
-
 	public double getMaxLen() {
 		return maxLen;
 	}
@@ -160,24 +153,26 @@ public class GrappleLineHandler {
 	
 	public void tick() {
 		if(pieces.size()>1) {
-			double angle = pieces.get(pieces.size()-1).compare(getLastPiece().subtract(line.getPlayer().getCameraPosVec(0)));
+			double angle = pieces.get(pieces.size()-1).compare(getLastPiecePos().subtract(line.getPlayer().getCameraPosVec(0)));
 			
 			if(angle>90) {
 				pieces.remove(pieces.size()-1);
 				recalcLen();
+				line.syncFromClient();
 			}
 		}
 		for(GrappleLinePiece piece:pieces) {
 			if(!piece.blockTick()) {
 				System.out.println("block changed!");
 				line.destroyLine();
+				line.syncFromClient();
 			}
 		}
 	}
 	
 	public boolean performCheck() {
-		BlockPos bpos = getBlock(0);
-		Vec3d pos = getPiece(0);
+		BlockPos bpos = getPieceBlock(0);
+		Vec3d pos = getPiecePos(0);
 		if(line.world.isClient) {
 			Collection<Identifier> tags = MinecraftClient.getInstance().getNetworkHandler().getTagManager().blocks().getTagsFor(line.world.getBlockState(bpos).getBlock());
 			if(tags.contains(new Identifier("wagrapple","ungrappable"))) {
@@ -186,26 +181,13 @@ public class GrappleLineHandler {
 			}
 			return true;
 		}else {
-			Collection<Identifier> tags = getTagsFor(line.world.getBlockState(bpos).getBlock(), line.getServer().getTagManager().blocks().getEntries());
+			Collection<Identifier> tags = Util.getTagsFor(line.world.getBlockState(bpos).getBlock(), line.getServer().getTagManager().blocks().getEntries());
 			if(tags.contains(new Identifier("wagrapple","ungrappable"))) {
 				line.world.playSound(line.getPlayer(), pos.x, pos.y, pos.z, SoundEvents.ITEM_ARMOR_EQUIP_DIAMOND, SoundCategory.PLAYERS, 0.7F, 1.0F);
 				return false;
 			}
 			return true;
 		}
-	}
-	
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private Collection<Identifier> getTagsFor(Block block, Map<Identifier, Tag<Block>> entries) {
-		List<Identifier> list = Lists.newArrayList();
-		Iterator var3 = entries.entrySet().iterator();
-		while(var3.hasNext()) {
-			Entry<Identifier, Tag<Block>> entry = (Entry)var3.next();
-			if (((Tag)entry.getValue()).contains(block)) {
-				list.add(entry.getKey());
-			}
-		}
-		return list;
 	}
 
 }

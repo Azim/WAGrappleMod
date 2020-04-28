@@ -1,11 +1,20 @@
 package icu.azim.wagrapple.entity;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Stream;
 
 import icu.azim.wagrapple.WAGrappleMod;
 import icu.azim.wagrapple.render.GrappleLineRenderer;
+import icu.azim.wagrapple.util.PacketUnwrapper;
+import icu.azim.wagrapple.util.PacketUnwrapperPiece;
+import icu.azim.wagrapple.util.Util;
 import io.netty.buffer.Unpooled;
+import net.fabricmc.api.EnvType;
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
+import net.fabricmc.fabric.api.network.PacketContext;
+import net.fabricmc.fabric.api.network.ServerSidePacketRegistry;
+import net.fabricmc.fabric.api.server.PlayerStream;
 import net.minecraft.block.piston.PistonBehavior;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.options.KeyBinding;
@@ -70,24 +79,75 @@ public class GrappleLineEntity extends Entity {
 	protected void initDataTracker() {
 		//FishingBobberEntityRenderer
 	}
+	
+	public static void handleSyncPacket(PacketContext context, PacketByteBuf data) {
+//
+		PacketUnwrapper unwrapped = new PacketUnwrapper(data);
+		if(context.getPacketEnvironment()==EnvType.CLIENT) {
+			context.getTaskQueue().execute(()->{
+				PlayerEntity player = context.getPlayer();
+				Entity e = player.world.getEntityById(unwrapped.getEid());
+				if(!(e instanceof GrappleLineEntity)) {
+					return;
+				}
+				GrappleLineEntity line = (GrappleLineEntity)e;
+				line.updateFromServer(unwrapped);
+			});
+		}else {
+			context.getTaskQueue().execute(()->{
+				PlayerEntity player = context.getPlayer();
+				Entity e = player.world.getEntityById(unwrapped.getEid());
+				if(!(e instanceof GrappleLineEntity)) {
+					return;
+				}
+				GrappleLineEntity line = (GrappleLineEntity)e;
+				line.syncFromServer(unwrapped);
+			});
+		}
+	}
+	
+	private void updateFromServer(PacketUnwrapper unwrapped) {
+		this.lineHandler.updateFromServer(unwrapped);
+	}
 
-	@Override
-	protected void readCustomDataFromTag(CompoundTag tag) {
-	}
-
-	@Override
-	protected void writeCustomDataToTag(CompoundTag tag) {
-		
+	public void syncFromClient() {
+		if(!world.isClient) {
+			System.out.println("attempted to sync from wrong side (expected client, got server)");
+			return;
+		}
+		PacketByteBuf passedData = new PacketByteBuf(Unpooled.buffer());
+		passedData.writeInt(this.getEntityId());
+		passedData.writeDouble(lineHandler.getMaxLen());
+		passedData.writeInt(lineHandler.size());
+		for(int i = 0; i < lineHandler.size(); i++) {
+			passedData.writeBlockPos(lineHandler.getPieceBlock(i));
+			Util.writeVec3d(passedData, lineHandler.getPiecePos(i));
+			Util.writeVec3d(passedData, lineHandler.getDirection(i));
+		}
+		ClientSidePacketRegistry.INSTANCE.sendToServer(WAGrappleMod.UPDATE_LINE_PACKED_ID, passedData);
 	}
 	
-	private void syncFromClient() {
+	private void syncFromServer(PacketUnwrapper unwrapped) {
+		if(world.isClient) {
+			System.out.println("attempted to sync from wrong side (expected server, got client)");
+			return;
+		}
+		Stream<PlayerEntity> watchingPlayers = Stream.concat(PlayerStream.watching(this),PlayerStream.watching(this.getPlayer())).distinct().filter(player->player!=this.getPlayer());
 		
-	}
-	
-	private void syncFromServer() {
+		PacketByteBuf passedData = new PacketByteBuf(Unpooled.buffer());
+		passedData.writeInt(unwrapped.getEid());
+		passedData.writeDouble(unwrapped.getMaxLength());
+		passedData.writeInt(unwrapped.getSize());
+		List<PacketUnwrapperPiece> ps = unwrapped.getPieces();
 		
+		for(int i = 0; i < unwrapped.getSize(); i++) {
+			PacketUnwrapperPiece p = ps.get(i);
+			passedData.writeBlockPos(p.getBpos());
+			Util.writeVec3d(passedData, p.getLocation());
+			Util.writeVec3d(passedData, p.getDirection());
+		}
+		watchingPlayers.forEach(player->ServerSidePacketRegistry.INSTANCE.sendToPlayer(player, WAGrappleMod.UPDATE_LINE_PACKED_ID, passedData));
 	}
-	
 
 	@Override
 	public Packet<?> createSpawnPacket() {
@@ -153,7 +213,7 @@ public class GrappleLineEntity extends Entity {
 		}
 		
 		if(boost.isPressed() && !player.abilities.flying && (boostCooldown==0)) {
-			Vec3d origin = lineHandler.getLastPiece();
+			Vec3d origin = lineHandler.getLastPiecePos();
 			Vec3d direction = player.getCameraPosVec(0).subtract(origin).normalize().multiply(-boostSpeed);
 			player.addVelocity(direction.x,direction.y,direction.z);
 			
@@ -178,7 +238,7 @@ public class GrappleLineEntity extends Entity {
 	}
 	
 	public void grapplePhysicsTick() {
-		BlockHitResult res = this.world.rayTrace(new RayTraceContext(player.getCameraPosVec(0),lineHandler.getPiece(lineHandler.size()-1), ShapeType.COLLIDER, FluidHandling.NONE, player));
+		BlockHitResult res = this.world.rayTrace(new RayTraceContext(player.getCameraPosVec(0),lineHandler.getPiecePos(lineHandler.size()-1), ShapeType.COLLIDER, FluidHandling.NONE, player));
 		
 		if(res.getType()==Type.BLOCK) {
 			lineHandler.add(res);
@@ -192,7 +252,7 @@ public class GrappleLineEntity extends Entity {
 		if(true) {
 			return;
 		}//*/
-		Vec3d origin = lineHandler.getLastPiece();
+		Vec3d origin = lineHandler.getLastPiecePos();
 		double distanceToOrigin = player.getPos().distanceTo(origin);
 		double totalLen = distanceToOrigin+lineHandler.getPiecesLen();
 		if(totalLen>lineHandler.getMaxLen()) {
@@ -268,12 +328,17 @@ public class GrappleLineEntity extends Entity {
 	public PistonBehavior getPistonBehavior() {
 		return PistonBehavior.IGNORE;
 	}
-	@Override
+	@Override //draw the line no matter distance
 	public boolean shouldRender(double distance) {
 		return true;
 	}
-	@Override
+	@Override //draw the line no matter distance
 	public boolean shouldRender(double cameraX, double cameraY, double cameraZ) {
 		return true;
 	}
+
+	@Override //unused methods
+	protected void readCustomDataFromTag(CompoundTag tag) { }
+	@Override
+	protected void writeCustomDataToTag(CompoundTag tag) { }
 }

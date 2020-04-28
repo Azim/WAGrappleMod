@@ -46,6 +46,7 @@ public class WAGrappleMod implements ModInitializer{
 	
 	
 	public static Identifier DETACH_LINE_PACKET_ID = new Identifier(modid, "detach_line");
+	public static Identifier UPDATE_LINE_PACKED_ID = new Identifier(modid, "update_line");
 	
 	
 	
@@ -74,6 +75,7 @@ public class WAGrappleMod implements ModInitializer{
 		
 		Registry.register(Registry.ITEM, new Identifier(modid, "grapple"), GRAPPLE_ITEM);
 		EntityComponents.setRespawnCopyStrategy(GRAPPLE_COMPONENT, RespawnCopyStrategy.NEVER_COPY);
+		
 		ServerSidePacketRegistry.INSTANCE.register(DETACH_LINE_PACKET_ID, (packetContext, attachedData) -> {
             boolean detach = attachedData.readBoolean();
             PlayerEntity player = packetContext.getPlayer();
@@ -93,6 +95,8 @@ public class WAGrappleMod implements ModInitializer{
  
             });
         });
+		
+		ServerSidePacketRegistry.INSTANCE.register(UPDATE_LINE_PACKED_ID, (context,data)-> GrappleLineEntity.handleSyncPacket(context, data));
 		System.out.println("init general");
 	}
 
