@@ -32,6 +32,7 @@ import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.Rarity;
 import net.minecraft.util.registry.Registry;
 
 public class WAGrappleMod implements ModInitializer, ClientModInitializer{
@@ -53,10 +54,8 @@ public class WAGrappleMod implements ModInitializer, ClientModInitializer{
 	
 	public static final ItemGroup ITEM_GROUP = FabricItemGroupBuilder.build(
 			new Identifier(modid, "general"),
-			() -> new ItemStack(Items.LEAD));
-	
-	
-	public static final GrappleItem GRAPPLE_ITEM = new GrappleItem(new Item.Settings().group(ITEM_GROUP));
+			() -> new ItemStack(new GrappleItem(new Item.Settings())));
+	public static final GrappleItem GRAPPLE_ITEM = new GrappleItem(new Item.Settings().group(ITEM_GROUP).maxCount(1).rarity(Rarity.EPIC));
 	
 	public static final ComponentType<GrappleComponent> GRAPPLE_COMPONENT = 
 	        ComponentRegistry.INSTANCE.registerIfAbsent(new Identifier(modid,"grapple_component"), GrappleComponent.class)
