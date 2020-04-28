@@ -2,11 +2,18 @@ package icu.azim.wagrapple.entity;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
+import com.google.common.collect.Lists;
+
+import net.minecraft.block.Block;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.tag.Tag;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
@@ -179,13 +186,26 @@ public class GrappleLineHandler {
 			}
 			return true;
 		}else {
-			Collection<Identifier> tags = line.getServer().getTagManager().blocks().getTagsFor(line.world.getBlockState(bpos).getBlock());
+			Collection<Identifier> tags = getTagsFor(line.world.getBlockState(bpos).getBlock(), line.getServer().getTagManager().blocks().getEntries());
 			if(tags.contains(new Identifier("wagrapple","ungrappable"))) {
 				line.world.playSound(line.getPlayer(), pos.x, pos.y, pos.z, SoundEvents.ITEM_ARMOR_EQUIP_DIAMOND, SoundCategory.PLAYERS, 0.7F, 1.0F);
 				return false;
 			}
 			return true;
 		}
+	}
+	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private Collection<Identifier> getTagsFor(Block block, Map<Identifier, Tag<Block>> entries) {
+		List<Identifier> list = Lists.newArrayList();
+		Iterator var3 = entries.entrySet().iterator();
+		while(var3.hasNext()) {
+			Entry<Identifier, Tag<Block>> entry = (Entry)var3.next();
+			if (((Tag)entry.getValue()).contains(block)) {
+				list.add(entry.getKey());
+			}
+		}
+		return list;
 	}
 
 }

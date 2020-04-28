@@ -1,5 +1,5 @@
 {
   "item.wagrapple.grapple": "Grapple",
-  "item.wagrapple.grapple.tooltip": "-------\nControls:\n\n[%s] to reel in\n[%s] to reel out\n[%s] to grapple boost"
+  "item.wagrapple.grapple.tooltip": "-------\nControls:\n\n[%s] to reel in\n[%s] to reel out\n[%s] to grapple boost",
   "itemGroup.wagrapple.general": "WAGrapple"
 }

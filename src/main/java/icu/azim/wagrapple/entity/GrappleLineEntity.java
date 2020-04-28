@@ -1,5 +1,7 @@
 package icu.azim.wagrapple.entity;
 
+import java.util.stream.Stream;
+
 import icu.azim.wagrapple.WAGrappleMod;
 import icu.azim.wagrapple.render.GrappleLineRenderer;
 import io.netty.buffer.Unpooled;
@@ -54,12 +56,12 @@ public class GrappleLineEntity extends Entity {
 		lineHandler.add(res);
 		motion = new Vec3d(0,0,0);
 		boostSpeed = 1;
-		
-		ascend = MinecraftClient.getInstance().options.keySneak;
-		descend = MinecraftClient.getInstance().options.keySprint;
-		boost = MinecraftClient.getInstance().options.keyJump;
-		debug = MinecraftClient.getInstance().options.keySwapHands;
-		
+		if(world.isClient) {
+			ascend = MinecraftClient.getInstance().options.keySneak;
+			descend = MinecraftClient.getInstance().options.keySprint;
+			boost = MinecraftClient.getInstance().options.keyJump;
+			debug = MinecraftClient.getInstance().options.keySwapHands;
+		}
 		boostCooldown = 15;
 		debugc = 0;
 	}
@@ -75,7 +77,17 @@ public class GrappleLineEntity extends Entity {
 
 	@Override
 	protected void writeCustomDataToTag(CompoundTag tag) {
+		
 	}
+	
+	private void syncFromClient() {
+		
+	}
+	
+	private void syncFromServer() {
+		
+	}
+	
 
 	@Override
 	public Packet<?> createSpawnPacket() {

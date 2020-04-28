@@ -22,7 +22,7 @@
       "icu.azim.wagrapple.WAGrappleMod"
     ],
     "client": [
-      "icu.azim.wagrapple.WAGrappleMod"
+      "icu.azim.wagrapple.WAGrappleModClient"
     ]
   },
   "mixins": [
