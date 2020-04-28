@@ -7,9 +7,10 @@ A grappling hook inspired by the one from the [Worlds Adrift](https://www.worlds
 Requires fabric. Mc version 1.15.2
 
 TODO:
-* supersonic speed when too close to the latest bend fix
 * rope recalculating it's position when blocks destroyed
-* make it work properly in multiplayer (no clue if it already does or not)
+* make it work better in multiplayer
+* bug fixes
+* dungeon block (this will be a better default ungrapplable block)
 
 
 ## License
