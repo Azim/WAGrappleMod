@@ -1,6 +1,5 @@
 package icu.azim.wagrapple.entity;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -338,7 +337,8 @@ public class GrappleLineEntity extends Entity {
 	}
 
 	@Override //unused methods
-	protected void readCustomDataFromTag(CompoundTag tag) { }
+	protected void readCustomDataFromTag(CompoundTag tag) {
+	}
 	@Override
 	protected void writeCustomDataToTag(CompoundTag tag) { }
 }

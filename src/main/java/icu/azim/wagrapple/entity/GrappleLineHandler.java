@@ -11,7 +11,6 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.PacketByteBuf;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
@@ -59,7 +58,9 @@ public class GrappleLineHandler {
 		if(piecesLen>maxLen) {
 			line.destroyLine();
 		}
-		line.syncFromClient();
+		if(line.world.isClient) {
+			line.syncFromClient();
+		}
 	}
 	
 	public Vec3d getDirection(int index) {
