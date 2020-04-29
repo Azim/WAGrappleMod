@@ -60,6 +60,6 @@ public class PlayerHandMixin<T extends LivingEntity> {
 		}
 		ModelPart arm = hand==1?rightArm:leftArm;
 		arm.pitch = -(line.getLinePitch()+(float)Math.PI/2);
-		arm.yaw = line.getLineYaw();//+((player.yaw%360)*(float)Math.PI/180);
+		arm.yaw = -line.getLineYaw() + (float) Math.PI -((player.bodyYaw%360)*(float)Math.PI/180);
 	}
 }

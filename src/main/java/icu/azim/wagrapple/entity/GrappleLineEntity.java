@@ -356,10 +356,19 @@ public class GrappleLineEntity extends Entity {
 	private void calcAxis() {
 		this.lpitch = (float) Math.asin(-this.direction.y);
 		this.lyaw = (float) Math.atan2(this.direction.x, this.direction.z);
-		System.out.println("p "+lpitch+" "+player.pitch+"   y "+lyaw+" "+player.yaw);
+		System.out.println("p "+lpitch+" "+player.pitch+"   y "+lyaw+" "+player.bodyYaw);
 				//Math.atan(Math.sqrt(this.direction.x*this.direction.x+this.direction.z*this.direction.z)/this.direction.y);
 	}
 	
+	private Vec3d getPlayerShoulder(int hand) {
+		double x = 0;
+		double y = 1.3;
+		double z = 0;
+		double yaw = player.bodyYaw%360;
+		x = Math.cos(yaw);
+		y = Math.sin(yaw);
+		return player.getPos().add(new Vec3d(x,y,z));
+	}
 	
 	public PlayerEntity getPlayer() {
 		return player;
