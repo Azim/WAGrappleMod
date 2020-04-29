@@ -45,6 +45,9 @@ public class GrappleLineEntity extends Entity {
 	private KeyBinding descend;
 	private KeyBinding boost;
 	private KeyBinding debug;
+	private Vec3d direction;
+	private float lpitch;
+	private float lyaw;
 	
 	private double boostSpeed;
 	private int boostCooldown;
@@ -73,6 +76,7 @@ public class GrappleLineEntity extends Entity {
 		}
 		boostCooldown = 15;
 		debugc = 0;
+		direction = new Vec3d(0,0,0);
 	}
 
 	@Override
@@ -268,6 +272,8 @@ public class GrappleLineEntity extends Entity {
 		}//*/
 		Vec3d origin = lineHandler.getLastPiecePos();
 		double distanceToOrigin = player.getPos().distanceTo(origin);
+		this.direction = player.getPos().subtract(origin).normalize();
+		calcAxis();
 		double totalLen = distanceToOrigin+lineHandler.getPiecesLen();
 		if(distanceToOrigin>lineHandler.getMaxLen()*2) {
 			destroyLine();
@@ -304,7 +310,7 @@ public class GrappleLineEntity extends Entity {
 			}
 		}
 	}
-	
+
 	public void destroyLine() {
 		if(world.isClient) {
 			player.playSound(SoundEvents.ENTITY_ITEM_BREAK, 1, 1);
@@ -337,6 +343,23 @@ public class GrappleLineEntity extends Entity {
 		return Math.acos(part);
 	}
 	
+
+	
+	public float getLinePitch() {
+		return this.lpitch; 
+	}
+
+	public float getLineYaw() {
+		return this.lyaw;
+	}
+	
+	private void calcAxis() {
+		this.lpitch = (float) Math.asin(this.direction.y);
+		this.lyaw = (float) Math.atan2(this.direction.x, this.direction.z);
+				//Math.atan(Math.sqrt(this.direction.x*this.direction.x+this.direction.z*this.direction.z)/this.direction.y);
+	}
+	
+	
 	public PlayerEntity getPlayer() {
 		return player;
 	}
@@ -359,4 +382,5 @@ public class GrappleLineEntity extends Entity {
 	}
 	@Override
 	protected void writeCustomDataToTag(CompoundTag tag) { }
+
 }

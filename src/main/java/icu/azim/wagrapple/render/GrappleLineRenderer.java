@@ -222,5 +222,5 @@ public class GrappleLineRenderer extends EntityRenderer<GrappleLineEntity> {
 		}
 		return false;
 	}
-
+	
 }
