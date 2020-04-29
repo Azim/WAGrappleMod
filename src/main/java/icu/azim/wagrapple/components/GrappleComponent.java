@@ -60,5 +60,10 @@ public class GrappleComponent implements EntitySyncedComponent{
 	public Entity getEntity() {
 		return owner;
 	}
-
+	
+	@Override
+	public String toString() {
+		return "grappled: "+grappled+" lineId"+lineId;
+	}
+	
 }

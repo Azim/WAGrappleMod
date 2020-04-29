@@ -37,6 +37,7 @@ public class PlayerHandMixin<T extends LivingEntity> {
 		if(gcomponent==null) {
 			gcomponent = WAGrappleMod.GRAPPLE_COMPONENT.get(player);
 		}
+		//System.out.println(gcomponent);
 		if(!gcomponent.isGrappled()) {
 			return;
 		}
