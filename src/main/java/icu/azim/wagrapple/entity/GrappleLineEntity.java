@@ -213,6 +213,11 @@ public class GrappleLineEntity extends Entity {
 				return;
 			}
 		}
+		if(player.teleporting) {
+			destroyLine();
+			return;
+		}
+		
 		
 		if(ascend.isPressed()&&descend.isPressed()) {
 			return; //not moving anywhere
@@ -264,6 +269,10 @@ public class GrappleLineEntity extends Entity {
 		Vec3d origin = lineHandler.getLastPiecePos();
 		double distanceToOrigin = player.getPos().distanceTo(origin);
 		double totalLen = distanceToOrigin+lineHandler.getPiecesLen();
+		if(distanceToOrigin>lineHandler.getMaxLen()*2) {
+			destroyLine();
+		}
+		
 		if(totalLen>lineHandler.getMaxLen()) {
 			
 			Vec3d originToPlayer = origin.subtract(player.getPos());
