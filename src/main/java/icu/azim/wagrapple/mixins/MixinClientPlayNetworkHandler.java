@@ -42,7 +42,7 @@ public class MixinClientPlayNetworkHandler {
     				ihand = -ihand;
     			}
     		    Vec3d from = Util.getPlayerShoulder(player, ihand, 1);
-    		    Vec3d to = from.add(player.getRotationVec(0).multiply(WAGrappleMod.maxLength));
+    		    Vec3d to = player.getCameraPosVec(0).add(player.getRotationVec(0).multiply(WAGrappleMod.maxLength));
     		    BlockHitResult result = owner.world.rayTrace(new RayTraceContext(from, to, RayTraceContext.ShapeType.COLLIDER, RayTraceContext.FluidHandling.NONE, owner));
     		    Vec3d pos = new Vec3d(x,y,z);
             	GrappleLineEntity toSpawn = new GrappleLineEntity(world, (PlayerEntity) owner, owner.getPos().distanceTo(pos)+1, result);

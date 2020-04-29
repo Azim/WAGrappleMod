@@ -39,7 +39,7 @@ public class GrappleItem extends Item{
 			int ihand = playerEntity.getMainArm() == Arm.RIGHT ? 1 : -1;
 			ihand *= (hand==Hand.MAIN_HAND)?1:-1;
 		    Vec3d from = Util.getPlayerShoulder(playerEntity, ihand, 1);
-		    Vec3d to = from.add(playerEntity.getRotationVec(0).multiply(WAGrappleMod.maxLength));
+		    Vec3d to = playerEntity.getCameraPosVec(0).add(playerEntity.getRotationVec(0).multiply(WAGrappleMod.maxLength));
 		    BlockHitResult result = playerEntity.world.rayTrace(new RayTraceContext(from, to, RayTraceContext.ShapeType.COLLIDER, RayTraceContext.FluidHandling.NONE, playerEntity));
 			if(result.getType()==Type.BLOCK) {
 				if(world.isClient) {
