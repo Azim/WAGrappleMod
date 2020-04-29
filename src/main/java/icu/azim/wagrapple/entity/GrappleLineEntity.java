@@ -20,6 +20,7 @@ import net.minecraft.client.options.KeyBinding;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Packet;
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
@@ -204,6 +205,15 @@ public class GrappleLineEntity extends Entity {
 	}
 	
 	public void handlePlayerInput() {
+		ItemStack hand = player.getMainHandStack();
+		if(hand.getItem()!=WAGrappleMod.GRAPPLE_ITEM) {
+			hand = player.getOffHandStack();
+			if(hand.getItem()!=WAGrappleMod.GRAPPLE_ITEM) {
+				destroyLine();
+				return;
+			}
+		}
+		
 		if(ascend.isPressed()&&descend.isPressed()) {
 			return; //not moving anywhere
 		}
