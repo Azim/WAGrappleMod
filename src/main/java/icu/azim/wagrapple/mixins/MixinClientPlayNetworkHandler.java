@@ -5,7 +5,9 @@ import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
+import net.minecraft.util.Arm;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RayTraceContext;
@@ -19,6 +21,7 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import icu.azim.wagrapple.WAGrappleMod;
 import icu.azim.wagrapple.entity.GrappleLineEntity;
+import icu.azim.wagrapple.util.Util;
 
 @Mixin(ClientPlayNetworkHandler.class)
 public class MixinClientPlayNetworkHandler {
@@ -32,11 +35,15 @@ public class MixinClientPlayNetworkHandler {
             Entity owner = world.getEntityById(packet.getEntityData());
 
             if (owner instanceof PlayerEntity) {
-    			Vec3d vec3d = owner.getCameraPosVec(0);
-    		    Vec3d vec3d2 = owner.getRotationVec(0);
-    		    Vec3d vec3d3 = vec3d.add(vec3d2.x * 16, vec3d2.y * 16, vec3d2.z * 16);
-    		    BlockHitResult result = owner.world.rayTrace(new RayTraceContext(vec3d, vec3d3, RayTraceContext.ShapeType.COLLIDER, RayTraceContext.FluidHandling.NONE, owner));
-    		    
+            	PlayerEntity player = (PlayerEntity) owner;
+    			int ihand = player.getMainArm() == Arm.RIGHT ? 1 : -1;
+    			ItemStack itemStack = player.getMainHandStack();
+    			if (itemStack.getItem() != WAGrappleMod.GRAPPLE_ITEM) {
+    				ihand = -ihand;
+    			}
+    		    Vec3d from = Util.getPlayerShoulder(player, ihand, 1);
+    		    Vec3d to = from.add(player.getRotationVec(0).multiply(WAGrappleMod.maxLength));
+    		    BlockHitResult result = owner.world.rayTrace(new RayTraceContext(from, to, RayTraceContext.ShapeType.COLLIDER, RayTraceContext.FluidHandling.NONE, owner));
     		    Vec3d pos = new Vec3d(x,y,z);
             	GrappleLineEntity toSpawn = new GrappleLineEntity(world, (PlayerEntity) owner, owner.getPos().distanceTo(pos)+1, result);
                 int id = packet.getId();

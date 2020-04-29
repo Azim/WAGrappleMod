@@ -5,6 +5,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 
 import icu.azim.wagrapple.WAGrappleMod;
 import icu.azim.wagrapple.entity.GrappleLineEntity;
+import icu.azim.wagrapple.util.Util;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.RenderPhase;
@@ -67,10 +68,10 @@ public class GrappleLineRenderer extends EntityRenderer<GrappleLineEntity> {
 			
 			float handSwingProgress = playerEntity.getHandSwingProgress(tickDelta); //some hand offset
 			float handSwingSin = MathHelper.sin(MathHelper.sqrt(handSwingProgress) * 3.1415927F); 
-			float nYaw = MathHelper.lerp(tickDelta, playerEntity.prevBodyYaw, playerEntity.bodyYaw) * 0.017453292F; //get new yaw
-			double nYawSin = (double) MathHelper.sin(nYaw);
-			double nYawCos = (double) MathHelper.cos(nYaw);
-			double handOffset = (double) hand * 0.35D;
+			//float nYaw = MathHelper.lerp(tickDelta, playerEntity.prevBodyYaw, playerEntity.bodyYaw) * 0.017453292F; //get new yaw
+			//double nYawSin = (double) MathHelper.sin(nYaw);
+			//double nYawCos = (double) MathHelper.cos(nYaw);
+			//double handOffset = (double) hand * 0.35D;
 			double nx; //somewhat player coordinates
 			double ny;
 			double nz;
@@ -91,9 +92,15 @@ public class GrappleLineRenderer extends EntityRenderer<GrappleLineEntity> {
 				nz = MathHelper.lerp((double) tickDelta, playerEntity.prevZ, playerEntity.getZ()) + vec3d.z;
 				eyeHeight = playerEntity.getStandingEyeHeight();
 			} else { //third person mode
+				/*
 				nx = MathHelper.lerp((double) tickDelta, playerEntity.prevX, playerEntity.getX()) - nYawCos * handOffset - nYawSin * 0.8D; //we dont need that much of an offset from 3rd person
 				ny = playerEntity.prevY + (double) playerEntity.getStandingEyeHeight() + (playerEntity.getY() - playerEntity.prevY) * (double) tickDelta - 0.45D;
 				nz = MathHelper.lerp((double) tickDelta, playerEntity.prevZ, playerEntity.getZ()) - nYawSin * handOffset + nYawCos * 0.8D;
+				*/
+				Vec3d h = Util.getPlayerShoulder(playerEntity, hand, tickDelta);
+				nx = h.x;
+				ny = h.y;
+				nz = h.z;
 				eyeHeight = playerEntity.isInSneakingPose() ? -0.1875F : 0.0F;
 			}
 			

@@ -42,7 +42,6 @@ public class PlayerHandMixin<T extends LivingEntity> {
 		}
 		Entity e =player.world.getEntityById(gcomponent.getLineId());
 		if(e==null||!(e instanceof GrappleLineEntity)) {
-			System.out.println("Entity not found ");
 			gcomponent = WAGrappleMod.GRAPPLE_COMPONENT.get(player);
 			return;
 		}

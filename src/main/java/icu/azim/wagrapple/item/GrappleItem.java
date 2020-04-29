@@ -3,6 +3,7 @@ package icu.azim.wagrapple.item;
 import java.util.List;
 import icu.azim.wagrapple.WAGrappleMod;
 import icu.azim.wagrapple.entity.GrappleLineEntity;
+import icu.azim.wagrapple.util.Util;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.client.resource.language.I18n;
@@ -15,6 +16,7 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
+import net.minecraft.util.Arm;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.hit.BlockHitResult;
@@ -34,13 +36,11 @@ public class GrappleItem extends Item{
     {
 		
 		if(!WAGrappleMod.GRAPPLE_COMPONENT.get(playerEntity).isGrappled()) {
-		
-			Vec3d vec3d = playerEntity.getCameraPosVec(0);
-		    Vec3d vec3d2 = playerEntity.getRotationVec(0);
-		    Vec3d vec3d3 = vec3d.add(vec3d2.x * WAGrappleMod.maxLength, vec3d2.y * WAGrappleMod.maxLength, vec3d2.z * WAGrappleMod.maxLength);
-		    BlockHitResult result = playerEntity.world.rayTrace(new RayTraceContext(vec3d, vec3d3, RayTraceContext.ShapeType.COLLIDER, RayTraceContext.FluidHandling.NONE, playerEntity));
-		    
-		    
+			int ihand = playerEntity.getMainArm() == Arm.RIGHT ? 1 : -1;
+			ihand *= (hand==Hand.MAIN_HAND)?1:-1;
+		    Vec3d from = Util.getPlayerShoulder(playerEntity, ihand, 1);
+		    Vec3d to = from.add(playerEntity.getRotationVec(0).multiply(WAGrappleMod.maxLength));
+		    BlockHitResult result = playerEntity.world.rayTrace(new RayTraceContext(from, to, RayTraceContext.ShapeType.COLLIDER, RayTraceContext.FluidHandling.NONE, playerEntity));
 			if(result.getType()==Type.BLOCK) {
 				if(world.isClient) {
 					

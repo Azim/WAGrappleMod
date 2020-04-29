@@ -25,6 +25,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Packet;
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.util.Arm;
 import net.minecraft.util.PacketByteBuf;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult.Type;
@@ -185,15 +186,25 @@ public class GrappleLineEntity extends Entity {
 			if(this.removed) {
 				return;
 			}
-			handlePlayerInput();
+
+			int hand = player.getMainArm() == Arm.RIGHT ? 1 : -1;
+			ItemStack main = player.getMainHandStack();
+			if(main.getItem()!=WAGrappleMod.GRAPPLE_ITEM) {
+				hand = -hand;
+				main = player.getOffHandStack();
+				if(main.getItem()!=WAGrappleMod.GRAPPLE_ITEM) {
+					hand = 0;
+				}
+			}
+			handlePlayerInput(hand);
 			if(this.removed) {
 				return;
 			}
-			grapplePhysicsTick();
+			grapplePhysicsTick(hand);
 			if(this.removed) {
 				return;
 			}
-			movementPhysicsTick();
+			movementPhysicsTick(hand);
 			if(this.removed) {
 				return;
 			}
@@ -208,15 +219,12 @@ public class GrappleLineEntity extends Entity {
 		super.tick();
 	}
 	
-	public void handlePlayerInput() {
-		ItemStack hand = player.getMainHandStack();
-		if(hand.getItem()!=WAGrappleMod.GRAPPLE_ITEM) {
-			hand = player.getOffHandStack();
-			if(hand.getItem()!=WAGrappleMod.GRAPPLE_ITEM) {
-				destroyLine();
-				return;
-			}
+	public void handlePlayerInput(int hand) {
+		if(hand==0) {
+			destroyLine();
+			return;
 		}
+		
 		if(player.teleporting) {
 			destroyLine();
 			return;
@@ -255,8 +263,9 @@ public class GrappleLineEntity extends Entity {
 		}
 	}
 	
-	public void grapplePhysicsTick() {
-		BlockHitResult res = this.world.rayTrace(new RayTraceContext(player.getCameraPosVec(0),lineHandler.getPiecePos(lineHandler.size()-1), ShapeType.COLLIDER, FluidHandling.NONE, player));
+	public void grapplePhysicsTick(int hand) {
+		
+		BlockHitResult res = this.world.rayTrace(new RayTraceContext(Util.getPlayerShoulder(player, hand, 1),lineHandler.getPiecePos(lineHandler.size()-1), ShapeType.COLLIDER, FluidHandling.NONE, player));
 		
 		if(res.getType()==Type.BLOCK) {
 			lineHandler.add(res);
@@ -265,14 +274,15 @@ public class GrappleLineEntity extends Entity {
 		}
 	}
 	
-	public void movementPhysicsTick() {
+	public void movementPhysicsTick(int hand) {
 		/*
 		if(true) {
 			return;
 		}//*/
 		Vec3d origin = lineHandler.getLastPiecePos();
 		double distanceToOrigin = player.getPos().distanceTo(origin);
-		this.direction = player.getCameraPosVec(0).subtract(origin).normalize();
+		
+		this.direction = Util.getPlayerShoulder(player, hand, 1).subtract(origin).normalize();
 		calcAxis();
 		double totalLen = distanceToOrigin+lineHandler.getPiecesLen();
 		if(distanceToOrigin>lineHandler.getMaxLen()*2) {
@@ -356,18 +366,6 @@ public class GrappleLineEntity extends Entity {
 	private void calcAxis() {
 		this.lpitch = (float) Math.asin(-this.direction.y);
 		this.lyaw = (float) Math.atan2(this.direction.x, this.direction.z);
-		System.out.println("p "+lpitch+" "+player.pitch+"   y "+lyaw+" "+player.bodyYaw);
-				//Math.atan(Math.sqrt(this.direction.x*this.direction.x+this.direction.z*this.direction.z)/this.direction.y);
-	}
-	
-	private Vec3d getPlayerShoulder(int hand) {
-		double x = 0;
-		double y = 1.3;
-		double z = 0;
-		double yaw = player.bodyYaw%360;
-		x = Math.cos(yaw);
-		y = Math.sin(yaw);
-		return player.getPos().add(new Vec3d(x,y,z));
 	}
 	
 	public PlayerEntity getPlayer() {
