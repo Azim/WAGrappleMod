@@ -59,48 +59,48 @@ public class GrappleLineRenderer extends EntityRenderer<GrappleLineEntity> {
 				hand = -hand;
 				mainHandStack = false;
 				itemStack = playerEntity.getOffHandStack();
-				if(itemStack.getItem()!=WAGrappleMod.GRAPPLE_ITEM) {
+				if(itemStack.getItem()!=WAGrappleMod.GRAPPLE_ITEM) { //neither of hands have an item - but we should draw it where it last was
 					hand = prevHand;
 				}
 			}
+			prevHand = hand;
 			
-			float handSwingProgress = playerEntity.getHandSwingProgress(tickDelta); //and hand offset
+			float handSwingProgress = playerEntity.getHandSwingProgress(tickDelta); //some hand offset
 			float handSwingSin = MathHelper.sin(MathHelper.sqrt(handSwingProgress) * 3.1415927F); 
 			float nYaw = MathHelper.lerp(tickDelta, playerEntity.prevBodyYaw, playerEntity.bodyYaw) * 0.017453292F; //get new yaw
 			double nYawSin = (double) MathHelper.sin(nYaw);
 			double nYawCos = (double) MathHelper.cos(nYaw);
 			double handOffset = (double) hand * 0.35D;
-			double nx;
+			double nx; //somewhat player coordinates
 			double ny;
 			double nz;
 			float eyeHeight;
-			double x;
 			double fov;
 			if ((this.renderManager.gameOptions == null || this.renderManager.gameOptions.perspective <= 0) && playerEntity == MinecraftClient.getInstance().player) {
 				fov = this.renderManager.gameOptions.fov;
 				fov /= 100.0D;
-				Vec3d vec3d = new Vec3d((double) hand * -0.37D * fov, -0.22D * fov, 0.35D); //some offset
+				Vec3d vec3d = new Vec3d((double) hand * -0.37D * fov, -0.22D * fov, 0.35D); //offset to the hand
 				vec3d = vec3d.rotateX(-MathHelper.lerp(tickDelta, playerEntity.prevPitch, playerEntity.pitch) * 0.017453292F); //apply pitch
 				vec3d = vec3d.rotateY(-MathHelper.lerp(tickDelta, playerEntity.prevYaw, playerEntity.yaw) * 0.017453292F);     //apply yaw
-				if(mainHandStack) {
+				if(mainHandStack) { //player only swings main hand
 					vec3d = vec3d.rotateY(handSwingSin * 0.5F); //apply hand swinging on Y and X
 					vec3d = vec3d.rotateX(-handSwingSin * 0.7F);
 				}
-				nx = MathHelper.lerp((double) tickDelta, playerEntity.prevX, playerEntity.getX()) + vec3d.x;
+				nx = MathHelper.lerp((double) tickDelta, playerEntity.prevX, playerEntity.getX()) + vec3d.x; //player coordinates + offset 
 				ny = MathHelper.lerp((double) tickDelta, playerEntity.prevY, playerEntity.getY()) + vec3d.y;
 				nz = MathHelper.lerp((double) tickDelta, playerEntity.prevZ, playerEntity.getZ()) + vec3d.z;
 				eyeHeight = playerEntity.getStandingEyeHeight();
-			} else {
-				nx = MathHelper.lerp((double) tickDelta, playerEntity.prevX, playerEntity.getX()) - nYawCos * handOffset - nYawSin * 0.8D;
+			} else { //third person mode
+				nx = MathHelper.lerp((double) tickDelta, playerEntity.prevX, playerEntity.getX()) - nYawCos * handOffset - nYawSin * 0.8D; //we dont need that much of an offset from 3rd person
 				ny = playerEntity.prevY + (double) playerEntity.getStandingEyeHeight() + (playerEntity.getY() - playerEntity.prevY) * (double) tickDelta - 0.45D;
 				nz = MathHelper.lerp((double) tickDelta, playerEntity.prevZ, playerEntity.getZ()) - nYawSin * handOffset + nYawCos * 0.8D;
 				eyeHeight = playerEntity.isInSneakingPose() ? -0.1875F : 0.0F;
 			}
 			
-			x = MathHelper.lerp((double) tickDelta, entity.prevX, entity.getX());
-			double y = MathHelper.lerp((double) tickDelta, entity.prevY, entity.getY());// + 0.25D; //some vertical offset?
+			double x = MathHelper.lerp((double) tickDelta, entity.prevX, entity.getX());//entity coordinates
+			double y = MathHelper.lerp((double) tickDelta, entity.prevY, entity.getY());
 			double z = MathHelper.lerp((double) tickDelta, entity.prevZ, entity.getZ());
-			float xpart = (float) (nx - x); //but those are the coordinates of player's hand (almost)
+			float xpart = (float) (nx - x); //get relative coordinates
 			float ypart = (float) (ny - y) + eyeHeight;
 			float zpart = (float) (nz - z);
 			VertexConsumer consumer = vertexConsumerProvider
