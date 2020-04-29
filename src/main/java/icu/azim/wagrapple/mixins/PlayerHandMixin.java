@@ -42,6 +42,8 @@ public class PlayerHandMixin<T extends LivingEntity> {
 		}
 		Entity e =player.world.getEntityById(gcomponent.getLineId());
 		if(e==null||!(e instanceof GrappleLineEntity)) {
+			System.out.println("Entity not found ");
+			gcomponent = WAGrappleMod.GRAPPLE_COMPONENT.get(player);
 			return;
 		}
 		GrappleLineEntity line = (GrappleLineEntity)e;
@@ -52,11 +54,12 @@ public class PlayerHandMixin<T extends LivingEntity> {
 			hand = -hand;
 			itemStack = player.getOffHandStack();
 			if(itemStack.getItem()!=WAGrappleMod.GRAPPLE_ITEM) { //neither of hands have an item
+				System.out.println("none of the hands have the line");
 				return;
 			}
 		}
 		ModelPart arm = hand==1?rightArm:leftArm;
-		arm.pitch = line.getLinePitch();
-		arm.yaw = line.getLineYaw()+player.yaw;
+		arm.pitch = -(line.getLinePitch()+(float)Math.PI/2);
+		arm.yaw = line.getLineYaw();//+((player.yaw%360)*(float)Math.PI/180);
 	}
 }

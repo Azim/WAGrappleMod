@@ -272,7 +272,7 @@ public class GrappleLineEntity extends Entity {
 		}//*/
 		Vec3d origin = lineHandler.getLastPiecePos();
 		double distanceToOrigin = player.getPos().distanceTo(origin);
-		this.direction = player.getPos().subtract(origin).normalize();
+		this.direction = player.getCameraPosVec(0).subtract(origin).normalize();
 		calcAxis();
 		double totalLen = distanceToOrigin+lineHandler.getPiecesLen();
 		if(distanceToOrigin>lineHandler.getMaxLen()*2) {
@@ -354,8 +354,9 @@ public class GrappleLineEntity extends Entity {
 	}
 	
 	private void calcAxis() {
-		this.lpitch = (float) Math.asin(this.direction.y);
+		this.lpitch = (float) Math.asin(-this.direction.y);
 		this.lyaw = (float) Math.atan2(this.direction.x, this.direction.z);
+		System.out.println("p "+lpitch+" "+player.pitch+"   y "+lyaw+" "+player.yaw);
 				//Math.atan(Math.sqrt(this.direction.x*this.direction.x+this.direction.z*this.direction.z)/this.direction.y);
 	}
 	
