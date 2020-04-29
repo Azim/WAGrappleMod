@@ -278,7 +278,6 @@ public class GrappleLineEntity extends Entity {
 			Vec3d originToPlayer = origin.subtract(player.getPos());
 			Vec3d direction = originToPlayer.normalize().multiply(totalLen-lineHandler.getMaxLen());
 			Vec3d projection = project(player.getVelocity(),originToPlayer);
-			
 
 			Vec3d newSpeed = player.getVelocity().subtract(projection);
 			
