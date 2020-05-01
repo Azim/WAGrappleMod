@@ -10,9 +10,11 @@ import com.google.common.collect.Lists;
 
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.tag.Tag;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.PacketByteBuf;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 
@@ -29,6 +31,32 @@ public class Util {
 		double y = buffer.readDouble();
 		double z = buffer.readDouble();
 		return new Vec3d(x,y,z);
+	}
+
+	public static Vec3d readVec3d(CompoundTag tag, String name) {
+		CompoundTag ctag = tag.getCompound(name);
+		return new Vec3d(ctag.getDouble("x"),ctag.getDouble("y"),ctag.getDouble("z"));
+	}
+	
+	public static void writeVec3d(CompoundTag tag, String name, Vec3d vec) {
+		CompoundTag ctag = new CompoundTag();
+		ctag.putDouble("x", vec.x);
+		ctag.putDouble("y", vec.y);
+		ctag.putDouble("z", vec.z);
+		tag.put(name, ctag);
+	}
+	
+	public static BlockPos readBlockPos(CompoundTag tag, String name) {
+		CompoundTag ctag = tag.getCompound(name);
+		return new BlockPos(ctag.getInt("x"),ctag.getInt("y"),ctag.getInt("z"));
+	}
+	
+	public static void writeBlockPos(CompoundTag tag, String name, BlockPos vec) {
+		CompoundTag ctag = new CompoundTag();
+		ctag.putInt("x", vec.getX());
+		ctag.putInt("y", vec.getY());
+		ctag.putInt("z", vec.getZ());
+		tag.put(name, ctag);
 	}
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
