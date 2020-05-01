@@ -391,4 +391,8 @@ public class GrappleLineEntity extends Entity {
 	@Override
 	protected void writeCustomDataToTag(CompoundTag tag) { }
 
+	public Vec3d getDirection() {
+		return direction;
+	}
+
 }

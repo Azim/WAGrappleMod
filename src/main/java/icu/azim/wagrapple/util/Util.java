@@ -50,7 +50,7 @@ public class Util {
 	
 	public static Vec3d getPlayerShoulder(PlayerEntity player, int hand, float tickDelta) {
 		double x = 0;
-		double y = 1.5;
+		double y = 1.3;
 		double z = 0;
 		double yaw = MathHelper.lerp(tickDelta, player.prevBodyYaw, player.bodyYaw)%360;
 		yaw = yaw*Math.PI/180;
@@ -58,7 +58,7 @@ public class Util {
 		double ycos = Math.cos(yaw);
 		double ysin = Math.sin(yaw);
 		x = x + MathHelper.lerp(tickDelta, player.prevX, player.getX()) - (ycos + ysin)*0.2;// * 0.8D;
-		y = y + MathHelper.lerp(tickDelta, player.prevY, player.getY());
+		y = y + MathHelper.lerp(tickDelta, player.prevY, player.getY()) - ((player.isSneaking()&&!player.abilities.flying)?0.3:0);
 		z = z + MathHelper.lerp(tickDelta, player.prevZ, player.getZ()) - (ysin - ycos)*0.2;// * 0.8D;
 		//System.out.println(yaw+" | "+(x-player.prevX)+" "+(y-player.prevY)+" "+(z-player.prevZ));
 		return new Vec3d(x,y,z);

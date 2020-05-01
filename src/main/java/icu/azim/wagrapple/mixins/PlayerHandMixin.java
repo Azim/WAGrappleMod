@@ -13,21 +13,23 @@ import org.spongepowered.asm.mixin.injection.At;
 
 import net.minecraft.client.model.ModelPart;
 import net.minecraft.client.render.entity.model.BipedEntityModel;
+import net.minecraft.client.render.entity.model.PlayerEntityModel;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Arm;
 
-@Mixin(BipedEntityModel.class)
+@Mixin(PlayerEntityModel.class)
 public class PlayerHandMixin<T extends LivingEntity> {
 	@Shadow
-	public ModelPart rightArm;
+	public ModelPart leftSleeve;
 	@Shadow
-	public ModelPart leftArm;
+	public ModelPart rightSleeve;
 	
 	private GrappleComponent gcomponent;
 
+	@SuppressWarnings("unchecked")
 	@Inject(method="setAngles",at = @At("TAIL"))
 	public void changeHandPosition(T livingEntity, float f, float g, float h, float i, float j, CallbackInfo ci) {
 		if(!(livingEntity instanceof PlayerEntity)) {
@@ -58,8 +60,9 @@ public class PlayerHandMixin<T extends LivingEntity> {
 				return;
 			}
 		}
-		ModelPart arm = hand==1?rightArm:leftArm;
-		arm.pitch = -(line.getLinePitch()+(float)Math.PI/2);
-		arm.yaw = -line.getLineYaw() + (float) Math.PI -((player.bodyYaw%360)*(float)Math.PI/180);
+		ModelPart arm = hand==1?((BipedEntityModel<T>)(Object) this).rightArm:((BipedEntityModel<T>)(Object) this).leftArm;
+		ModelPart sleeve = hand==1?rightSleeve:leftSleeve;
+		sleeve.pitch = arm.pitch = -(line.getLinePitch()+(float)Math.PI/2);
+		sleeve.yaw = arm.yaw = -line.getLineYaw() + (float) Math.PI -((player.bodyYaw%360)*(float)Math.PI/180);
 	}
 }
