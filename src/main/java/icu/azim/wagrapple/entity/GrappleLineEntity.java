@@ -192,8 +192,9 @@ public class GrappleLineEntity extends Entity {
 			if(main.getItem()!=WAGrappleMod.GRAPPLE_ITEM) {
 				hand = -hand;
 				main = player.getOffHandStack();
-				if(main.getItem()!=WAGrappleMod.GRAPPLE_ITEM) {
-					hand = 0;
+				if(main.getItem()!=WAGrappleMod.GRAPPLE_ITEM) { //neither of hands have the hook item, removing
+					destroyLine();
+					return;
 				}
 			}
 			handlePlayerInput(hand);
@@ -220,10 +221,6 @@ public class GrappleLineEntity extends Entity {
 	}
 	
 	public void handlePlayerInput(int hand) {
-		if(hand==0) {
-			destroyLine();
-			return;
-		}
 		
 		if(player.teleporting) {
 			destroyLine();
@@ -353,8 +350,6 @@ public class GrappleLineEntity extends Entity {
 		return Math.acos(part);
 	}
 	
-
-	
 	public float getLinePitch() {
 		return this.lpitch; 
 	}
@@ -387,12 +382,26 @@ public class GrappleLineEntity extends Entity {
 
 	@Override //unused methods
 	protected void readCustomDataFromTag(CompoundTag tag) {
+		lineHandler.updateFromCompound(tag);
 	}
 	@Override
-	protected void writeCustomDataToTag(CompoundTag tag) { }
+	protected void writeCustomDataToTag(CompoundTag tag) {
+		tag.putDouble("maxLen", lineHandler.getMaxLen());
+		tag.putInt("pieces", lineHandler.size());
+		
+		for(int i = 0; i < lineHandler.size(); i++) {
+			Util.writeBlockPos(tag, "bpos"+i, lineHandler.getPieceBlock(i));
+			Util.writeVec3d(tag,"location"+i, lineHandler.getPiecePos(i));
+			Util.writeVec3d(tag,"direction"+i, lineHandler.getDirection(i));
+		}
+	}
 
 	public Vec3d getDirection() {
 		return direction;
+	}
+
+	public double getMaxLength() {
+		return lineHandler.getMaxLen();
 	}
 
 }

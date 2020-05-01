@@ -14,8 +14,6 @@ import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.client.render.entity.EntityRenderer;
-import net.minecraft.client.render.entity.PlayerEntityRenderer;
-import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.client.util.math.Matrix4f;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.util.math.Vector3f;
@@ -70,10 +68,6 @@ public class GrappleLineRenderer extends EntityRenderer<GrappleLineEntity> {
 			
 			float handSwingProgress = playerEntity.getHandSwingProgress(tickDelta); //some hand offset
 			float handSwingSin = MathHelper.sin(MathHelper.sqrt(handSwingProgress) * 3.1415927F); 
-			//float nYaw = MathHelper.lerp(tickDelta, playerEntity.prevBodyYaw, playerEntity.bodyYaw) * 0.017453292F; //get new yaw
-			//double nYawSin = (double) MathHelper.sin(nYaw);
-			//double nYawCos = (double) MathHelper.cos(nYaw);
-			//double handOffset = (double) hand * 0.35D;
 			double nx; //somewhat player coordinates
 			double ny;
 			double nz;
@@ -92,21 +86,15 @@ public class GrappleLineRenderer extends EntityRenderer<GrappleLineEntity> {
 				ny = MathHelper.lerp((double) tickDelta, playerEntity.prevY, playerEntity.getY()) + vec3d.y+ playerEntity.getStandingEyeHeight();
 				nz = MathHelper.lerp((double) tickDelta, playerEntity.prevZ, playerEntity.getZ()) + vec3d.z;
 			} else { //third person mode
-				/*
-				nx = MathHelper.lerp((double) tickDelta, playerEntity.prevX, playerEntity.getX()) - nYawCos * handOffset - nYawSin * 0.8D; //we dont need that much of an offset from 3rd person
-				ny = playerEntity.prevY + (double) playerEntity.getStandingEyeHeight() + (playerEntity.getY() - playerEntity.prevY) * (double) tickDelta - 0.45D;
-				nz = MathHelper.lerp((double) tickDelta, playerEntity.prevZ, playerEntity.getZ()) - nYawSin * handOffset + nYawCos * 0.8D;
-				*/
-				Vec3d h = Util.getPlayerShoulder(playerEntity, hand, tickDelta);
-				//make line go out from the proper end
+				Vec3d shoulderCoordinates = Util.getPlayerShoulder(playerEntity, hand, tickDelta);
+				
 				double opitch = -(entity.getLinePitch()+(float)Math.PI/2);
 				double oyaw = entity.getLineYaw();
-				//ItemRenderer
 				Vec3d toolOffset = new Vec3d(0.025*hand,-0.55,-0.2).rotateX((float) opitch).rotateY((float) oyaw);
 				
-				nx = h.x+toolOffset.x;
-				ny = h.y+toolOffset.y;
-				nz = h.z+toolOffset.z;
+				nx = shoulderCoordinates.x+toolOffset.x;
+				ny = shoulderCoordinates.y+toolOffset.y;
+				nz = shoulderCoordinates.z+toolOffset.z;
 			}
 			
 			double x = MathHelper.lerp((double) tickDelta, entity.prevX, entity.getX());//entity coordinates

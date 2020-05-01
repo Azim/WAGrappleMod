@@ -8,6 +8,7 @@ import icu.azim.wagrapple.util.PacketUnwrapper;
 import icu.azim.wagrapple.util.PacketUnwrapperPiece;
 import icu.azim.wagrapple.util.Util;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Identifier;
@@ -37,6 +38,20 @@ public class GrappleLineHandler {
 		for(int i = 0; i<unwrapped.getSize(); i++) {
 			PacketUnwrapperPiece p = ps.get(i);
 			pieces.add(new GrappleLinePiece(p.getLocation(), p.getBpos(), p.getDirection(), line.world));
+		}
+		recalcLen();
+	}
+	
+	public void updateFromCompound(CompoundTag tag) {
+		this.setMaxLen(tag.getDouble("maxLen"));
+		int pieces = tag.getInt("pieces");
+		this.pieces.clear();
+		for(int i = 0; i<pieces;i++) {
+			this.pieces.add(new GrappleLinePiece(
+					Util.readVec3d(tag, "location"+i), 
+					Util.readBlockPos(tag, "bpos"+i),
+					Util.readVec3d(tag, "direction"+i),
+					line.world));
 		}
 		recalcLen();
 	}
