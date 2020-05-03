@@ -46,15 +46,14 @@ public class GrappleItem extends Item{
 					
 					world.playSound(playerEntity, result.getPos().x,result.getPos().y,result.getPos().z, SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.PLAYERS, 0.3F, 1.0F);
 				}else {
-					GrappleLineEntity entity = new GrappleLineEntity(world, playerEntity, playerEntity.getPos().distanceTo(result.getPos())+1, result);
+					GrappleLineEntity entity = new GrappleLineEntity(world, playerEntity, playerEntity.getPos().distanceTo(result.getPos())+1.5, result);
 					world.spawnEntity(entity);
 					WAGrappleMod.GRAPPLE_COMPONENT.get(playerEntity).setLineId(entity.getEntityId());
 					WAGrappleMod.GRAPPLE_COMPONENT.get(playerEntity).setGrappled(true);
 					WAGrappleMod.GRAPPLE_COMPONENT.get(playerEntity).sync();
-					System.out.println("server - spawned");
 				}
 			}else {
-				playerEntity.playSound(SoundEvents.ITEM_ARMOR_EQUIP_CHAIN, 1.0F, 1.0F);
+				playerEntity.playSound(SoundEvents.ITEM_ARMOR_EQUIP_CHAIN, 1.0F, 0.6F);
 			}
 			
 		}else {
@@ -71,7 +70,7 @@ public class GrappleItem extends Item{
 			WAGrappleMod.GRAPPLE_COMPONENT.get(playerEntity).setGrappled(false);
 			WAGrappleMod.GRAPPLE_COMPONENT.get(playerEntity).sync();
 
-			playerEntity.playSound(SoundEvents.ITEM_ARMOR_EQUIP_CHAIN, 1.0F, 1.0F);
+			playerEntity.playSound(SoundEvents.ITEM_ARMOR_EQUIP_CHAIN, 1.0F, 0.6F);
 		}
 		
 		

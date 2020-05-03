@@ -20,12 +20,12 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Arm;
 
-@Mixin(PlayerEntityModel.class)
+@Mixin(BipedEntityModel.class)
 public class PlayerHandMixin<T extends LivingEntity> {
 	@Shadow
-	public ModelPart leftSleeve;
+	public ModelPart rightArm;
 	@Shadow
-	public ModelPart rightSleeve;
+	public ModelPart leftArm;
 	
 	private GrappleComponent gcomponent;
 
@@ -36,9 +36,7 @@ public class PlayerHandMixin<T extends LivingEntity> {
 			return;
 		}
 		PlayerEntity player = (PlayerEntity) livingEntity;
-		if(gcomponent==null) {
-			gcomponent = WAGrappleMod.GRAPPLE_COMPONENT.get(player);
-		}
+		gcomponent = WAGrappleMod.GRAPPLE_COMPONENT.get(player);
 		//System.out.println(gcomponent);
 		if(!gcomponent.isGrappled()) {
 			return;
@@ -60,9 +58,15 @@ public class PlayerHandMixin<T extends LivingEntity> {
 				return;
 			}
 		}
-		ModelPart arm = hand==1?((BipedEntityModel<T>)(Object) this).rightArm:((BipedEntityModel<T>)(Object) this).leftArm;
-		ModelPart sleeve = hand==1?rightSleeve:leftSleeve;
-		sleeve.pitch = arm.pitch = -(line.getLinePitch()+(float)Math.PI/2);
-		sleeve.yaw = arm.yaw = -line.getLineYaw() + (float) Math.PI -((player.bodyYaw%360)*(float)Math.PI/180);
+		if((Object)this instanceof PlayerEntityModel) {
+			ModelPart sleeve = hand==1?((PlayerEntityModel<T>)(Object) this).rightSleeve:((PlayerEntityModel<T>)(Object) this).leftSleeve;
+			ModelPart arm = hand==1?rightArm:leftArm;
+			sleeve.pitch = arm.pitch = -(line.getLinePitch()+(float)Math.PI/2);
+			sleeve.yaw = arm.yaw = -line.getLineYaw() + (float) Math.PI -((player.bodyYaw%360)*(float)Math.PI/180);
+		}else {
+			ModelPart arm = hand==1?rightArm:leftArm;
+			arm.pitch = -(line.getLinePitch()+(float)Math.PI/2);
+			arm.yaw = -line.getLineYaw() + (float) Math.PI -((player.bodyYaw%360)*(float)Math.PI/180);
+		}
 	}
 }

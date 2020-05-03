@@ -1,6 +1,5 @@
 package icu.azim.wagrapple.render;
 
-import java.util.OptionalDouble;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import icu.azim.wagrapple.WAGrappleMod;
@@ -46,12 +45,11 @@ public class GrappleLineRenderer extends EntityRenderer<GrappleLineEntity> {
 			VertexConsumerProvider vertexConsumerProvider, int light) {
 		PlayerEntity playerEntity = entity.getPlayer();
 		if (playerEntity != null) {
-			matrixStack.push(); //woodo magic
+			matrixStack.push(); //cause when you rotate or translate, you mutate the matrix. but when you're done rendering, you need to restore the original state, so as to not mess up everything else that renders after you (c)UpcraftLP 
 			matrixStack.push();
 			matrixStack.multiply(this.renderManager.getRotation());
 			matrixStack.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(180.0F));
 			matrixStack.pop();
-
 			int hand = playerEntity.getMainArm() == Arm.RIGHT ? 1 : -1; //get hand
 			boolean mainHandStack = true;
 			ItemStack itemStack = playerEntity.getMainHandStack();
@@ -72,10 +70,12 @@ public class GrappleLineRenderer extends EntityRenderer<GrappleLineEntity> {
 			double ny;
 			double nz;
 			double fov;
+			double lwidth;
+			Vec3d vec3d = null;
 			if ((this.renderManager.gameOptions == null || this.renderManager.gameOptions.perspective <= 0) && playerEntity == MinecraftClient.getInstance().player) {
 				fov = this.renderManager.gameOptions.fov;
 				fov /= 100.0D;
-				Vec3d vec3d = new Vec3d((double) hand * -0.37D * fov, -0.22D * fov, 0.35D); //offset to the hand
+				vec3d = new Vec3d((double) hand * -0.37D * fov, -0.22D * fov, 0.35D); //offset to the hand
 				vec3d = vec3d.rotateX(-MathHelper.lerp(tickDelta, playerEntity.prevPitch, playerEntity.pitch) * 0.017453292F); //apply pitch
 				vec3d = vec3d.rotateY(-MathHelper.lerp(tickDelta, playerEntity.prevYaw, playerEntity.yaw) * 0.017453292F);     //apply yaw
 				if(mainHandStack) { //player only swings main hand
@@ -85,6 +85,7 @@ public class GrappleLineRenderer extends EntityRenderer<GrappleLineEntity> {
 				nx = MathHelper.lerp((double) tickDelta, playerEntity.prevX, playerEntity.getX()) + vec3d.x; //player coordinates + offset 
 				ny = MathHelper.lerp((double) tickDelta, playerEntity.prevY, playerEntity.getY()) + vec3d.y+ playerEntity.getStandingEyeHeight();
 				nz = MathHelper.lerp((double) tickDelta, playerEntity.prevZ, playerEntity.getZ()) + vec3d.z;
+				lwidth = width;
 			} else { //third person mode
 				Vec3d shoulderCoordinates = Util.getPlayerShoulder(playerEntity, hand, tickDelta);
 				
@@ -95,19 +96,27 @@ public class GrappleLineRenderer extends EntityRenderer<GrappleLineEntity> {
 				nx = shoulderCoordinates.x+toolOffset.x;
 				ny = shoulderCoordinates.y+toolOffset.y;
 				nz = shoulderCoordinates.z+toolOffset.z;
+				lwidth = width*2;
 			}
 			
-			double x = MathHelper.lerp((double) tickDelta, entity.prevX, entity.getX());//entity coordinates
-			double y = MathHelper.lerp((double) tickDelta, entity.prevY, entity.getY());
-			double z = MathHelper.lerp((double) tickDelta, entity.prevZ, entity.getZ());
+
+			double x = entity.prevX==0?entity.getX():MathHelper.lerp((double) tickDelta, entity.prevX, entity.getX());//entity coordinates
+			double y = entity.prevY==0?entity.getY():MathHelper.lerp((double) tickDelta, entity.prevY, entity.getY());
+			double z = entity.prevZ==0?entity.getZ():MathHelper.lerp((double) tickDelta, entity.prevZ, entity.getZ());
+			
 			float xpart = (float) (nx - x); //get relative coordinates
 			float ypart = (float) (ny - y);
 			float zpart = (float) (nz - z);
+			
+			if(xpart>20||ypart>20||zpart>20) {
+				System.out.println(xpart+" "+ypart+" "+zpart);
+				System.out.println(entity.prevY+" "+entity.getY());
+			}
+			
 			VertexConsumer consumer = vertexConsumerProvider
 					.getBuffer(RenderLayer.of(
 							"grapple_line", VertexFormats.POSITION_COLOR, 7, 256,
 							RenderLayer.MultiPhaseParameters.builder()
-							.lineWidth(new RenderPhase.LineWidth(OptionalDouble.of(10)))
 							.layering(new RenderPhase.Layering("projection_layering", () -> {
 								RenderSystem.matrixMode(5889);
 								RenderSystem.pushMatrix();
@@ -128,17 +137,18 @@ public class GrappleLineRenderer extends EntityRenderer<GrappleLineEntity> {
 
 			Vec3d begin = new Vec3d(0,0,0);
 			if(entity.getHandler().size()>1) { //multiple points - multiple lines
-				drawPiece(begin, entity.getHandler().getPiecePos(1).subtract(entity.getPos()), consumer, matrix4f2, entity.getHandler().getDirection(1)); //draw the line between the entity and the first point
+				drawPiece(begin, entity.getHandler().getPiecePos(1).subtract(entity.getPos()), lwidth, consumer, matrix4f2, entity.getHandler().getDirection(1)); //draw the line between the entity and the first point
 
 				for (int i = 1; i < entity.getHandler().size()-1; i++) { // skip the very start of it, cuz we already added it above
 					Vec3d start = entity.getHandler().getPiecePos(i).subtract(entity.getPos());
 					Vec3d end = entity.getHandler().getPiecePos(i+1).subtract(entity.getPos());
-					drawPiece(start, end,  consumer, matrix4f2, entity.getHandler().getDirection(i+1));
+					drawPiece(start, end, lwidth, consumer, matrix4f2, entity.getHandler().getDirection(i+1));
 
 				}
 				drawPiece(
 						entity.getHandler().getPiecePos(entity.getHandler().size()-1).subtract(entity.getPos()), //from last piece to player's hand
 						new Vec3d(xpart, ypart, zpart),
+						lwidth,
 						consumer,
 						matrix4f2,
 						entity.getHandler().getDirection(entity.getHandler().size()-1)
@@ -147,6 +157,7 @@ public class GrappleLineRenderer extends EntityRenderer<GrappleLineEntity> {
 				drawPiece(
 						begin,
 						new Vec3d(xpart, ypart, zpart),
+						lwidth,
 						consumer, matrix4f2, entity.getHandler().getDirection(0));
 			}
 			matrixStack.pop();
@@ -154,19 +165,19 @@ public class GrappleLineRenderer extends EntityRenderer<GrappleLineEntity> {
 
 	}
 
-	private void drawPiece(Vec3d start, Vec3d end, VertexConsumer consumer, Matrix4f matrix, Vec3d direction) {
-		drawPiece(start,end,consumer,matrix, false);
+	private void drawPiece(Vec3d start, Vec3d end, double width, VertexConsumer consumer, Matrix4f matrix, Vec3d direction) {
+		drawPiece(start,end,width,consumer,matrix, false);
 		if(debug) {
-			drawPiece(end, end.add(direction), consumer, matrix, true);
+			drawPiece(end, end.add(direction), width, consumer, matrix, true);
 		}
 	}
 	
-	private void drawPiece(Vec3d start, Vec3d end, VertexConsumer consumer, Matrix4f matrix, boolean debug) {
+	private void drawPiece(Vec3d start, Vec3d end, double width, VertexConsumer consumer, Matrix4f matrix, boolean debug) {
 		
 		if(start.squaredDistanceTo(end)>64) { //split each segment onto smaller segments
 			Vec3d ba = end.subtract(start);
 			ba = ba.normalize().multiply(8);
-			drawPiece(start, end.subtract(ba), consumer, matrix, debug);
+			drawPiece(start, end.subtract(ba), width, consumer, matrix, debug);
 			start = end.subtract(ba);
 		}
 		

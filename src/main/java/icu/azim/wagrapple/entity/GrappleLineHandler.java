@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import icu.azim.wagrapple.util.PacketUnwrapper;
-import icu.azim.wagrapple.util.PacketUnwrapperPiece;
 import icu.azim.wagrapple.util.Util;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.nbt.CompoundTag;
@@ -31,17 +29,6 @@ public class GrappleLineHandler {
 		this.line = line;
 	}
 	
-	public void updateFromServer(PacketUnwrapper unwrapped) {
-		this.maxLen = unwrapped.getMaxLength();
-		pieces.clear();
-		List<PacketUnwrapperPiece> ps = unwrapped.getPieces();
-		for(int i = 0; i<unwrapped.getSize(); i++) {
-			PacketUnwrapperPiece p = ps.get(i);
-			pieces.add(new GrappleLinePiece(p.getLocation(), p.getBpos(), p.getDirection(), line.world));
-		}
-		recalcLen();
-	}
-	
 	public void updateFromCompound(CompoundTag tag) {
 		this.setMaxLen(tag.getDouble("maxLen"));
 		int pieces = tag.getInt("pieces");
@@ -54,6 +41,7 @@ public class GrappleLineHandler {
 					line.world));
 		}
 		recalcLen();
+		
 	}
 	
 	public void add(BlockHitResult result) {
@@ -74,7 +62,7 @@ public class GrappleLineHandler {
 			line.destroyLine();
 		}
 		if(line.world.isClient) {
-			line.syncFromClient();
+			line.sendEntityDataToServer();
 		}
 	}
 	
@@ -174,14 +162,14 @@ public class GrappleLineHandler {
 			if(angle>90) {
 				pieces.remove(pieces.size()-1);
 				recalcLen();
-				line.syncFromClient();
+				line.sendEntityDataToServer();
 			}
 		}
 		for(GrappleLinePiece piece:pieces) {
 			if(!piece.blockTick()) {
 				System.out.println("block changed!");
 				line.destroyLine();
-				line.syncFromClient();
+				line.sendEntityDataToServer();
 			}
 		}
 	}
