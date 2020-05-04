@@ -75,12 +75,13 @@ public class GrappleLineRenderer extends EntityRenderer<GrappleLineEntity> {
 			if ((this.renderManager.gameOptions == null || this.renderManager.gameOptions.perspective <= 0) && playerEntity == MinecraftClient.getInstance().player) {
 				fov = this.renderManager.gameOptions.fov;
 				fov /= 100.0D;
-				vec3d = new Vec3d((double) hand * -0.37D * fov, -0.22D * fov, 0.35D); //offset to the hand
+				vec3d = new Vec3d((double) hand * -0.37D * fov, -0.22D * fov, playerEntity.isSprinting()?0.28:0.35D); //offset to the hand
+				
 				vec3d = vec3d.rotateX(-MathHelper.lerp(tickDelta, playerEntity.prevPitch, playerEntity.pitch) * 0.017453292F); //apply pitch
 				vec3d = vec3d.rotateY(-MathHelper.lerp(tickDelta, playerEntity.prevYaw, playerEntity.yaw) * 0.017453292F);     //apply yaw
 				if(mainHandStack) { //player only swings main hand
 					vec3d = vec3d.rotateY(handSwingSin * 0.5F); //apply hand swinging on Y and X
-					vec3d = vec3d.rotateX(-handSwingSin * 0.7F);
+					vec3d = vec3d.rotateX(handSwingSin * 0.7F);
 				}
 				nx = MathHelper.lerp((double) tickDelta, playerEntity.prevX, playerEntity.getX()) + vec3d.x; //player coordinates + offset 
 				ny = MathHelper.lerp((double) tickDelta, playerEntity.prevY, playerEntity.getY()) + vec3d.y+ playerEntity.getStandingEyeHeight();

@@ -93,7 +93,7 @@ public class GrappleLineHandler {
 		}else {
 			result = diff.crossProduct(vdir).crossProduct(diff).normalize();
 		}
-		System.out.println(dir.toString()+" "+dir.getVector().toString()+" "+result);
+		//System.out.println(dir.toString()+" "+dir.getVector().toString()+" "+result);
 		return result;
 	}
 	

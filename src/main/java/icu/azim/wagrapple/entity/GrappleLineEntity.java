@@ -62,7 +62,7 @@ public class GrappleLineEntity extends Entity {
 		boostSpeed = 1;
 		direction = new Vec3d(0,0,0);
 		boostCooldown = 15;
-		debugc = 0;
+		debugc = -1;
 		boostSpeed = 1;
 		this.ignoreCameraFrustum = true;
 	}
