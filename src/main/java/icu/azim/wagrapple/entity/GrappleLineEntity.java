@@ -21,6 +21,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Packet;
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
+import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Arm;
 import net.minecraft.util.PacketByteBuf;
@@ -82,8 +83,17 @@ public class GrappleLineEntity extends Entity {
 	
 	public GrappleLineEntity(World world, PlayerEntity player, double length, Vec3d pos) {
 		this(WAGrappleMod.GRAPPLE_LINE, world);
-		
-		
+		this.updatePosition(pos.x, pos.y, pos.z);
+		this.player = player;
+		lineHandler = new GrappleLineHandler(this, length);
+		lineHandler.addFirst(pos);
+		if(world.isClient) {
+			ascend = MinecraftClient.getInstance().options.keySneak;
+			descend = MinecraftClient.getInstance().options.keySprint;
+			boost = MinecraftClient.getInstance().options.keyJump;
+			debug = MinecraftClient.getInstance().options.keySwapHands;
+			world.playSound(player, pos.x, pos.y, pos.z, SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.PLAYERS, 0.3F, 1.0F);
+		}
 	}
 
 	@Override

@@ -80,15 +80,19 @@ public class Util {
 		double x = 0;
 		double y = 1.3;
 		double z = 0;
-		double yaw = MathHelper.lerp(tickDelta, player.prevBodyYaw, player.bodyYaw)%360;
+		double yaw = (player.prevBodyYaw==0?player.bodyYaw:MathHelper.lerp(tickDelta, player.prevBodyYaw, player.bodyYaw))%360;
 		yaw = yaw*Math.PI/180;
 		yaw += hand==-1?-Math.PI*3/4:+Math.PI/4;
 		double ycos = Math.cos(yaw);
 		double ysin = Math.sin(yaw);
-		x = x + MathHelper.lerp(tickDelta, player.prevX, player.getX()) - (ycos + ysin)*0.2;// * 0.8D;
-		y = y + MathHelper.lerp(tickDelta, player.prevY, player.getY()) - ((player.isSneaking()&&!player.abilities.flying)?0.3:0);
-		z = z + MathHelper.lerp(tickDelta, player.prevZ, player.getZ()) - (ysin - ycos)*0.2;// * 0.8D;
-		//System.out.println(yaw+" | "+(x-player.prevX)+" "+(y-player.prevY)+" "+(z-player.prevZ));
+		x = x + (player.prevX==0?player.getX():MathHelper.lerp(tickDelta, player.prevX, player.getX())) - (ycos + ysin)*0.2;// * 0.8D;
+		y = y + (player.prevY==0?player.getY():MathHelper.lerp(tickDelta, player.prevY, player.getY())) - ((player.isSneaking()&&!player.abilities.flying)?0.3:0);
+		z = z + (player.prevZ==0?player.getZ():MathHelper.lerp(tickDelta, player.prevZ, player.getZ())) - (ysin - ycos)*0.2;// * 0.8D;
+		/*
+		x = x + player.prevX==0?player.getX():MathHelper.lerp(tickDelta, player.prevX, player.getX());
+		y = y + player.prevY==0?player.getY():MathHelper.lerp(tickDelta, player.prevY, player.getY());
+		z = z + player.prevZ==0?player.getZ():MathHelper.lerp(tickDelta, player.prevZ, player.getZ());
+		*/
 		return new Vec3d(x,y,z);
 	}
 }

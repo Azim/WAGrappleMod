@@ -61,9 +61,15 @@ public class GrappleLineHandler {
 		if(piecesLen>maxLen) {
 			line.destroyLine();
 		}
-		if(line.world.isClient) {
+		if(line.world.isClient && this.size()>0) {
 			line.sendEntityDataToServer();
 		}
+	}
+	
+	public void addFirst(Vec3d pos) {
+		System.out.println(pos);
+		Vec3d piece = getSnap(pos, line.world.getBlockState(new BlockPos(pos)).getCollisionShape(line.world, new BlockPos(pos)).getBoundingBox());
+		pieces.add(new GrappleLinePiece(piece, new BlockPos(pos), new Vec3d(0,0,0), line.world));
 	}
 	
 	public Vec3d getDirection(int index) {
