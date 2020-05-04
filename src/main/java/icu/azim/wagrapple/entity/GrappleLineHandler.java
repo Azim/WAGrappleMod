@@ -67,7 +67,6 @@ public class GrappleLineHandler {
 	}
 	
 	public void addFirst(Vec3d pos) {
-		System.out.println(pos);
 		Vec3d piece = getSnap(pos, line.world.getBlockState(new BlockPos(pos)).getCollisionShape(line.world, new BlockPos(pos)).getBoundingBox());
 		pieces.add(new GrappleLinePiece(piece, new BlockPos(pos), new Vec3d(0,0,0), line.world));
 	}

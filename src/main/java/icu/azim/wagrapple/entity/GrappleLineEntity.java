@@ -332,6 +332,7 @@ public class GrappleLineEntity extends Entity {
 	public void detachLine() {
 		if(world.isClient) {
 			player.playSound(SoundEvents.ENTITY_ENDER_DRAGON_SHOOT, 0.5f, 1.5f);
+			player.playSound(SoundEvents.ITEM_ARMOR_EQUIP_CHAIN, 1.0F, 0.6F);
 			
 			PacketByteBuf passedData = new PacketByteBuf(Unpooled.buffer());
 			passedData.writeBoolean(true);

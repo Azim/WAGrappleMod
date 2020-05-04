@@ -11,7 +11,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
@@ -58,6 +57,11 @@ public class GrappleItem extends Item{
 			}
 			
 		}else {
+			if(world.isClient) {
+				if(playerEntity!=MinecraftClient.getInstance().player) {
+					return new TypedActionResult<>(ActionResult.PASS, playerEntity.getStackInHand(hand));
+				}
+			}
 			
 			int id = WAGrappleMod.GRAPPLE_COMPONENT.get(playerEntity).getLineId();
 			if(id>0) {

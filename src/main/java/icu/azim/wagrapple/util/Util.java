@@ -88,11 +88,6 @@ public class Util {
 		x = x + (player.prevX==0?player.getX():MathHelper.lerp(tickDelta, player.prevX, player.getX())) - (ycos + ysin)*0.2;// * 0.8D;
 		y = y + (player.prevY==0?player.getY():MathHelper.lerp(tickDelta, player.prevY, player.getY())) - ((player.isSneaking()&&!player.abilities.flying)?0.3:0);
 		z = z + (player.prevZ==0?player.getZ():MathHelper.lerp(tickDelta, player.prevZ, player.getZ())) - (ysin - ycos)*0.2;// * 0.8D;
-		/*
-		x = x + player.prevX==0?player.getX():MathHelper.lerp(tickDelta, player.prevX, player.getX());
-		y = y + player.prevY==0?player.getY():MathHelper.lerp(tickDelta, player.prevY, player.getY());
-		z = z + player.prevZ==0?player.getZ():MathHelper.lerp(tickDelta, player.prevZ, player.getZ());
-		*/
 		return new Vec3d(x,y,z);
 	}
 }
