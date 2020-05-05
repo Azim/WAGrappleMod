@@ -15,6 +15,8 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
@@ -40,14 +42,19 @@ public class GrappleItem extends Item{
     {
 		player.getItemCooldownManager().set(this, 16);
 		if(!WAGrappleMod.GRAPPLE_COMPONENT.get(player).isGrappled()) {
+			
+			ItemStack stack = player.getStackInHand(hand);
+			int modifier = getEnchantmentMultiplier(stack.getEnchantments());
+
 			int ihand = player.getMainArm() == Arm.RIGHT ? 1 : -1;
 			ihand *= (hand==Hand.MAIN_HAND)?1:-1;
 		    Vec3d from = Util.getPlayerShoulder(player, ihand, 1);
-		    Vec3d to = player.getCameraPosVec(0).add(player.getRotationVec(0).multiply(WAGrappleMod.maxLength));
+		    Vec3d to = player.getCameraPosVec(0).add(player.getRotationVec(0).multiply(WAGrappleMod.maxLength*modifier));
+		    
 		    BlockHitResult result = player.world.rayTrace(new RayTraceContext(from, to, RayTraceContext.ShapeType.COLLIDER, RayTraceContext.FluidHandling.NONE, player));
+		    
 			if(result.getType()==Type.BLOCK) {
 				if(!world.isClient) {
-					ItemStack stack = player.getStackInHand(hand);
 					EquipmentSlot slot = hand==Hand.MAIN_HAND?EquipmentSlot.MAINHAND:EquipmentSlot.OFFHAND;
 					
 					stack.damage(1, (LivingEntity)player, (Consumer<LivingEntity>)((e) -> {
@@ -101,5 +108,17 @@ public class GrappleItem extends Item{
 		for(String line : text.split("\n")) {
 			tooltip.add(new LiteralText(line));
 		}
+	}
+	
+	public int getEnchantmentMultiplier(ListTag listTag) {
+		System.out.println(listTag.toString());
+		int result = 1;
+		CompoundTag ctag = (CompoundTag)listTag.stream().filter(tag -> {
+			return ((CompoundTag)tag).getString("id").equalsIgnoreCase(WAGrappleMod.LINE_LENGTH_ENCHANTMENT_ID.toString());
+		}).findFirst().orElse(null);
+		if(ctag!=null) {
+			result = result * ctag.getShort("lvl")*5;
+		}
+		return result;
 	}
 }

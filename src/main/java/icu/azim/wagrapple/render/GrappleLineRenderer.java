@@ -109,11 +109,6 @@ public class GrappleLineRenderer extends EntityRenderer<GrappleLineEntity> {
 			float ypart = (float) (ny - y);
 			float zpart = (float) (nz - z);
 			
-			if(xpart>20||ypart>20||zpart>20) {
-				System.out.println(xpart+" "+ypart+" "+zpart);
-				System.out.println(entity.prevY+" "+entity.getY());
-			}
-			
 			VertexConsumer consumer = vertexConsumerProvider
 					.getBuffer(RenderLayer.of(
 							"grapple_line", VertexFormats.POSITION_COLOR, 7, 256,
