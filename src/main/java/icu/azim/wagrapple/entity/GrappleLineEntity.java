@@ -20,7 +20,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Packet;
-import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Arm;
@@ -40,6 +39,7 @@ public class GrappleLineEntity extends Entity {
 	private Vec3d motion;
 	
 	private GrappleLineHandler lineHandler;
+	private BlockHitResult initialResult;
 	private KeyBinding ascend;
 	private KeyBinding descend;
 	private KeyBinding boost;
@@ -69,6 +69,7 @@ public class GrappleLineEntity extends Entity {
 	
 	public GrappleLineEntity(World world, PlayerEntity player, double length, BlockHitResult res) {
 		this(WAGrappleMod.GRAPPLE_LINE, world);
+		initialResult = res;
 		this.updatePosition(res.getPos().x, res.getPos().y, res.getPos().z);
 		this.player = player;
 		lineHandler= new GrappleLineHandler(this, length);
@@ -80,7 +81,7 @@ public class GrappleLineEntity extends Entity {
 			debug = MinecraftClient.getInstance().options.keySwapHands;
 		}
 	}
-	
+	@Deprecated
 	public GrappleLineEntity(World world, PlayerEntity player, double length, Vec3d pos) {
 		this(WAGrappleMod.GRAPPLE_LINE, world);
 		this.updatePosition(pos.x, pos.y, pos.z);
@@ -95,7 +96,7 @@ public class GrappleLineEntity extends Entity {
 			world.playSound(player, pos.x, pos.y, pos.z, SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.PLAYERS, 0.3F, 1.0F);
 		}
 	}
-
+	
 	@Override
 	protected void initDataTracker() {
 		//FishingBobberEntityRenderer
@@ -137,7 +138,7 @@ public class GrappleLineEntity extends Entity {
 		CompoundTag data = new CompoundTag();
 		this.writeCustomDataToTag(data);
 		passedData.writeCompoundTag(data);
-		ClientSidePacketRegistry.INSTANCE.sendToServer(WAGrappleMod.UPDATE_LINE_PACKED_ID, passedData);
+		ClientSidePacketRegistry.INSTANCE.sendToServer(WAGrappleMod.UPDATE_LINE_PACKET_ID, passedData);
 	}
 	
 	private void echoEntityDataToClients(CompoundTag tag) {
@@ -149,12 +150,17 @@ public class GrappleLineEntity extends Entity {
 		
 		PacketByteBuf passedData = new PacketByteBuf(Unpooled.buffer());
 		passedData.writeCompoundTag(tag);
-		watchingPlayers.forEach(player->ServerSidePacketRegistry.INSTANCE.sendToPlayer(player, WAGrappleMod.UPDATE_LINE_PACKED_ID, passedData));
+		watchingPlayers.forEach(player->ServerSidePacketRegistry.INSTANCE.sendToPlayer(player, WAGrappleMod.UPDATE_LINE_PACKET_ID, passedData));
 	}
 
 	@Override
 	public Packet<?> createSpawnPacket() {
-	    return new EntitySpawnS2CPacket(this, player==null?this.getEntityId():player.getEntityId());
+        PacketByteBuf data = new PacketByteBuf(Unpooled.buffer());
+        data.writeInt(this.getEntityId());
+        data.writeInt(this.player.getEntityId());
+        data.writeDouble(lineHandler.getMaxLen());
+		data.writeBlockHitResult(initialResult);
+		return ServerSidePacketRegistry.INSTANCE.toPacket(WAGrappleMod.CREATE_LINE_PACKET_ID, data);
 	}
 	
 	public GrappleLineHandler getHandler(){

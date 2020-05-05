@@ -51,7 +51,8 @@ public class WAGrappleMod implements ModInitializer{
 	
 	
 	public static Identifier DETACH_LINE_PACKET_ID = new Identifier(modid, "detach_line");
-	public static Identifier UPDATE_LINE_PACKED_ID = new Identifier(modid, "update_line");
+	public static Identifier UPDATE_LINE_PACKET_ID = new Identifier(modid, "update_line");
+	public static Identifier CREATE_LINE_PACKET_ID = new Identifier(modid, "create_line");
 	public static Identifier UPDATE_LINE_LENGTH_PACKET_ID = new Identifier(modid, "update_line_length");
 	
 	public static Identifier LINE_LENGTH_ENCHANTMENT_ID = new Identifier(modid, "rope_length");

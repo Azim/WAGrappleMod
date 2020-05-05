@@ -26,7 +26,6 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult.Type;
-import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RayTraceContext;
 import net.minecraft.world.World;
@@ -61,10 +60,7 @@ public class GrappleItem extends Item{
 			            ((LivingEntity) e).sendEquipmentBreakStatus(slot);
 			         }));
 					
-					Direction dir = result.getSide();
-					Vec3d pos = result.getPos().add(new Vec3d(dir.getVector()).multiply(-0.01));
-					
-					GrappleLineEntity entity = new GrappleLineEntity(world, player, player.getPos().distanceTo(result.getPos())+1.5, pos);
+					GrappleLineEntity entity = new GrappleLineEntity(world, player, player.getPos().distanceTo(result.getPos())+1.5, result);
 					world.spawnEntity(entity);
 					WAGrappleMod.GRAPPLE_COMPONENT.get(player).setLineId(entity.getEntityId());
 					WAGrappleMod.GRAPPLE_COMPONENT.get(player).setGrappled(true);

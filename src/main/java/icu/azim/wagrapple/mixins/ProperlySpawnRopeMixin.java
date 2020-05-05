@@ -21,7 +21,8 @@ import icu.azim.wagrapple.entity.GrappleLineEntity;
 public class ProperlySpawnRopeMixin {
 
     @Shadow private ClientWorld world;
-
+    
+    @Deprecated
     @SuppressWarnings("rawtypes")
 	@Inject(method = "onEntitySpawn", at = @At(value = "INVOKE_ASSIGN", target = "Lnet/minecraft/network/packet/s2c/play/EntitySpawnS2CPacket;getEntityTypeId()Lnet/minecraft/entity/EntityType;"), cancellable = true, locals = LocalCapture.CAPTURE_FAILEXCEPTION)
     private void spawnGrappleLine(EntitySpawnS2CPacket packet, CallbackInfo ci, double x, double y, double z, EntityType type) {
