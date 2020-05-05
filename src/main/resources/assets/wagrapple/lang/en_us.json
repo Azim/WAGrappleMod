@@ -1,5 +1,7 @@
 {
   "item.wagrapple.grapple": "Grapple",
-  "item.wagrapple.grapple.tooltip": "-------\nControls:\n\n[%s] to reel in\n[%s] to reel out\n[%s] to grapple boost",
-  "itemGroup.wagrapple.general": "WAGrapple"
+  "item.wagrapple.grapple.tooltip": "-------\nControls:\n\n[%s] to reel in\n[%s] to reel out\n[%s] to grapple boost\n ",
+  "itemGroup.wagrapple.general": "WAGrapple",
+  "enchantment.wagrapple.rope_length": "Rope Length",
+  "enchantment.wagrapple.boost_power": "Boost Power"
 }

@@ -1,13 +1,14 @@
-package icu.azim.wagrapple.item;
+package icu.azim.wagrapple.item.enchantments;
 
+import icu.azim.wagrapple.item.GrappleItem;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentTarget;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.ItemStack;
 
-public class RopeLengthEnchantment extends Enchantment{
+public class BoostPowerEnchantment extends Enchantment{
 
-	public RopeLengthEnchantment(Weight weight, EnchantmentTarget type, EquipmentSlot[] slotTypes) {
+	public BoostPowerEnchantment(Weight weight, EnchantmentTarget type, EquipmentSlot[] slotTypes) {
 		super(weight, type, slotTypes);
 	}
 	

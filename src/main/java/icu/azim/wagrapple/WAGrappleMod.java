@@ -8,7 +8,7 @@ import java.util.Properties;
 import icu.azim.wagrapple.components.GrappledPlayerComponent;
 import icu.azim.wagrapple.entity.GrappleLineEntity;
 import icu.azim.wagrapple.item.GrappleItem;
-import icu.azim.wagrapple.item.RopeLengthEnchantment;
+import icu.azim.wagrapple.item.enchantments.RopeLengthEnchantment;
 import nerdhub.cardinal.components.api.ComponentRegistry;
 import nerdhub.cardinal.components.api.ComponentType;
 import nerdhub.cardinal.components.api.event.EntityComponentCallback;
@@ -45,6 +45,7 @@ public class WAGrappleMod implements ModInitializer{
 	public static GrappleItem GRAPPLE_ITEM;
 	
 	public static Enchantment LINE_LENGTH_ENCHANTMENT;
+	public static Enchantment BOOST_POWER_ENCHANTMENT;
 	
 	public static ComponentType<GrappledPlayerComponent> GRAPPLE_COMPONENT;
 	
@@ -54,6 +55,7 @@ public class WAGrappleMod implements ModInitializer{
 	public static Identifier UPDATE_LINE_LENGTH_PACKET_ID = new Identifier(modid, "update_line_length");
 	
 	public static Identifier LINE_LENGTH_ENCHANTMENT_ID = new Identifier(modid, "rope_length");
+	public static Identifier BOOST_POWER_ENCHANTMENT_ID = new Identifier(modid, "boost_power");
 	
 	@Override
 	public void onInitialize() {
@@ -81,8 +83,19 @@ public class WAGrappleMod implements ModInitializer{
 				EquipmentSlot.MAINHAND,
 				EquipmentSlot.OFFHAND
 			    }
-			)
-		    );
+			));
+		
+		BOOST_POWER_ENCHANTMENT = Registry.register(
+		        Registry.ENCHANTMENT,
+			BOOST_POWER_ENCHANTMENT_ID,
+			new RopeLengthEnchantment(
+			    Enchantment.Weight.RARE,
+			    EnchantmentTarget.ALL,
+			    new EquipmentSlot[] {
+				EquipmentSlot.MAINHAND,
+				EquipmentSlot.OFFHAND
+			    }
+			));
 		
 		GRAPPLE_COMPONENT = ComponentRegistry.INSTANCE.registerIfAbsent(
 				new Identifier(modid,"grapple_component"),

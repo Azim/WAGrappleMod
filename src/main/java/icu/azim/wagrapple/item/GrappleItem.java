@@ -121,4 +121,18 @@ public class GrappleItem extends Item{
 		}
 		return result;
 	}
+	
+	@Override
+	public boolean isEnchantable(ItemStack stack) {
+		return true;
+	}
+	
+	@Override
+	public int getEnchantability() {
+		return 1;
+	}
+	@Override
+	public boolean isDamageable() {
+		return true;
+	}
 }
