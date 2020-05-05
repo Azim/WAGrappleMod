@@ -3,6 +3,7 @@ package icu.azim.wagrapple.entity;
 import java.util.stream.Stream;
 
 import icu.azim.wagrapple.WAGrappleMod;
+import icu.azim.wagrapple.WAGrappleModClient;
 import icu.azim.wagrapple.render.GrappleLineRenderer;
 import icu.azim.wagrapple.util.Util;
 import io.netty.buffer.Unpooled;
@@ -13,7 +14,6 @@ import net.fabricmc.fabric.api.network.ServerSidePacketRegistry;
 import net.fabricmc.fabric.api.server.PlayerStream;
 import net.minecraft.block.piston.PistonBehavior;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.options.KeyBinding;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
@@ -40,10 +40,6 @@ public class GrappleLineEntity extends Entity {
 	
 	private GrappleLineHandler lineHandler;
 	private BlockHitResult initialResult;
-	private KeyBinding ascend;
-	private KeyBinding descend;
-	private KeyBinding boost;
-	private KeyBinding debug;
 	private Vec3d direction;
 	private float lpitch;
 	private float lyaw;
@@ -70,15 +66,14 @@ public class GrappleLineEntity extends Entity {
 	public GrappleLineEntity(World world, PlayerEntity player, double length, BlockHitResult res) {
 		this(WAGrappleMod.GRAPPLE_LINE, world);
 		initialResult = res;
-		this.updatePosition(res.getPos().x, res.getPos().y, res.getPos().z);
+		Vec3d pos = res.getPos();
+		this.updatePosition(pos.x, pos.y, pos.z);
+        this.updateTrackedPosition(pos.x, pos.y, pos.z);
 		this.player = player;
 		lineHandler= new GrappleLineHandler(this, length);
 		lineHandler.add(res);
 		if(world.isClient) {
-			ascend = MinecraftClient.getInstance().options.keySneak;
-			descend = MinecraftClient.getInstance().options.keySprint;
-			boost = MinecraftClient.getInstance().options.keyJump;
-			debug = MinecraftClient.getInstance().options.keySwapHands;
+			world.playSound(player, pos.x, pos.y, pos.z, SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.PLAYERS, 0.3F, 1.0F);
 		}
 	}
 	@Deprecated
@@ -89,10 +84,6 @@ public class GrappleLineEntity extends Entity {
 		lineHandler = new GrappleLineHandler(this, length);
 		lineHandler.addFirst(pos);
 		if(world.isClient) {
-			ascend = MinecraftClient.getInstance().options.keySneak;
-			descend = MinecraftClient.getInstance().options.keySprint;
-			boost = MinecraftClient.getInstance().options.keyJump;
-			debug = MinecraftClient.getInstance().options.keySwapHands;
 			world.playSound(player, pos.x, pos.y, pos.z, SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.PLAYERS, 0.3F, 1.0F);
 		}
 	}
@@ -159,6 +150,7 @@ public class GrappleLineEntity extends Entity {
         data.writeInt(this.getEntityId());
         data.writeInt(this.player.getEntityId());
         data.writeDouble(lineHandler.getMaxLen());
+        data.writeUuid(this.getUuid());
 		data.writeBlockHitResult(initialResult);
 		return ServerSidePacketRegistry.INSTANCE.toPacket(WAGrappleMod.CREATE_LINE_PACKET_ID, data);
 	}
@@ -234,14 +226,14 @@ public class GrappleLineEntity extends Entity {
 		}
 		
 		
-		if(ascend.isPressed()&&descend.isPressed()) {
+		if(WAGrappleModClient.getAscend().isPressed()&&WAGrappleModClient.getDescend().isPressed()) {
 			return; //not moving anywhere
 		}
 		if(player.abilities.flying||player.onGround) {
 			boostCooldown = 5;
 		}
 		
-		if(boost.isPressed() && !player.abilities.flying && (boostCooldown==0)) {
+		if(WAGrappleModClient.getBoost().isPressed() && !player.abilities.flying && (boostCooldown==0)) {
 			Vec3d origin = lineHandler.getLastPiecePos();
 			Vec3d direction = player.getCameraPosVec(0).subtract(origin).normalize().multiply(-boostSpeed);
 			player.addVelocity(direction.x,direction.y,direction.z);
@@ -249,17 +241,17 @@ public class GrappleLineEntity extends Entity {
 			detachLine();
 		}
 		
-		if(ascend.isPressed()) {
+		if(WAGrappleModClient.getAscend().isPressed()) {
 			if(lineHandler.getMaxLen()-lineHandler.getPiecesLen()>1) {
 				lineHandler.setMaxLen(lineHandler.getMaxLen()-0.1);
 			}
 		}
 		
-		if(descend.isPressed()) {
+		if(WAGrappleModClient.getDescend().isPressed()) {
 			lineHandler.setMaxLen(lineHandler.getMaxLen()+0.1);
 		}
 		
-		if(debug.isPressed()&&debugc==0) {
+		if(WAGrappleModClient.getDebug().isPressed()&&debugc==0) {
 			System.out.println("debug pressed");
 			GrappleLineRenderer.debug = !GrappleLineRenderer.debug;
 			debugc = 60;

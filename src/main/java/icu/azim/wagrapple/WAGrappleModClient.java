@@ -8,12 +8,34 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.rendereregistry.v1.EntityRendererRegistry;
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.options.KeyBinding;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.hit.BlockHitResult;
 
 public class WAGrappleModClient implements ClientModInitializer {
 
+	private static KeyBinding ascend;
+	private static KeyBinding descend;
+	private static KeyBinding boost;
+	
+	public static KeyBinding getAscend() {
+		if(ascend==null) ascend =  MinecraftClient.getInstance().options.keySneak;
+		return ascend;
+	}
+	public static KeyBinding getDescend() {
+		if(descend==null) descend = MinecraftClient.getInstance().options.keySprint;
+		return descend;
+	}
+	public static KeyBinding getBoost() {
+		if(boost==null) boost = MinecraftClient.getInstance().options.keyJump;
+		return boost;
+	}
+	public static KeyBinding getDebug() {
+		if(debug==null) debug = MinecraftClient.getInstance().options.keySwapHands;
+		return debug;
+	}
+	private static KeyBinding debug;
 
 	@Override
 	public void onInitializeClient() {
@@ -41,6 +63,9 @@ public class WAGrappleModClient implements ClientModInitializer {
                 MinecraftClient.getInstance().world.addEntity(entityId, toSpawn);
             });
         });
+		
+		
+		
 		
 		System.out.println("client init done");
 	}

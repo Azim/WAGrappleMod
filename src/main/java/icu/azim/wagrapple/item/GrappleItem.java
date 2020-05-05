@@ -39,9 +39,8 @@ public class GrappleItem extends Item{
 	@Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand)
     {
-		player.getItemCooldownManager().set(this, 16);
 		if(!WAGrappleMod.GRAPPLE_COMPONENT.get(player).isGrappled()) {
-			
+
 			ItemStack stack = player.getStackInHand(hand);
 			int modifier = getEnchantmentMultiplier(stack.getEnchantments());
 
@@ -53,6 +52,7 @@ public class GrappleItem extends Item{
 		    BlockHitResult result = player.world.rayTrace(new RayTraceContext(from, to, RayTraceContext.ShapeType.COLLIDER, RayTraceContext.FluidHandling.NONE, player));
 		    
 			if(result.getType()==Type.BLOCK) {
+				player.getItemCooldownManager().set(this, 16);
 				if(!world.isClient) {
 					EquipmentSlot slot = hand==Hand.MAIN_HAND?EquipmentSlot.MAINHAND:EquipmentSlot.OFFHAND;
 					
@@ -107,7 +107,6 @@ public class GrappleItem extends Item{
 	}
 	
 	public int getEnchantmentMultiplier(ListTag listTag) {
-		System.out.println(listTag.toString());
 		int result = 1;
 		CompoundTag ctag = (CompoundTag)listTag.stream().filter(tag -> {
 			return ((CompoundTag)tag).getString("id").equalsIgnoreCase(WAGrappleMod.LINE_LENGTH_ENCHANTMENT_ID.toString());
