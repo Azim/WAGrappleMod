@@ -5,7 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.Properties;
 
-import icu.azim.wagrapple.components.GrappleComponent;
+import icu.azim.wagrapple.components.GrappledPlayerComponent;
 import icu.azim.wagrapple.entity.GrappleLineEntity;
 import icu.azim.wagrapple.item.GrappleItem;
 import nerdhub.cardinal.components.api.ComponentRegistry;
@@ -16,9 +16,7 @@ import nerdhub.cardinal.components.api.util.RespawnCopyStrategy;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
 import net.fabricmc.fabric.api.entity.FabricEntityTypeBuilder;
-import net.fabricmc.fabric.api.network.ServerSidePacketRegistry;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityCategory;
 import net.minecraft.entity.EntityDimensions;
 import net.minecraft.entity.EntityType;
@@ -42,7 +40,7 @@ public class WAGrappleMod implements ModInitializer{
 	
 	public static GrappleItem GRAPPLE_ITEM;
 	
-	public static ComponentType<GrappleComponent> GRAPPLE_COMPONENT;
+	public static ComponentType<GrappledPlayerComponent> GRAPPLE_COMPONENT;
 	
 	
 	public static Identifier DETACH_LINE_PACKET_ID = new Identifier(modid, "detach_line");
@@ -64,39 +62,18 @@ public class WAGrappleMod implements ModInitializer{
 				.size(EntityDimensions.fixed(0.2F, 0.2F))
 				.build());
 		ITEM_GROUP = FabricItemGroupBuilder.build(new Identifier(modid, "general"), () -> new ItemStack(WAGrappleMod.GRAPPLE_ITEM));
-		GRAPPLE_ITEM =  new GrappleItem(new Item.Settings().group(ITEM_GROUP).maxCount(1).rarity(Rarity.EPIC));
+		GRAPPLE_ITEM =  new GrappleItem(new Item.Settings().group(ITEM_GROUP).maxCount(1).rarity(Rarity.EPIC).maxDamage(690));
 		GRAPPLE_COMPONENT = ComponentRegistry.INSTANCE.registerIfAbsent(
 				new Identifier(modid,"grapple_component"),
-				GrappleComponent.class)
+				GrappledPlayerComponent.class)
 				.attach(
 						EntityComponentCallback.event(PlayerEntity.class),
-						player->new GrappleComponent(player));
+						player->new GrappledPlayerComponent(player));
 		
 		
 		Registry.register(Registry.ITEM, new Identifier(modid, "grapple"), GRAPPLE_ITEM);
 		EntityComponents.setRespawnCopyStrategy(GRAPPLE_COMPONENT, RespawnCopyStrategy.NEVER_COPY);
-		
-		ServerSidePacketRegistry.INSTANCE.register(DETACH_LINE_PACKET_ID, (packetContext, attachedData) -> {
-            boolean detach = attachedData.readBoolean();
-            PlayerEntity player = packetContext.getPlayer();
-            packetContext.getTaskQueue().execute(() -> {
-            	if(WAGrappleMod.GRAPPLE_COMPONENT.get(player).isGrappled() && detach) {
-            		int id = WAGrappleMod.GRAPPLE_COMPONENT.get(player).getLineId();
-            		if(id>0) {
-        				Entity e = player.world.getEntityById(id);
-        				if(e!=null) {
-        					e.remove();
-        				}
-            		}
-            		WAGrappleMod.GRAPPLE_COMPONENT.get(player).setLineId(-1);
-        			WAGrappleMod.GRAPPLE_COMPONENT.get(player).setGrappled(!detach);
-        			WAGrappleMod.GRAPPLE_COMPONENT.get(player).sync();
-            	}
- 
-            });
-        });
-		
-		ServerSidePacketRegistry.INSTANCE.register(UPDATE_LINE_PACKED_ID, (context,data)-> GrappleLineEntity.handleSyncPacket(context, data));
+
 		System.out.println("init general");
 	}
 

@@ -6,7 +6,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import icu.azim.wagrapple.WAGrappleMod;
-import icu.azim.wagrapple.components.GrappleComponent;
+import icu.azim.wagrapple.components.GrappledPlayerComponent;
 import icu.azim.wagrapple.entity.GrappleLineEntity;
 
 import org.spongepowered.asm.mixin.injection.At;
@@ -27,7 +27,7 @@ public class PlayerHandMixin<T extends LivingEntity> {
 	@Shadow
 	public ModelPart leftArm;
 	
-	private GrappleComponent gcomponent;
+	private GrappledPlayerComponent gcomponent;
 
 	@SuppressWarnings("unchecked")
 	@Inject(method="setAngles",at = @At("TAIL"))

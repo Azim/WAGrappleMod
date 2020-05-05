@@ -7,12 +7,12 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundTag;
 
-public class GrappleComponent implements EntitySyncedComponent{
+public class GrappledPlayerComponent implements EntitySyncedComponent{
 	private boolean grappled = false;
 	private int lineId = -1;
 	private PlayerEntity owner;
 	
-	public GrappleComponent(PlayerEntity owner) {
+	public GrappledPlayerComponent(PlayerEntity owner) {
 		this.owner = owner;
 	}
 	
