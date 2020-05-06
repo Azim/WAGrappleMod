@@ -63,9 +63,10 @@ public class GrappleLineEntity extends Entity {
 		this.ignoreCameraFrustum = true;
 	}
 	
-	public GrappleLineEntity(World world, PlayerEntity player, double length, BlockHitResult res) {
+	public GrappleLineEntity(World world, PlayerEntity player, double length, double boostSpeed, BlockHitResult res) {
 		this(WAGrappleMod.GRAPPLE_LINE, world);
 		initialResult = res;
+		this.boostSpeed=boostSpeed;
 		Vec3d pos = res.getPos();
 		this.updatePosition(pos.x, pos.y, pos.z);
         this.updateTrackedPosition(pos.x, pos.y, pos.z);
@@ -76,18 +77,6 @@ public class GrappleLineEntity extends Entity {
 			world.playSound(player, pos.x, pos.y, pos.z, SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.PLAYERS, 0.3F, 1.0F);
 		}
 	}
-	@Deprecated
-	public GrappleLineEntity(World world, PlayerEntity player, double length, Vec3d pos) {
-		this(WAGrappleMod.GRAPPLE_LINE, world);
-		this.updatePosition(pos.x, pos.y, pos.z);
-		this.player = player;
-		lineHandler = new GrappleLineHandler(this, length);
-		lineHandler.addFirst(pos);
-		if(world.isClient) {
-			world.playSound(player, pos.x, pos.y, pos.z, SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.PLAYERS, 0.3F, 1.0F);
-		}
-	}
-	
 	@Override
 	protected void initDataTracker() {
 		//FishingBobberEntityRenderer
@@ -150,6 +139,7 @@ public class GrappleLineEntity extends Entity {
         data.writeInt(this.getEntityId());
         data.writeInt(this.player.getEntityId());
         data.writeDouble(lineHandler.getMaxLen());
+        data.writeDouble(boostSpeed);
         data.writeUuid(this.getUuid());
 		data.writeBlockHitResult(initialResult);
 		return ServerSidePacketRegistry.INSTANCE.toPacket(WAGrappleMod.CREATE_LINE_PACKET_ID, data);

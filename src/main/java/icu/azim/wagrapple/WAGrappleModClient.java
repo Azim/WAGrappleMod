@@ -49,6 +49,7 @@ public class WAGrappleModClient implements ClientModInitializer {
             int entityId = packet.readInt();
             int ownerId = packet.readInt();
             double length = packet.readDouble();
+            double boost = packet.readDouble();
             UUID entityUUID = packet.readUuid();
             BlockHitResult res = packet.readBlockHitResult();
             context.getTaskQueue().execute(() -> {
@@ -57,7 +58,7 @@ public class WAGrappleModClient implements ClientModInitializer {
                 	return;
                 }
                 PlayerEntity player = (PlayerEntity)e;
-                GrappleLineEntity toSpawn = new GrappleLineEntity(MinecraftClient.getInstance().world, player, length, res);
+                GrappleLineEntity toSpawn = new GrappleLineEntity(MinecraftClient.getInstance().world, player, length, boost, res);
                 toSpawn.setEntityId(entityId);
                 toSpawn.setUuid(entityUUID);
                 MinecraftClient.getInstance().world.addEntity(entityId, toSpawn);

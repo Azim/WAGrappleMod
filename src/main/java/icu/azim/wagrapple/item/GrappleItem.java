@@ -42,12 +42,13 @@ public class GrappleItem extends Item{
 		if(!WAGrappleMod.GRAPPLE_COMPONENT.get(player).isGrappled()) {
 
 			ItemStack stack = player.getStackInHand(hand);
-			int modifier = getEnchantmentMultiplier(stack.getEnchantments());
-
+			int lengthModifier = getLengthEnchantmentMultiplier(stack.getEnchantments());
+			double boostModifier = getBoostEnchantmentMultiplier(stack.getEnchantments());
+			
 			int ihand = player.getMainArm() == Arm.RIGHT ? 1 : -1;
 			ihand *= (hand==Hand.MAIN_HAND)?1:-1;
 		    Vec3d from = Util.getPlayerShoulder(player, ihand, 1);
-		    Vec3d to = player.getCameraPosVec(0).add(player.getRotationVec(0).multiply(WAGrappleMod.maxLength*modifier));
+		    Vec3d to = player.getCameraPosVec(0).add(player.getRotationVec(0).multiply(WAGrappleMod.maxLength*lengthModifier));
 		    
 		    BlockHitResult result = player.world.rayTrace(new RayTraceContext(from, to, RayTraceContext.ShapeType.COLLIDER, RayTraceContext.FluidHandling.NONE, player));
 		    
@@ -60,7 +61,7 @@ public class GrappleItem extends Item{
 			            ((LivingEntity) e).sendEquipmentBreakStatus(slot);
 			         }));
 					
-					GrappleLineEntity entity = new GrappleLineEntity(world, player, player.getPos().distanceTo(result.getPos())+1.5, result);
+					GrappleLineEntity entity = new GrappleLineEntity(world, player, player.getPos().distanceTo(result.getPos())+1.5, boostModifier, result);
 					world.spawnEntity(entity);
 					WAGrappleMod.GRAPPLE_COMPONENT.get(player).setLineId(entity.getEntityId());
 					WAGrappleMod.GRAPPLE_COMPONENT.get(player).setGrappled(true);
@@ -106,13 +107,24 @@ public class GrappleItem extends Item{
 		}
 	}
 	
-	public int getEnchantmentMultiplier(ListTag listTag) {
+	public int getLengthEnchantmentMultiplier(ListTag listTag) {
 		int result = 1;
 		CompoundTag ctag = (CompoundTag)listTag.stream().filter(tag -> {
 			return ((CompoundTag)tag).getString("id").equalsIgnoreCase(WAGrappleMod.LINE_LENGTH_ENCHANTMENT_ID.toString());
 		}).findFirst().orElse(null);
 		if(ctag!=null) {
 			result = result * ctag.getShort("lvl")*5;
+		}
+		return result;
+	}
+	
+	public double getBoostEnchantmentMultiplier(ListTag listTag) {
+		double result = 1;
+		CompoundTag ctag = (CompoundTag)listTag.stream().filter(tag -> {
+			return ((CompoundTag)tag).getString("id").equalsIgnoreCase(WAGrappleMod.BOOST_POWER_ENCHANTMENT_ID.toString());
+		}).findFirst().orElse(null);
+		if(ctag!=null) {
+			result = result + ctag.getShort("lvl")*0.5;
 		}
 		return result;
 	}

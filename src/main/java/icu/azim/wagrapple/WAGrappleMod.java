@@ -8,6 +8,7 @@ import java.util.Properties;
 import icu.azim.wagrapple.components.GrappledPlayerComponent;
 import icu.azim.wagrapple.entity.GrappleLineEntity;
 import icu.azim.wagrapple.item.GrappleItem;
+import icu.azim.wagrapple.item.enchantments.BoostPowerEnchantment;
 import icu.azim.wagrapple.item.enchantments.RopeLengthEnchantment;
 import nerdhub.cardinal.components.api.ComponentRegistry;
 import nerdhub.cardinal.components.api.ComponentType;
@@ -15,9 +16,12 @@ import nerdhub.cardinal.components.api.event.EntityComponentCallback;
 import nerdhub.cardinal.components.api.util.EntityComponents;
 import nerdhub.cardinal.components.api.util.RespawnCopyStrategy;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.block.FabricBlockSettings;
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
 import net.fabricmc.fabric.api.entity.FabricEntityTypeBuilder;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.block.Block;
+import net.minecraft.block.Material;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentTarget;
 import net.minecraft.entity.EntityCategory;
@@ -25,6 +29,7 @@ import net.minecraft.entity.EntityDimensions;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
@@ -49,6 +54,7 @@ public class WAGrappleMod implements ModInitializer{
 	
 	public static ComponentType<GrappledPlayerComponent> GRAPPLE_COMPONENT;
 	
+	public static Block DUNGEON_BLOCK;
 	
 	public static Identifier DETACH_LINE_PACKET_ID = new Identifier(modid, "detach_line");
 	public static Identifier UPDATE_LINE_PACKET_ID = new Identifier(modid, "update_line");
@@ -72,7 +78,9 @@ public class WAGrappleMod implements ModInitializer{
 				.build());
 		
 		ITEM_GROUP = FabricItemGroupBuilder.build(new Identifier(modid, "general"), () -> new ItemStack(WAGrappleMod.GRAPPLE_ITEM));
-		GRAPPLE_ITEM =  new GrappleItem(new Item.Settings().group(ITEM_GROUP).maxCount(1).rarity(Rarity.EPIC).maxDamage(690));
+		GRAPPLE_ITEM = new GrappleItem(new Item.Settings().group(ITEM_GROUP).maxCount(1).rarity(Rarity.EPIC).maxDamage(690));
+		DUNGEON_BLOCK = new Block(FabricBlockSettings.of(Material.METAL).build());
+		
 		
 		LINE_LENGTH_ENCHANTMENT = Registry.register(
 		        Registry.ENCHANTMENT,
@@ -89,7 +97,7 @@ public class WAGrappleMod implements ModInitializer{
 		BOOST_POWER_ENCHANTMENT = Registry.register(
 		        Registry.ENCHANTMENT,
 			BOOST_POWER_ENCHANTMENT_ID,
-			new RopeLengthEnchantment(
+			new BoostPowerEnchantment(
 			    Enchantment.Weight.RARE,
 			    EnchantmentTarget.ALL,
 			    new EquipmentSlot[] {
@@ -107,6 +115,10 @@ public class WAGrappleMod implements ModInitializer{
 		
 		
 		Registry.register(Registry.ITEM, new Identifier(modid, "grapple"), GRAPPLE_ITEM);
+		
+		Registry.register(Registry.BLOCK, new Identifier(modid, "dungeon_block"), DUNGEON_BLOCK);
+		Registry.register(Registry.ITEM, new Identifier(modid, "dungeon_block"), new BlockItem(DUNGEON_BLOCK, new Item.Settings().group(ITEM_GROUP)));
+		
 		EntityComponents.setRespawnCopyStrategy(GRAPPLE_COMPONENT, RespawnCopyStrategy.NEVER_COPY);
 
 		System.out.println("init general");
