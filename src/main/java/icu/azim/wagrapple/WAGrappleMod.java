@@ -139,7 +139,14 @@ public class WAGrappleMod implements ModInitializer{
 		
 		EntityComponents.setRespawnCopyStrategy(GRAPPLE_COMPONENT, RespawnCopyStrategy.NEVER_COPY);
 		
-		
+		//generateDungeonBlockPattern();
+		try {
+			generateDungeonTest();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		RRPCallback.EVENT.register(a -> a.add(0, RESOURCE_PACK));
+		RESOURCE_PACK.dump();
 		System.out.println("init general");
 	}
 
@@ -206,32 +213,60 @@ public class WAGrappleMod implements ModInitializer{
 		List<BufferedImage> east = new ArrayList<BufferedImage>();
 		List<BufferedImage> up = new ArrayList<BufferedImage>();
 		for(int x = 0; x<6; x++) {
-			BufferedImage sheet = ImageIO.read(MinecraftClient.getInstance().getResourceManager().getResource(new Identifier("wagrapple","textures/block/test_x"+x)).getInputStream());
-			for(int iy = 0; iy<0; iy++) {
-				for(int ix = 0; ix<0; ix++) {
+			//System.out.println(MinecraftClient.getInstance());
+			//System.out.println(MinecraftClient.getInstance().getResourceManager());
+			//System.out.println(MinecraftClient.getInstance().getResourceManager().getResource(new Identifier("wagrapple","textures/block/test_x"+x+".png")));
+			
+			BufferedImage sheet = ImageIO.read(WAGrappleMod.class.getClassLoader().getResourceAsStream("assets/wagrapple/textures/block/test_x"+x+".png"));
+			for(int iy = 0; iy<6; iy++) {
+				for(int ix = 0; ix<6; ix++) {
 					//north.add();
-					RESOURCE_PACK.addTexture(new Identifier("wagrapple","block/north_"+ix+"_"+iy), sheet.getSubimage(ix*16, iy*16, 16, 16));
+					RESOURCE_PACK.addTexture(new Identifier("wagrapple","block/north_"+x+"_"+iy+"_"+ix), sheet.getSubimage(ix*16, iy*16, 16, 16));
 				}
 			}
 		}
 		for(int y = 0; y<6; y++) {
-			BufferedImage sheet = ImageIO.read(MinecraftClient.getInstance().getResourceManager().getResource(new Identifier("wagrapple","textures/block/test_y"+y)).getInputStream());
-			for(int iy = 0; iy<0; iy++) {
-				for(int ix = 0; ix<0; ix++) {
-					RESOURCE_PACK.addTexture(new Identifier("wagrapple","block/up_"+ix+"_"+iy), sheet.getSubimage(ix*16, iy*16, 16, 16));
+			BufferedImage sheet = ImageIO.read(WAGrappleMod.class.getClassLoader().getResourceAsStream("assets/wagrapple/textures/block/test_y"+y+".png"));
+			for(int iy = 0; iy<6; iy++) {
+				for(int ix = 0; ix<6; ix++) {
+					RESOURCE_PACK.addTexture(new Identifier("wagrapple","block/up_"+ix+"_"+y+"_"+iy), sheet.getSubimage(ix*16, iy*16, 16, 16));
 				}
 			}
 		}
 		for(int z = 0; z<6; z++) {
-			BufferedImage sheet = ImageIO.read(MinecraftClient.getInstance().getResourceManager().getResource(new Identifier("wagrapple","textures/block/test_z"+z)).getInputStream());
-			for(int iy = 0; iy<0; iy++) {
-				for(int ix = 0; ix<0; ix++) {
-					RESOURCE_PACK.addTexture(new Identifier("wagrapple","block/east_"+ix+"_"+iy), sheet.getSubimage(ix*16, iy*16, 16, 16));
+			BufferedImage sheet = ImageIO.read(WAGrappleMod.class.getClassLoader().getResourceAsStream("assets/wagrapple/textures/block/test_z"+z+".png"));
+			for(int iy = 0; iy<6; iy++) {
+				for(int ix = 0; ix<6; ix++) {
+					RESOURCE_PACK.addTexture(new Identifier("wagrapple","block/east_"+ix+"_"+iy+"_"+z), sheet.getSubimage(ix*16, iy*16, 16, 16));
 				}
 			}
 		}
+		for(int x = 0; x<6;x++) {
+			for(int y = 0; y<6; y++) {
+				for(int z = 0; z<6; z++) {
+					JModel model = JModel.model("wagrapple:block/dungeon_block");
+					JTextures textures = JModel.textures()
+							.var("up", "wagrapple:block/up_"+x+"_"+y+"_"+z)
+							.var("down", "wagrapple:block/up_"+x+"_"+(y+5)%6+"_"+z)
+							.var("north", "wagrapple:block/north_"+x+"_"+y+"_"+z)
+							.var("south", "wagrapple:block/north_"+(x+5)%6+"_"+y+"_"+z)
+							.var("west", "wagrapple:block/east_"+x+"_"+y+"_"+(z+5)%6)
+							.var("east", "wagrapple:block/east_"+x+"_"+y+"_"+z);
+					model.textures(textures);
+					RESOURCE_PACK.addModel(model, new Identifier("wagrapple","block/dungeon_block_"+(x+6*y+6*6*z)));
+				}
+				
+			}
+			
+		}
+		JState state = JState.state();
+		JVariant variant = JState.variant();
+		for(int i = 0; i < 216; i++) {
+			variant.put("dungeon", i, JState.model("wagrapple:block/dungeon_block_"+i));
+		}
+		state.add(variant);
 		
-		
+		RESOURCE_PACK.addBlockState(state, new Identifier("wagrapple","dungeon_block"));
 	}
 	
 }
