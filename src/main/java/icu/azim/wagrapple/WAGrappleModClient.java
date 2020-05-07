@@ -64,8 +64,17 @@ public class WAGrappleModClient implements ClientModInitializer {
                 MinecraftClient.getInstance().world.addEntity(entityId, toSpawn);
             });
         });
-		
-		
+		/*
+		ModelLoadingRegistry.INSTANCE.registerVariantProvider((manager)->{
+
+			return new ModelVariantProvider() {
+				@Override
+				public UnbakedModel loadModelVariant(ModelIdentifier modelId, ModelProviderContext context)
+						throws ModelProviderException {
+					return context.loadModel(modelId);
+				}
+			};
+		});*/
 		
 		
 		System.out.println("client init done");

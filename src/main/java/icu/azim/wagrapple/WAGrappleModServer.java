@@ -30,6 +30,7 @@ public class WAGrappleModServer implements net.fabricmc.api.DedicatedServerModIn
         });
 		
 		ServerSidePacketRegistry.INSTANCE.register(WAGrappleMod.UPDATE_LINE_PACKET_ID, (context,data)-> GrappleLineEntity.handleSyncPacket(context, data));
+		System.out.println("server init done");
 	}
 
 }
