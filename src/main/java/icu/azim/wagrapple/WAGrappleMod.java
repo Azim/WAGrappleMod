@@ -145,7 +145,7 @@ public class WAGrappleMod implements ModInitializer{
 			e.printStackTrace();
 		}
 		RRPCallback.EVENT.register(a -> a.add(0, RESOURCE_PACK));
-		RESOURCE_PACK.dump();
+		//RESOURCE_PACK.dump();
 		System.out.println("init general");
 	}
 
