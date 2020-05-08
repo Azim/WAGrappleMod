@@ -36,7 +36,6 @@ import net.fabricmc.fabric.api.entity.FabricEntityTypeBuilder;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.Block;
 import net.minecraft.block.Material;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentTarget;
 import net.minecraft.entity.EntityCategory;
@@ -208,10 +207,8 @@ public class WAGrappleMod implements ModInitializer{
 		RESOURCE_PACK.addBlockState(state, new Identifier("wagrapple","dungeon_block"));
 	}
 	
+	//TODO add resource pack support - load this after resource packs are created
 	public void generateDungeonTest() throws IOException {
-		List<BufferedImage> north = new ArrayList<BufferedImage>();
-		List<BufferedImage> east = new ArrayList<BufferedImage>();
-		List<BufferedImage> up = new ArrayList<BufferedImage>();
 		for(int x = 0; x<6; x++) {
 			//System.out.println(MinecraftClient.getInstance());
 			//System.out.println(MinecraftClient.getInstance().getResourceManager());
@@ -248,10 +245,10 @@ public class WAGrappleMod implements ModInitializer{
 					JTextures textures = JModel.textures()
 							.var("up", "wagrapple:block/up_"+x+"_"+y+"_"+z)
 							.var("down", "wagrapple:block/up_"+x+"_"+(y+5)%6+"_"+z)
-							.var("north", "wagrapple:block/north_"+x+"_"+y+"_"+z)
-							.var("south", "wagrapple:block/north_"+(x+5)%6+"_"+y+"_"+z)
-							.var("west", "wagrapple:block/east_"+x+"_"+y+"_"+(z+5)%6)
-							.var("east", "wagrapple:block/east_"+x+"_"+y+"_"+z);
+							.var("north", "wagrapple:block/north_"+z+"_"+x+"_"+y)
+							.var("south", "wagrapple:block/north_"+(z+5)%6+"_"+x+"_"+y)
+							.var("west", "wagrapple:block/east_"+y+"_"+z+"_"+(x+5)%6)
+							.var("east", "wagrapple:block/east_"+y+"_"+z+"_"+x);
 					model.textures(textures);
 					RESOURCE_PACK.addModel(model, new Identifier("wagrapple","block/dungeon_block_"+(x+6*y+6*6*z)));
 				}
