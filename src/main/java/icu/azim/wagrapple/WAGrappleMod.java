@@ -245,8 +245,8 @@ public class WAGrappleMod implements ModInitializer{
 					JTextures textures = JModel.textures()
 							.var("up", "wagrapple:block/up_"+x+"_"+y+"_"+z)
 							.var("down", "wagrapple:block/up_"+x+"_"+(y+5)%6+"_"+z)
-							.var("north", "wagrapple:block/north_"+z+"_"+x+"_"+y)
-							.var("south", "wagrapple:block/north_"+(z+5)%6+"_"+x+"_"+y)
+							.var("south", "wagrapple:block/north_"+z+"_"+x+"_"+y)
+							.var("north", "wagrapple:block/north_"+(z+5)%6+"_"+x+"_"+y)
 							.var("west", "wagrapple:block/east_"+y+"_"+z+"_"+(x+5)%6)
 							.var("east", "wagrapple:block/east_"+y+"_"+z+"_"+x);
 					model.textures(textures);
