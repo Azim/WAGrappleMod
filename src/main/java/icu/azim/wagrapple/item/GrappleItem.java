@@ -92,7 +92,7 @@ public class GrappleItem extends Item{
 
 			player.playSound(SoundEvents.ITEM_ARMOR_EQUIP_CHAIN, 1.0F, 0.6F);
 		}
-        return new TypedActionResult<>(ActionResult.PASS, player.getStackInHand(hand));
+        return new TypedActionResult<>(ActionResult.CONSUME, player.getStackInHand(hand));
     }
 	
 	@Override
