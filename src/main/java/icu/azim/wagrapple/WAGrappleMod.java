@@ -1,17 +1,9 @@
 package icu.azim.wagrapple;
 
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Properties;
-import java.util.Random;
-
-import javax.imageio.ImageIO;
-
 import icu.azim.wagrapple.blocks.DungeonBlock;
 import icu.azim.wagrapple.components.GrappledPlayerComponent;
 import icu.azim.wagrapple.entity.GrappleLineEntity;
@@ -23,12 +15,6 @@ import nerdhub.cardinal.components.api.ComponentType;
 import nerdhub.cardinal.components.api.event.EntityComponentCallback;
 import nerdhub.cardinal.components.api.util.EntityComponents;
 import nerdhub.cardinal.components.api.util.RespawnCopyStrategy;
-import net.devtech.arrp.api.RRPCallback;
-import net.devtech.arrp.api.RuntimeResourcePack;
-import net.devtech.arrp.json.blockstate.JState;
-import net.devtech.arrp.json.blockstate.JVariant;
-import net.devtech.arrp.json.models.JModel;
-import net.devtech.arrp.json.models.JTextures;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.block.FabricBlockSettings;
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
@@ -79,7 +65,6 @@ public class WAGrappleMod implements ModInitializer{
 	public static Identifier LINE_LENGTH_ENCHANTMENT_ID = new Identifier(modid, "rope_length");
 	public static Identifier BOOST_POWER_ENCHANTMENT_ID = new Identifier(modid, "boost_power");
 	
-	public static final RuntimeResourcePack RESOURCE_PACK = RuntimeResourcePack.create(modid+":rpack");
 	
 	@Override
 	public void onInitialize() {
@@ -139,12 +124,7 @@ public class WAGrappleMod implements ModInitializer{
 		EntityComponents.setRespawnCopyStrategy(GRAPPLE_COMPONENT, RespawnCopyStrategy.NEVER_COPY);
 		
 		//generateDungeonBlockPattern();
-		try {
-			generateDungeonTest();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		RRPCallback.EVENT.register(a -> a.add(0, RESOURCE_PACK));
+
 		//RESOURCE_PACK.dump();
 		System.out.println("init general");
 	}
@@ -176,95 +156,8 @@ public class WAGrappleMod implements ModInitializer{
 			ignored.printStackTrace();
 		}
 	}
-	
-	public void generateDungeonBlockPattern() {
-		List<String> stextures = new ArrayList<String>();
-		for(int i = 1; i<=8;i++) {
-			stextures.add("wagrapple:block/dungeon"+i);
-		}
-		Random r = new Random(System.currentTimeMillis());
-		
-		for(int i = 0; i < 16; i++) {
-			JModel model = JModel.model("minecraft:block/cube");
-			JTextures textures = JModel.textures()
-					.var("up", stextures.get(r.nextInt(8)))
-					.var("down", stextures.get(r.nextInt(8)))
-					.var("north", stextures.get(r.nextInt(8)))
-					.var("south", stextures.get(r.nextInt(8)))
-					.var("west", stextures.get(r.nextInt(8)))
-					.var("east", stextures.get(r.nextInt(8)));
-			model.textures(textures);
-			
-			RESOURCE_PACK.addModel(model, new Identifier("wagrapple","block/dungeon_block_"+i));
-		}
-		JState state = JState.state();
-		JVariant variant = JState.variant();
-		for(int i = 0; i < 16; i++) {
-			variant.put("dungeon", i, JState.model("wagrapple:block/dungeon_block_"+i));
-		}
-		state.add(variant);
-		
-		RESOURCE_PACK.addBlockState(state, new Identifier("wagrapple","dungeon_block"));
-	}
-	
 	//TODO add resource pack support - load this after resource packs are created
-	public void generateDungeonTest() throws IOException {
-		for(int x = 0; x<6; x++) {
-			//System.out.println(MinecraftClient.getInstance());
-			//System.out.println(MinecraftClient.getInstance().getResourceManager());
-			//System.out.println(MinecraftClient.getInstance().getResourceManager().getResource(new Identifier("wagrapple","textures/block/test_x"+x+".png")));
-			
-			BufferedImage sheet = ImageIO.read(WAGrappleMod.class.getClassLoader().getResourceAsStream("assets/wagrapple/textures/block/test_x"+x+".png"));
-			for(int iy = 0; iy<6; iy++) {
-				for(int ix = 0; ix<6; ix++) {
-					//north.add();
-					RESOURCE_PACK.addTexture(new Identifier("wagrapple","block/north_"+x+"_"+iy+"_"+ix), sheet.getSubimage(ix*16, iy*16, 16, 16));
-				}
-			}
-		}
-		for(int y = 0; y<6; y++) {
-			BufferedImage sheet = ImageIO.read(WAGrappleMod.class.getClassLoader().getResourceAsStream("assets/wagrapple/textures/block/test_y"+y+".png"));
-			for(int iy = 0; iy<6; iy++) {
-				for(int ix = 0; ix<6; ix++) {
-					RESOURCE_PACK.addTexture(new Identifier("wagrapple","block/up_"+ix+"_"+y+"_"+iy), sheet.getSubimage(ix*16, iy*16, 16, 16));
-				}
-			}
-		}
-		for(int z = 0; z<6; z++) {
-			BufferedImage sheet = ImageIO.read(WAGrappleMod.class.getClassLoader().getResourceAsStream("assets/wagrapple/textures/block/test_z"+z+".png"));
-			for(int iy = 0; iy<6; iy++) {
-				for(int ix = 0; ix<6; ix++) {
-					RESOURCE_PACK.addTexture(new Identifier("wagrapple","block/east_"+ix+"_"+iy+"_"+z), sheet.getSubimage(ix*16, iy*16, 16, 16));
-				}
-			}
-		}
-		for(int x = 0; x<6;x++) {
-			for(int y = 0; y<6; y++) {
-				for(int z = 0; z<6; z++) {
-					JModel model = JModel.model("wagrapple:block/dungeon_block");
-					JTextures textures = JModel.textures()
-							.var("up", "wagrapple:block/up_"+x+"_"+y+"_"+z)
-							.var("down", "wagrapple:block/up_"+x+"_"+(y+5)%6+"_"+z)
-							.var("south", "wagrapple:block/north_"+z+"_"+x+"_"+y)
-							.var("north", "wagrapple:block/north_"+(z+5)%6+"_"+x+"_"+y)
-							.var("west", "wagrapple:block/east_"+y+"_"+z+"_"+(x+5)%6)
-							.var("east", "wagrapple:block/east_"+y+"_"+z+"_"+x);
-					model.textures(textures);
-					RESOURCE_PACK.addModel(model, new Identifier("wagrapple","block/dungeon_block_"+(x+6*y+6*6*z)));
-				}
-				
-			}
-			
-		}
-		JState state = JState.state();
-		JVariant variant = JState.variant();
-		for(int i = 0; i < 216; i++) {
-			variant.put("dungeon", i, JState.model("wagrapple:block/dungeon_block_"+i));
-		}
-		state.add(variant);
-		
-		RESOURCE_PACK.addBlockState(state, new Identifier("wagrapple","dungeon_block"));
-	}
+
 	
 }
 
