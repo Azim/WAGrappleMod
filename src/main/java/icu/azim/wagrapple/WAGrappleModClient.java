@@ -86,36 +86,37 @@ public class WAGrappleModClient implements ClientModInitializer {
 			});
 		});
 
-		RRPCallback.EVENT.register(a -> a.add(0, RESOURCE_PACK));
+		RRPCallback.EVENT.register(a -> {
+			ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(new IdentifiableResourceReloadListener(){
+				private final Identifier identifier = new Identifier(WAGrappleMod.modid, "rrp");
 
-		ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(new IdentifiableResourceReloadListener(){
-			private final Identifier identifier = new Identifier(WAGrappleMod.modid, "rrp");
+				@Override
+				public CompletableFuture<Void> reload(Synchronizer synchronizer, ResourceManager manager, Profiler prepareProfiler, Profiler applyProfiler, Executor prepareExecutor, Executor applyExecutor){
 
-			@Override
-			public CompletableFuture<Void> reload(Synchronizer synchronizer, ResourceManager manager, Profiler prepareProfiler, Profiler applyProfiler, Executor prepareExecutor, Executor applyExecutor){
-
-				return CompletableFuture.supplyAsync(()->{
-					try {
-						generateDungeonBlockPattern(manager);
-						System.out.println("generated dungeon block");
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-					return null;
-				}, applyExecutor).thenCompose((v)->synchronizer.whenPrepared(null));
-			}
-			@Override
-			public Identifier getFabricId(){
-				return identifier;
-			}
+					return CompletableFuture.supplyAsync(()->{
+						try {
+							generateDungeonBlockPattern(manager);
+							System.out.println("generated dungeon block");
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+						return null;
+					}, applyExecutor).thenCompose((v)->synchronizer.whenPrepared(null));
+				}
+				@Override
+				public Identifier getFabricId(){
+					return identifier;
+				}
+			});
+			a.add(0, RESOURCE_PACK);
 		});
+
+		
 
 		System.out.println("client init done");
 	}
 
 	public void generateDungeonBlockPattern(ResourceManager manager) throws IOException {
-
-
 		for(int x = 0; x<6; x++) {
 			BufferedImage sheet = ImageIO.read(manager.getResource(new Identifier("wagrapple", "textures/block/test_x"+x+".png")).getInputStream());
 			for(int iy = 0; iy<6; iy++) {
@@ -151,13 +152,13 @@ public class WAGrappleModClient implements ClientModInitializer {
 							.var("south", "wagrapple:block/north_"+z+"_"+x+"_"+y)
 							.var("north", "wagrapple:block/north_"+(z+5)%6+"_"+x+"_"+y)
 							.var("west", "wagrapple:block/east_"+y+"_"+z+"_"+(x+5)%6)
-							.var("east", "wagrapple:block/east_"+y+"_"+z+"_"+x);
+							.var("east", "wagrapple:block/east_"+y+"_"+z+"_"+x)
+							.var("particle", "#up")
+							;
 					model.textures(textures);
 					RESOURCE_PACK.addModel(model, new Identifier("wagrapple","block/dungeon_block_"+(x+6*y+6*6*z)));
 				}
-
 			}
-
 		}
 		JState state = JState.state();
 		JVariant variant = JState.variant();
