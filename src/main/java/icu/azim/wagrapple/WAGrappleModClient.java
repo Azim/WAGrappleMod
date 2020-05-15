@@ -36,10 +36,10 @@ public class WAGrappleModClient implements ClientModInitializer {
 	private static KeyBinding ascend;
 	private static KeyBinding descend;
 	private static KeyBinding boost;
-	
+
 
 	public static final RuntimeResourcePack RESOURCE_PACK = RuntimeResourcePack.create(WAGrappleMod.modid+":rpack");
-	
+
 	public static KeyBinding getAscend() {
 		if(ascend==null) ascend =  MinecraftClient.getInstance().options.keySneak;
 		return ascend;
@@ -67,55 +67,55 @@ public class WAGrappleModClient implements ClientModInitializer {
 		});
 		ClientSidePacketRegistry.INSTANCE.register(WAGrappleMod.CREATE_LINE_PACKET_ID, (context, packet) -> {
 
-            int entityId = packet.readInt();
-            int ownerId = packet.readInt();
-            double length = packet.readDouble();
-            double boost = packet.readDouble();
-            UUID entityUUID = packet.readUuid();
-            BlockHitResult res = packet.readBlockHitResult();
-            context.getTaskQueue().execute(() -> {
-                Entity e = MinecraftClient.getInstance().world.getEntityById(ownerId);
-                if(!(e instanceof PlayerEntity)) {
-                	return;
-                }
-                PlayerEntity player = (PlayerEntity)e;
-                GrappleLineEntity toSpawn = new GrappleLineEntity(MinecraftClient.getInstance().world, player, length, boost, res);
-                toSpawn.setEntityId(entityId);
-                toSpawn.setUuid(entityUUID);
-                MinecraftClient.getInstance().world.addEntity(entityId, toSpawn);
-            });
-        });
-		
-		RRPCallback.EVENT.register(a -> a.add(0, RESOURCE_PACK));
-		
-		ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(new IdentifiableResourceReloadListener(){
-            private final Identifier identifier = new Identifier(WAGrappleMod.modid, "rrp");
+			int entityId = packet.readInt();
+			int ownerId = packet.readInt();
+			double length = packet.readDouble();
+			double boost = packet.readDouble();
+			UUID entityUUID = packet.readUuid();
+			BlockHitResult res = packet.readBlockHitResult();
+			context.getTaskQueue().execute(() -> {
+				Entity e = MinecraftClient.getInstance().world.getEntityById(ownerId);
+				if(!(e instanceof PlayerEntity)) {
+					return;
+				}
+				PlayerEntity player = (PlayerEntity)e;
+				GrappleLineEntity toSpawn = new GrappleLineEntity(MinecraftClient.getInstance().world, player, length, boost, res);
+				toSpawn.setEntityId(entityId);
+				toSpawn.setUuid(entityUUID);
+				MinecraftClient.getInstance().world.addEntity(entityId, toSpawn);
+			});
+		});
 
-            @Override
-            public CompletableFuture<Void> reload(Synchronizer synchronizer, ResourceManager manager, Profiler prepareProfiler, Profiler applyProfiler, Executor prepareExecutor, Executor applyExecutor){
-                
-            	return CompletableFuture.supplyAsync(()->{
-                    try {
+		RRPCallback.EVENT.register(a -> a.add(0, RESOURCE_PACK));
+
+		ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(new IdentifiableResourceReloadListener(){
+			private final Identifier identifier = new Identifier(WAGrappleMod.modid, "rrp");
+
+			@Override
+			public CompletableFuture<Void> reload(Synchronizer synchronizer, ResourceManager manager, Profiler prepareProfiler, Profiler applyProfiler, Executor prepareExecutor, Executor applyExecutor){
+
+				return CompletableFuture.supplyAsync(()->{
+					try {
 						generateDungeonBlockPattern(manager);
 						System.out.println("generated dungeon block");
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
-                    return null;
-                }, applyExecutor).thenCompose((v)->synchronizer.whenPrepared(null));
-            }
-            @Override
-            public Identifier getFabricId(){
-                return identifier;
-            }
-        });
-		
+					return null;
+				}, applyExecutor).thenCompose((v)->synchronizer.whenPrepared(null));
+			}
+			@Override
+			public Identifier getFabricId(){
+				return identifier;
+			}
+		});
+
 		System.out.println("client init done");
 	}
-	
+
 	public void generateDungeonBlockPattern(ResourceManager manager) throws IOException {
-		
-		
+
+
 		for(int x = 0; x<6; x++) {
 			BufferedImage sheet = ImageIO.read(manager.getResource(new Identifier("wagrapple", "textures/block/test_x"+x+".png")).getInputStream());
 			for(int iy = 0; iy<6; iy++) {
@@ -155,9 +155,9 @@ public class WAGrappleModClient implements ClientModInitializer {
 					model.textures(textures);
 					RESOURCE_PACK.addModel(model, new Identifier("wagrapple","block/dungeon_block_"+(x+6*y+6*6*z)));
 				}
-				
+
 			}
-			
+
 		}
 		JState state = JState.state();
 		JVariant variant = JState.variant();
@@ -165,9 +165,9 @@ public class WAGrappleModClient implements ClientModInitializer {
 			variant.put("dungeon", i, JState.model("wagrapple:block/dungeon_block_"+i));
 		}
 		state.add(variant);
-		
+
 		RESOURCE_PACK.addBlockState(state, new Identifier("wagrapple","dungeon_block"));
 	}
-	
+
 
 }
