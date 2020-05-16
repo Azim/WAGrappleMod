@@ -2,6 +2,7 @@ package icu.azim.wagrapple;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -110,15 +111,27 @@ public class WAGrappleModClient implements ClientModInitializer {
 			});
 			a.add(0, RESOURCE_PACK);
 		});
-
-		
-
+		try {
+			generateDungeonBlockPattern(null);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		System.out.println("client init done");
 	}
-
+	
+	
+	public InputStream getImageResource(ResourceManager manager, String resource) throws IOException {
+		if(manager==null) {
+			resource = "assets/wagrapple/"+resource;
+			return WAGrappleMod.class.getClassLoader().getResourceAsStream(resource);
+		}else {
+			return manager.getResource(new Identifier("wagrapple", resource)).getInputStream();
+		}
+	}
+	
 	public void generateDungeonBlockPattern(ResourceManager manager) throws IOException {
 		for(int x = 0; x<6; x++) {
-			BufferedImage sheet = ImageIO.read(manager.getResource(new Identifier("wagrapple", "textures/block/test_x"+x+".png")).getInputStream());
+			BufferedImage sheet = ImageIO.read(getImageResource(manager, "textures/block/test_x"+x+".png"));
 			for(int iy = 0; iy<6; iy++) {
 				for(int ix = 0; ix<6; ix++) {
 					//north.add();
@@ -127,7 +140,7 @@ public class WAGrappleModClient implements ClientModInitializer {
 			}
 		}
 		for(int y = 0; y<6; y++) {
-			BufferedImage sheet = ImageIO.read(manager.getResource(new Identifier("wagrapple", "textures/block/test_y"+y+".png")).getInputStream());
+			BufferedImage sheet = ImageIO.read(getImageResource(manager, "textures/block/test_y"+y+".png"));
 			for(int iy = 0; iy<6; iy++) {
 				for(int ix = 0; ix<6; ix++) {
 					RESOURCE_PACK.addTexture(new Identifier("wagrapple","block/up_"+ix+"_"+y+"_"+iy), sheet.getSubimage(ix*16, iy*16, 16, 16));
@@ -135,7 +148,7 @@ public class WAGrappleModClient implements ClientModInitializer {
 			}
 		}
 		for(int z = 0; z<6; z++) {
-			BufferedImage sheet = ImageIO.read(manager.getResource(new Identifier("wagrapple", "textures/block/test_z"+z+".png")).getInputStream());
+			BufferedImage sheet = ImageIO.read(getImageResource(manager, "textures/block/test_z"+z+".png"));
 			for(int iy = 0; iy<6; iy++) {
 				for(int ix = 0; ix<6; ix++) {
 					RESOURCE_PACK.addTexture(new Identifier("wagrapple","block/east_"+ix+"_"+iy+"_"+z), sheet.getSubimage(ix*16, iy*16, 16, 16));
