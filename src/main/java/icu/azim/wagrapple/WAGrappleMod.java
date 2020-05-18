@@ -65,6 +65,7 @@ public class WAGrappleMod implements ModInitializer{
 	public static Identifier LINE_LENGTH_ENCHANTMENT_ID = new Identifier(modid, "rope_length");
 	public static Identifier BOOST_POWER_ENCHANTMENT_ID = new Identifier(modid, "boost_power");
 	
+	public static Identifier DUNGEON_BLOCK_ID = new Identifier(modid, "dungeon_block");
 	
 	@Override
 	public void onInitialize() {
@@ -118,8 +119,8 @@ public class WAGrappleMod implements ModInitializer{
 		
 		Registry.register(Registry.ITEM, new Identifier(modid, "grapple"), GRAPPLE_ITEM);
 		
-		Registry.register(Registry.BLOCK, new Identifier(modid, "dungeon_block"), DUNGEON_BLOCK);
-		Registry.register(Registry.ITEM, new Identifier(modid, "dungeon_block"), new BlockItem(DUNGEON_BLOCK, new Item.Settings().group(ITEM_GROUP)));
+		Registry.register(Registry.BLOCK, DUNGEON_BLOCK_ID , DUNGEON_BLOCK);
+		Registry.register(Registry.ITEM, DUNGEON_BLOCK_ID, new BlockItem(DUNGEON_BLOCK, new Item.Settings().group(ITEM_GROUP)));
 		
 		EntityComponents.setRespawnCopyStrategy(GRAPPLE_COMPONENT, RespawnCopyStrategy.NEVER_COPY);
 		

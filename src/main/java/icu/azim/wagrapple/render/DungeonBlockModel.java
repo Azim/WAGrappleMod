@@ -111,7 +111,6 @@ public class DungeonBlockModel implements UnbakedModel{
 			model.emitBlockQuads(blockView, state, pos, randomSupplier, context);
 			
 		}
-
 		@Override
 		public void emitItemQuads(ItemStack stack, Supplier<Random> randomSupplier, RenderContext context) {
 			model.emitItemQuads(stack, randomSupplier, context);

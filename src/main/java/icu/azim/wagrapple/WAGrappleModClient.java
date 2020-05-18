@@ -10,6 +10,7 @@ import java.util.concurrent.Executor;
 import javax.imageio.ImageIO;
 
 import icu.azim.wagrapple.entity.GrappleLineEntity;
+import icu.azim.wagrapple.render.CustomSprites;
 import icu.azim.wagrapple.render.GrappleLineRenderer;
 import net.devtech.arrp.api.RRPCallback;
 import net.devtech.arrp.api.RuntimeResourcePack;
@@ -88,34 +89,39 @@ public class WAGrappleModClient implements ClientModInitializer {
 		});
 
 		RRPCallback.EVENT.register(a -> {
-			ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(new IdentifiableResourceReloadListener(){
-				private final Identifier identifier = new Identifier(WAGrappleMod.modid, "rrp");
-
-				@Override
-				public CompletableFuture<Void> reload(Synchronizer synchronizer, ResourceManager manager, Profiler prepareProfiler, Profiler applyProfiler, Executor prepareExecutor, Executor applyExecutor){
-
-					return CompletableFuture.supplyAsync(()->{
-						try {
-							generateDungeonBlockPattern(manager);
-							System.out.println("generated dungeon block");
-						} catch (IOException e) {
-							e.printStackTrace();
-						}
-						return null;
-					}, applyExecutor).thenCompose((v)->synchronizer.whenPrepared(null));
-				}
-				@Override
-				public Identifier getFabricId(){
-					return identifier;
-				}
-			});
 			a.add(0, RESOURCE_PACK);
 		});
+		
+		ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(new IdentifiableResourceReloadListener(){
+			private final Identifier identifier = new Identifier(WAGrappleMod.modid, "rrp");
+
+			@Override
+			public CompletableFuture<Void> reload(Synchronizer synchronizer, ResourceManager manager, Profiler prepareProfiler, Profiler applyProfiler, Executor prepareExecutor, Executor applyExecutor){
+
+				return CompletableFuture.supplyAsync(()->{
+					try {
+						generateDungeonBlockPattern(manager);
+						System.out.println("generated dungeon block");
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+					return null;
+				}, applyExecutor).thenCompose((v)->synchronizer.whenPrepared(null));
+			}
+			@Override
+			public Identifier getFabricId(){
+				return identifier;
+			}
+		});
+		
 		try {
 			generateDungeonBlockPattern(null);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		CustomSprites.init();
+		
+		
 		System.out.println("client init done");
 	}
 	
@@ -151,7 +157,7 @@ public class WAGrappleModClient implements ClientModInitializer {
 			BufferedImage sheet = ImageIO.read(getImageResource(manager, "textures/block/test_z"+z+".png"));
 			for(int iy = 0; iy<6; iy++) {
 				for(int ix = 0; ix<6; ix++) {
-					RESOURCE_PACK.addTexture(new Identifier("wagrapple","block/east_"+ix+"_"+iy+"_"+z), sheet.getSubimage(ix*16, iy*16, 16, 16));
+					RESOURCE_PACK.addTexture(new Identifier("wagrapple","block/east_"+(5-iy)+"_"+(5-ix)+"_"+z), sheet.getSubimage(ix*16, iy*16, 16, 16));
 				}
 			}
 		}
