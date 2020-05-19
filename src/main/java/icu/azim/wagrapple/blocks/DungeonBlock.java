@@ -34,6 +34,7 @@ public class DungeonBlock extends Block {
 	public static int getPositionIndex(BlockPos pos) {
 		return getPositionIndex(pos.getX(), pos.getY(),pos.getZ());
 	}
+	
 	public static int getPositionIndex(int x, int y, int z) {
 		while(x<0) x+=6;
 		while(y<0) y+=6;

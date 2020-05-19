@@ -3,6 +3,7 @@ package icu.azim.wagrapple.render;
 import icu.azim.wagrapple.WAGrappleMod;
 import net.fabricmc.fabric.api.event.client.ClientSpriteRegistryCallback;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.render.block.BlockModelRenderer;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.util.Identifier;
@@ -22,7 +23,7 @@ public class CustomSprites {
 	    	Sprite sprite = MinecraftClient.getInstance().getSpriteAtlas(SpriteAtlasTexture.BLOCK_ATLAS_TEX).apply(id);
 	    	
 	    	
-	        return MinecraftClient.getInstance().getSpriteAtlas(SpriteAtlasTexture.BLOCK_ATLAS_TEX).apply(id);
+	        return sprite;
 	    }
 
 	    private static void registerSprites(SpriteAtlasTexture texture, ClientSpriteRegistryCallback.Registry registry) {
