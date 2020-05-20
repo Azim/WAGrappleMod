@@ -18,6 +18,7 @@ import net.fabricmc.fabric.api.client.model.ModelProviderException;
 import net.fabricmc.fabric.api.client.model.ModelVariantProvider;
 import net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView;
 import net.fabricmc.fabric.api.renderer.v1.model.FabricBakedModel;
+import net.fabricmc.fabric.api.renderer.v1.model.ForwardingBakedModel;
 import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
 import net.fabricmc.fabric.api.renderer.v1.render.RenderContext.QuadTransform;
 import net.minecraft.block.BlockState;
@@ -36,16 +37,24 @@ import net.minecraft.client.util.SpriteIdentifier;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
 import net.minecraft.world.BlockRenderView;
 
 public class DungeonBlockModel implements UnbakedModel{
 	
-	public static final DungeonBlockModel INSTANCE = new DungeonBlockModel();
+	private static DungeonBlockModel INSTANCE;
 	public static SpriteIdentifier id = new SpriteIdentifier(SpriteAtlasTexture.BLOCK_ATLAS_TEX, new Identifier("wagrapple","dungeon_block"));
 	public static SpriteIdentifier glass = new SpriteIdentifier(SpriteAtlasTexture.BLOCK_ATLAS_TEX, new Identifier("minecraft","glass"));
+	private UnbakedModel original;
 	
-	public DungeonBlockModel() {
+	public static DungeonBlockModel INSTANCE(UnbakedModel m) {
+		if (INSTANCE==null) {
+			INSTANCE = new DungeonBlockModel(m);
+		}
+		return INSTANCE;
+	}
+	
+	public DungeonBlockModel(UnbakedModel m) {
+		original = m;
 	}
 	
 	@Override
@@ -63,24 +72,17 @@ public class DungeonBlockModel implements UnbakedModel{
 	public BakedModel bake(ModelLoader loader, Function<SpriteIdentifier, Sprite> textureGetter,
 			ModelBakeSettings rotationContainer, Identifier modelId) {
 		
-		return new Baked(textureGetter.apply(glass));
+		return new Baked(original.bake(loader, textureGetter, rotationContainer, modelId), textureGetter.apply(glass));
 	}
 	
 
-	@SuppressWarnings("unused")
-	public static class Baked implements FabricBakedModel, BakedModel{
+	public static class Baked extends ForwardingBakedModel{
 		
-		private Function<SpriteIdentifier, Sprite> textureGetter;
 		private Sprite glassSprite;
 		
-		public Baked(Sprite sprite) {
-			glassSprite = sprite;
-			
-		}
-		
-		@Override
-		public List<BakedQuad> getQuads(BlockState state, Direction face, Random random) {
-			return Collections.emptyList();
+		public Baked(BakedModel original, Sprite overlay) {
+			glassSprite = overlay;
+			this.wrapped = original;//what do i choose here
 		}
 		@Override
 		public void emitBlockQuads(BlockRenderView blockView, BlockState state, BlockPos pos, Supplier<Random> randomSupplier, RenderContext context) {
@@ -88,27 +90,24 @@ public class DungeonBlockModel implements UnbakedModel{
 				QuadTransform retextureTransform = new RetextureTransform(glassSprite);
 				
 				BakedModel model = MinecraftClient.getInstance().getBlockRenderManager().getModel(state);
-				
 				emitQuads(blockView, pos, randomSupplier, context, state, model);
-			
+				
 				//context.pushTransform(retextureTransform);
 				//emitQuads(blockView, pos, randomSupplier, context, state, model);
 				//context.popTransform();
 			}
 		}
 		
-		@Override
-		public void emitItemQuads(ItemStack stack, Supplier<Random> randomSupplier, RenderContext context) { }
-		
 		public void emitQuads(BlockRenderView blockView, BlockPos pos, Supplier<Random> randomSupplier, RenderContext context, BlockState camoState, BakedModel model) {
 			
-			
-			//if (model instanceof FabricBakedModel)
-				//((FabricBakedModel) model).emitBlockQuads(blockView, camoState, pos, randomSupplier, context);
-			//else
+			if (model instanceof FabricBakedModel)
+				super.emitBlockQuads(blockView, camoState, pos, randomSupplier, context);
+			else
 				context.fallbackConsumer().accept(model);
 		}
 		
+		@Override
+		public void emitItemQuads(ItemStack stack, Supplier<Random> randomSupplier, RenderContext context) {}
 		private static class RetextureTransform implements QuadTransform
 		{
 			private final Sprite newTexture;
@@ -187,8 +186,8 @@ public class DungeonBlockModel implements UnbakedModel{
 		@Override
 		public UnbakedModel loadModelVariant(ModelIdentifier modelId, ModelProviderContext context)
 				throws ModelProviderException {
-			// TODO Auto-generated method stub
-			return modelId.getNamespace().equals(WAGrappleMod.modid) && modelId.getPath().equals("dungeon_block")? DungeonBlockModel.INSTANCE:null;
+			
+			return modelId.getNamespace().equals(WAGrappleMod.modid) && modelId.getPath().equals("dungeon_block")? DungeonBlockModel.INSTANCE(context.loadModel(modelId)):null;
 		}
 	}
 }
