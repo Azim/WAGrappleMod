@@ -34,6 +34,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.profiler.Profiler;
 
+@SuppressWarnings("unused")
 public class WAGrappleModClient implements ClientModInitializer {
 
 	private static KeyBinding ascend;
@@ -89,7 +90,7 @@ public class WAGrappleModClient implements ClientModInitializer {
 			});
 		});
 
-		ModelLoadingRegistry.INSTANCE.registerVariantProvider(manager -> DungeonBlockModel.VariantProvider.INSTANCE);
+		//ModelLoadingRegistry.INSTANCE.registerVariantProvider(manager -> DungeonBlockModel.VariantProvider.INSTANCE);
 		
 		
 		

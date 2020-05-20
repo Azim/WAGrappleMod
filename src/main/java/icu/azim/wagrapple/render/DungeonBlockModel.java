@@ -16,11 +16,7 @@ import icu.azim.wagrapple.blocks.DungeonBlock;
 import net.fabricmc.fabric.api.client.model.ModelProviderContext;
 import net.fabricmc.fabric.api.client.model.ModelProviderException;
 import net.fabricmc.fabric.api.client.model.ModelVariantProvider;
-import net.fabricmc.fabric.api.renderer.v1.RendererAccess;
-import net.fabricmc.fabric.api.renderer.v1.mesh.Mesh;
-import net.fabricmc.fabric.api.renderer.v1.mesh.MeshBuilder;
 import net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView;
-import net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter;
 import net.fabricmc.fabric.api.renderer.v1.model.FabricBakedModel;
 import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
 import net.fabricmc.fabric.api.renderer.v1.render.RenderContext.QuadTransform;
@@ -46,7 +42,8 @@ import net.minecraft.world.BlockRenderView;
 public class DungeonBlockModel implements UnbakedModel{
 	
 	public static final DungeonBlockModel INSTANCE = new DungeonBlockModel();
-	public SpriteIdentifier id = new SpriteIdentifier(SpriteAtlasTexture.BLOCK_ATLAS_TEX, new Identifier("wagrapple","dungeon_block"));
+	public static SpriteIdentifier id = new SpriteIdentifier(SpriteAtlasTexture.BLOCK_ATLAS_TEX, new Identifier("wagrapple","dungeon_block"));
+	public static SpriteIdentifier glass = new SpriteIdentifier(SpriteAtlasTexture.BLOCK_ATLAS_TEX, new Identifier("minecraft","glass"));
 	
 	public DungeonBlockModel() {
 	}
@@ -66,19 +63,18 @@ public class DungeonBlockModel implements UnbakedModel{
 	public BakedModel bake(ModelLoader loader, Function<SpriteIdentifier, Sprite> textureGetter,
 			ModelBakeSettings rotationContainer, Identifier modelId) {
 		
-		return new Baked(textureGetter);
+		return new Baked(textureGetter.apply(glass));
 	}
 	
-	
+
+	@SuppressWarnings("unused")
 	public static class Baked implements FabricBakedModel, BakedModel{
 		
 		private Function<SpriteIdentifier, Sprite> textureGetter;
 		private Sprite glassSprite;
-		public static SpriteIdentifier glass = new SpriteIdentifier(SpriteAtlasTexture.BLOCK_ATLAS_TEX, new Identifier("minecraft","glass"));
 		
-		public Baked(Function<SpriteIdentifier, Sprite> textureGetter) {
-			this.textureGetter = textureGetter;
-			glassSprite = textureGetter.apply(glass);
+		public Baked(Sprite sprite) {
+			glassSprite = sprite;
 			
 		}
 		
@@ -89,7 +85,7 @@ public class DungeonBlockModel implements UnbakedModel{
 		@Override
 		public void emitBlockQuads(BlockRenderView blockView, BlockState state, BlockPos pos, Supplier<Random> randomSupplier, RenderContext context) {
 			if(state.getBlock() instanceof DungeonBlock) {
-				QuadTransform retextureTransform = new RetextureTransform(textureGetter.apply(glass));
+				QuadTransform retextureTransform = new RetextureTransform(glassSprite);
 				
 				BakedModel model = MinecraftClient.getInstance().getBlockRenderManager().getModel(state);
 				
