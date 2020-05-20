@@ -10,7 +10,7 @@ import java.util.concurrent.Executor;
 import javax.imageio.ImageIO;
 
 import icu.azim.wagrapple.entity.GrappleLineEntity;
-import icu.azim.wagrapple.render.CustomSprites;
+import icu.azim.wagrapple.render.DungeonBlockModel;
 import icu.azim.wagrapple.render.GrappleLineRenderer;
 import net.devtech.arrp.api.RRPCallback;
 import net.devtech.arrp.api.RuntimeResourcePack;
@@ -19,6 +19,7 @@ import net.devtech.arrp.json.blockstate.JVariant;
 import net.devtech.arrp.json.models.JModel;
 import net.devtech.arrp.json.models.JTextures;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.model.ModelLoadingRegistry;
 import net.fabricmc.fabric.api.client.rendereregistry.v1.EntityRendererRegistry;
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
@@ -88,6 +89,10 @@ public class WAGrappleModClient implements ClientModInitializer {
 			});
 		});
 
+		ModelLoadingRegistry.INSTANCE.registerVariantProvider(manager -> DungeonBlockModel.VariantProvider.INSTANCE);
+		
+		
+		
 		RRPCallback.EVENT.register(a -> {
 			a.add(0, RESOURCE_PACK);
 		});
@@ -119,7 +124,7 @@ public class WAGrappleModClient implements ClientModInitializer {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		CustomSprites.init();
+		//CustomSprites.init();
 		
 		
 		System.out.println("client init done");

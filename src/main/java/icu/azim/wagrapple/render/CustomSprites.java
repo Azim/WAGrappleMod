@@ -3,13 +3,14 @@ package icu.azim.wagrapple.render;
 import icu.azim.wagrapple.WAGrappleMod;
 import net.fabricmc.fabric.api.event.client.ClientSpriteRegistryCallback;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.block.BlockModelRenderer;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.util.Identifier;
 
 public class CustomSprites {
-
+		
+	
+		@Deprecated
 	    public static void init() {
 	        ClientSpriteRegistryCallback
 	                .event(SpriteAtlasTexture.BLOCK_ATLAS_TEX)

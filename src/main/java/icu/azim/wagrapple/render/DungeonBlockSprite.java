@@ -5,7 +5,8 @@ import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.SpriteAtlasTexture;
 
 public class DungeonBlockSprite extends FabricSprite{
-
+	
+	@Deprecated
 	public DungeonBlockSprite(SpriteAtlasTexture spriteAtlasTexture, Info info, int mipmap, int u, int v, int x, int y,
 			NativeImage nativeImage) {
 		super(spriteAtlasTexture, info, mipmap, u, v, x, y, nativeImage);
