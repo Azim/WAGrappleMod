@@ -20,12 +20,17 @@ import net.devtech.arrp.json.models.JModel;
 import net.devtech.arrp.json.models.JTextures;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.model.ModelLoadingRegistry;
+import net.fabricmc.fabric.api.client.model.ModelProviderContext;
+import net.fabricmc.fabric.api.client.model.ModelProviderException;
+import net.fabricmc.fabric.api.client.model.ModelVariantProvider;
 import net.fabricmc.fabric.api.client.rendereregistry.v1.EntityRendererRegistry;
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.options.KeyBinding;
+import net.minecraft.client.render.model.UnbakedModel;
+import net.minecraft.client.util.ModelIdentifier;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.resource.ResourceManager;
@@ -89,10 +94,21 @@ public class WAGrappleModClient implements ClientModInitializer {
 				MinecraftClient.getInstance().world.addEntity(entityId, toSpawn);
 			});
 		});
-
-		//ModelLoadingRegistry.INSTANCE.registerVariantProvider(manager -> DungeonBlockModel.VariantProvider.INSTANCE);
 		
-		
+		/*
+		ModelLoadingRegistry.INSTANCE.registerVariantProvider(manager -> {
+			return new ModelVariantProvider() {
+				@Override
+				public UnbakedModel loadModelVariant(ModelIdentifier modelId, ModelProviderContext context) throws ModelProviderException {
+					
+					return modelId.getNamespace().equals(WAGrappleMod.modid) && modelId.getPath().equals("dungeon_block")
+							?
+									DungeonBlockModel.INSTANCE(context.loadModel(modelId))
+									:null;
+				}
+			};
+		});
+		*/
 		
 		RRPCallback.EVENT.register(a -> {
 			a.add(0, RESOURCE_PACK);
@@ -147,7 +163,7 @@ public class WAGrappleModClient implements ClientModInitializer {
 			for(int iy = 0; iy<6; iy++) {
 				for(int ix = 0; ix<6; ix++) {
 					//north.add();
-					RESOURCE_PACK.addTexture(new Identifier("wagrapple","block/north_"+x+"_"+iy+"_"+ix), sheet.getSubimage(ix*16, iy*16, 16, 16));
+					RESOURCE_PACK.addTexture(new Identifier("wagrapple","block/north_"+(5-x)+"_"+(5-iy)+"_"+(5-ix)), sheet.getSubimage(ix*16, iy*16, 16, 16));
 				}
 			}
 		}
@@ -174,8 +190,8 @@ public class WAGrappleModClient implements ClientModInitializer {
 					JTextures textures = JModel.textures()
 							.var("up", "wagrapple:block/up_"+x+"_"+y+"_"+z)
 							.var("down", "wagrapple:block/up_"+x+"_"+(y+5)%6+"_"+z)
-							.var("south", "wagrapple:block/north_"+z+"_"+x+"_"+y)
-							.var("north", "wagrapple:block/north_"+(z+5)%6+"_"+x+"_"+y)
+							.var("south", "wagrapple:block/north_"+z+"_"+y+"_"+x)
+							.var("north", "wagrapple:block/north_"+(5-z)+"_"+y+"_"+x)
 							.var("west", "wagrapple:block/east_"+y+"_"+z+"_"+(x+5)%6)
 							.var("east", "wagrapple:block/east_"+y+"_"+z+"_"+x)
 							.var("particle", "#up")
