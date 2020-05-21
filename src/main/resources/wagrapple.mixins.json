@@ -6,7 +6,8 @@
   "mixins": [
   ],
   "client": [
-    "PlayerHandMixin"
+    "PlayerHandMixin",
+    "ModelsPostLoadMixin"
   ],
   "injectors": {
     "defaultRequire": 1

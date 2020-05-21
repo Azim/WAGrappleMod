@@ -12,6 +12,7 @@ import javax.imageio.ImageIO;
 import icu.azim.wagrapple.entity.GrappleLineEntity;
 import icu.azim.wagrapple.render.DungeonBlockModel;
 import icu.azim.wagrapple.render.GrappleLineRenderer;
+import icu.azim.wagrapple.util.ModelWrapperHandler;
 import net.devtech.arrp.api.RRPCallback;
 import net.devtech.arrp.api.RuntimeResourcePack;
 import net.devtech.arrp.json.blockstate.JState;
@@ -109,6 +110,10 @@ public class WAGrappleModClient implements ClientModInitializer {
 			};
 		});
 		*/
+		ModelWrapperHandler.INSTANCE.register(manager->(state,model)->{
+			return new DungeonBlockModel(model);
+		});
+		
 		
 		RRPCallback.EVENT.register(a -> {
 			a.add(0, RESOURCE_PACK);
