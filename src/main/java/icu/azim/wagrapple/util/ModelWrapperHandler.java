@@ -20,7 +20,6 @@ public class ModelWrapperHandler {
 	
 	
 	public BiFunction<BlockState, UnbakedModel, UnbakedModel> prepare(ResourceManager manager){
-		
 		List<BiFunction<BlockState, UnbakedModel, UnbakedModel>> list = new ArrayList<>();
 		for(Function<ResourceManager, BiFunction<BlockState, UnbakedModel, UnbakedModel>> handler:handlers) {
 			 list.add(handler.apply(manager));

@@ -2,7 +2,6 @@ package icu.azim.wagrapple.render;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.Function;
@@ -11,48 +10,29 @@ import java.util.function.Supplier;
 import com.google.common.collect.ImmutableSet;
 import com.mojang.datafixers.util.Pair;
 
-import icu.azim.wagrapple.WAGrappleMod;
 import icu.azim.wagrapple.blocks.DungeonBlock;
-import net.fabricmc.fabric.api.client.model.ModelProviderContext;
-import net.fabricmc.fabric.api.client.model.ModelProviderException;
-import net.fabricmc.fabric.api.client.model.ModelVariantProvider;
 import net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView;
 import net.fabricmc.fabric.api.renderer.v1.model.FabricBakedModel;
 import net.fabricmc.fabric.api.renderer.v1.model.ForwardingBakedModel;
 import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
 import net.fabricmc.fabric.api.renderer.v1.render.RenderContext.QuadTransform;
 import net.minecraft.block.BlockState;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.TexturedRenderLayers;
 import net.minecraft.client.render.model.BakedModel;
-import net.minecraft.client.render.model.BakedQuad;
 import net.minecraft.client.render.model.ModelBakeSettings;
 import net.minecraft.client.render.model.ModelLoader;
 import net.minecraft.client.render.model.UnbakedModel;
-import net.minecraft.client.render.model.json.ModelItemPropertyOverrideList;
-import net.minecraft.client.render.model.json.ModelTransformation;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.texture.SpriteAtlasTexture;
-import net.minecraft.client.util.ModelIdentifier;
 import net.minecraft.client.util.SpriteIdentifier;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.BlockRenderView;
 
 public class DungeonBlockModel implements UnbakedModel{
-	
-	private static DungeonBlockModel INSTANCE;
-	public static SpriteIdentifier id = new SpriteIdentifier(SpriteAtlasTexture.BLOCK_ATLAS_TEX, new Identifier("wagrapple","dungeon_block"));
+
+	public static SpriteIdentifier id = new SpriteIdentifier(SpriteAtlasTexture.BLOCK_ATLAS_TEX, new Identifier("wagrapple","block/east_0_0_0"));
 	public static SpriteIdentifier glass = new SpriteIdentifier(SpriteAtlasTexture.BLOCK_ATLAS_TEX, new Identifier("minecraft","block/glass"));
 	private UnbakedModel original;
-	
-	public static DungeonBlockModel INSTANCE(UnbakedModel m) {
-		if (INSTANCE==null) {
-			INSTANCE = new DungeonBlockModel(m);
-		}
-		return INSTANCE;
-	}
 	
 	public DungeonBlockModel(UnbakedModel m) {
 		original = m;
@@ -60,13 +40,13 @@ public class DungeonBlockModel implements UnbakedModel{
 	
 	@Override
 	public Collection<Identifier> getModelDependencies() {
-		return Collections.emptyList();
+		return original.getModelDependencies();
 	}
 
 	@Override
 	public Collection<SpriteIdentifier> getTextureDependencies(Function<Identifier, UnbakedModel> unbakedModelGetter,
 			Set<Pair<String, String>> unresolvedTextureReferences) {
-		return ImmutableSet.of(id);
+		return original.getTextureDependencies(unbakedModelGetter, unresolvedTextureReferences);
 	}
 
 	@Override
@@ -80,37 +60,37 @@ public class DungeonBlockModel implements UnbakedModel{
 	public static class Baked extends ForwardingBakedModel{
 		
 		private Sprite glassSprite;
+		private QuadTransform retextureTransform;
 		
 		public Baked(BakedModel original, Sprite overlay) {
 			glassSprite = overlay;
 			this.wrapped = original;//what do i choose here
+			retextureTransform = new RetextureTransform(glassSprite);
 		}
 		@Override
 		public void emitBlockQuads(BlockRenderView blockView, BlockState state, BlockPos pos, Supplier<Random> randomSupplier, RenderContext context) {
+			
 			if(state.getBlock() instanceof DungeonBlock) {
-				QuadTransform retextureTransform = new RetextureTransform(glassSprite);
-				
-				BakedModel model = MinecraftClient.getInstance().getBlockRenderManager().getModel(state);
+				//((FabricBakedModel) wrapped).emitBlockQuads(blockView, state, pos, randomSupplier, context);
 
-				//context.fallbackConsumer().accept(this.wrapped);
-				//emitQuads(blockView, pos, randomSupplier, context, state, model);
-				context.fallbackConsumer().accept(this.wrapped);
-				/*
+				//emitQuads(blockView, pos, randomSupplier, context, state, this);
 				context.pushTransform(retextureTransform);
-				context.fallbackConsumer().accept(this.wrapped);
+				emitQuads(blockView, pos, randomSupplier, context, state, this);
 				context.popTransform();
-				*/
+				
 			}else {
 				context.fallbackConsumer().accept(this.wrapped);
 			}
 		}
 		
-		public void emitQuads(BlockRenderView blockView, BlockPos pos, Supplier<Random> randomSupplier, RenderContext context, BlockState camoState, BakedModel model) {
-			
-			if (model instanceof FabricBakedModel)
-				super.emitBlockQuads(blockView, camoState, pos, randomSupplier, context);
-			else
+		public void emitQuads(BlockRenderView blockView, BlockPos pos, Supplier<Random> randomSupplier, RenderContext context, BlockState state, BakedModel model) {
+			if(model instanceof Baked) {
+				((FabricBakedModel) wrapped).emitBlockQuads(blockView, state, pos, randomSupplier, context);
+			}else if (model instanceof FabricBakedModel) {
+				((FabricBakedModel) model).emitBlockQuads(blockView, state, pos, randomSupplier, context);
+			}else {
 				context.fallbackConsumer().accept(model);
+			}
 		}
 		
 		private static class RetextureTransform implements QuadTransform
