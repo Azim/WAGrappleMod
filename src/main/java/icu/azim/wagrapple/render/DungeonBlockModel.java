@@ -91,7 +91,8 @@ public class DungeonBlockModel implements UnbakedModel{
 				
 				BakedModel model = MinecraftClient.getInstance().getBlockRenderManager().getModel(state);
 
-				context.fallbackConsumer().accept(this);
+				context.fallbackConsumer().accept(this.wrapped);
+				//super.emitBlockQuads(blockView, state, pos, randomSupplier, context);
 				//emitQuads(blockView, pos, randomSupplier, context, state, model);
 				
 				//context.pushTransform(retextureTransform);
@@ -129,49 +130,6 @@ public class DungeonBlockModel implements UnbakedModel{
 				return true;
 			}
 		}
-		
-
-		@Override
-		public boolean useAmbientOcclusion() {
-			return true;
-		}
-
-		@Override
-		public boolean hasDepth() {
-			return true;
-		}
-
-		@Override
-		public boolean isSideLit() {
-			return false;
-		}
-
-		@Override
-		public boolean isBuiltin() {
-			return false;
-		}
-
-		//TODO edit
-		@Override
-		public Sprite getSprite() {
-			return glassSprite;
-		}
-
-		@Override
-		public ModelTransformation getTransformation() {
-			return ModelTransformation.NONE;
-		}
-
-		@Override
-		public ModelItemPropertyOverrideList getItemPropertyOverrides() {
-			return ModelItemPropertyOverrideList.EMPTY;
-		}
-
-		@Override
-		public boolean isVanillaAdapter() {
-			return false;
-		}
-		
 	}
 
 	public static enum VariantProvider implements ModelVariantProvider
