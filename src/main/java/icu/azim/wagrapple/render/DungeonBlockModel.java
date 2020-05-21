@@ -74,9 +74,9 @@ public class DungeonBlockModel implements UnbakedModel{
 				//((FabricBakedModel) wrapped).emitBlockQuads(blockView, state, pos, randomSupplier, context);
 
 				//emitQuads(blockView, pos, randomSupplier, context, state, this);
-				context.pushTransform(retextureTransform);
+				//context.pushTransform(retextureTransform);
 				emitQuads(blockView, pos, randomSupplier, context, state, this);
-				context.popTransform();
+				//context.popTransform();
 				
 			}else {
 				context.fallbackConsumer().accept(this.wrapped);
