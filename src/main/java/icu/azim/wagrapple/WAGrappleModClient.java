@@ -9,6 +9,7 @@ import java.util.concurrent.Executor;
 
 import javax.imageio.ImageIO;
 
+import icu.azim.wagrapple.blocks.DungeonBlock;
 import icu.azim.wagrapple.entity.GrappleLineEntity;
 import icu.azim.wagrapple.render.DungeonBlockModel;
 import icu.azim.wagrapple.render.GrappleLineRenderer;
@@ -111,7 +112,7 @@ public class WAGrappleModClient implements ClientModInitializer {
 		});
 		*/
 		ModelWrapperHandler.INSTANCE.register(manager->(state,model)->{
-			return new DungeonBlockModel(model);
+			return (state.getBlock()instanceof DungeonBlock)?new DungeonBlockModel(model):model;
 		});
 		
 		

@@ -90,11 +90,15 @@ public class DungeonBlockModel implements UnbakedModel{
 				QuadTransform retextureTransform = new RetextureTransform(glassSprite);
 				
 				BakedModel model = MinecraftClient.getInstance().getBlockRenderManager().getModel(state);
-				emitQuads(blockView, pos, randomSupplier, context, state, model);
+
+				context.fallbackConsumer().accept(this);
+				//emitQuads(blockView, pos, randomSupplier, context, state, model);
 				
 				//context.pushTransform(retextureTransform);
 				//emitQuads(blockView, pos, randomSupplier, context, state, model);
 				//context.popTransform();
+			}else {
+				context.fallbackConsumer().accept(this.wrapped);
 			}
 		}
 		
