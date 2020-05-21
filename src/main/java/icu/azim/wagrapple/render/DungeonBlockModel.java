@@ -23,6 +23,7 @@ import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
 import net.fabricmc.fabric.api.renderer.v1.render.RenderContext.QuadTransform;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.render.TexturedRenderLayers;
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.BakedQuad;
 import net.minecraft.client.render.model.ModelBakeSettings;
@@ -43,7 +44,7 @@ public class DungeonBlockModel implements UnbakedModel{
 	
 	private static DungeonBlockModel INSTANCE;
 	public static SpriteIdentifier id = new SpriteIdentifier(SpriteAtlasTexture.BLOCK_ATLAS_TEX, new Identifier("wagrapple","dungeon_block"));
-	public static SpriteIdentifier glass = new SpriteIdentifier(SpriteAtlasTexture.BLOCK_ATLAS_TEX, new Identifier("minecraft","glass"));
+	public static SpriteIdentifier glass = new SpriteIdentifier(SpriteAtlasTexture.BLOCK_ATLAS_TEX, new Identifier("minecraft","block/glass"));
 	private UnbakedModel original;
 	
 	public static DungeonBlockModel INSTANCE(UnbakedModel m) {
@@ -91,13 +92,14 @@ public class DungeonBlockModel implements UnbakedModel{
 				
 				BakedModel model = MinecraftClient.getInstance().getBlockRenderManager().getModel(state);
 
+				//context.fallbackConsumer().accept(this.wrapped);
+				//emitQuads(blockView, pos, randomSupplier, context, state, model);
 				context.fallbackConsumer().accept(this.wrapped);
-				//super.emitBlockQuads(blockView, state, pos, randomSupplier, context);
-				//emitQuads(blockView, pos, randomSupplier, context, state, model);
-				
-				//context.pushTransform(retextureTransform);
-				//emitQuads(blockView, pos, randomSupplier, context, state, model);
-				//context.popTransform();
+				/*
+				context.pushTransform(retextureTransform);
+				context.fallbackConsumer().accept(this.wrapped);
+				context.popTransform();
+				*/
 			}else {
 				context.fallbackConsumer().accept(this.wrapped);
 			}
@@ -111,8 +113,6 @@ public class DungeonBlockModel implements UnbakedModel{
 				context.fallbackConsumer().accept(model);
 		}
 		
-		@Override
-		public void emitItemQuads(ItemStack stack, Supplier<Random> randomSupplier, RenderContext context) {}
 		private static class RetextureTransform implements QuadTransform
 		{
 			private final Sprite newTexture;
@@ -129,27 +129,6 @@ public class DungeonBlockModel implements UnbakedModel{
 					.colorIndex(-1);
 				return true;
 			}
-		}
-	}
-
-	public static enum VariantProvider implements ModelVariantProvider
-	{
-		INSTANCE;
-		
-		/*
-		@Override
-		public UnbakedModel loadModelVariant(ModelIdentifier modelId, ModelProviderContext context) throws ModelProviderException
-		{
-			return modelId.getNamespace().equals(Polar.MOD_ID) && modelId.getPath().equals("stabilised_block")
-					? StabilisedBlockModel.INSTANCE
-					: null;
-		}*/
-
-		@Override
-		public UnbakedModel loadModelVariant(ModelIdentifier modelId, ModelProviderContext context)
-				throws ModelProviderException {
-			
-			return modelId.getNamespace().equals(WAGrappleMod.modid) && modelId.getPath().equals("dungeon_block")? DungeonBlockModel.INSTANCE(context.loadModel(modelId)):null;
 		}
 	}
 }

@@ -3,6 +3,8 @@ package icu.azim.wagrapple;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -29,6 +31,7 @@ import net.fabricmc.fabric.api.client.rendereregistry.v1.EntityRendererRegistry;
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
+import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.options.KeyBinding;
 import net.minecraft.client.render.model.UnbakedModel;
@@ -112,7 +115,11 @@ public class WAGrappleModClient implements ClientModInitializer {
 		});
 		*/
 		ModelWrapperHandler.INSTANCE.register(manager->(state,model)->{
-			return (state.getBlock()instanceof DungeonBlock)?new DungeonBlockModel(model):model;
+			if(state.getBlock() instanceof DungeonBlock) {
+				return new DungeonBlockModel(model);
+			}else {
+				return model;
+			}
 		});
 		
 		
