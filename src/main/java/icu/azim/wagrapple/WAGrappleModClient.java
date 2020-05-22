@@ -204,7 +204,7 @@ public class WAGrappleModClient implements ClientModInitializer {
 							.var("up", "wagrapple:block/up_"+x+"_"+y+"_"+z)
 							.var("down", "wagrapple:block/up_"+x+"_"+(y+5)%6+"_"+z)
 							.var("south", "wagrapple:block/north_"+z+"_"+y+"_"+x)
-							.var("north", "wagrapple:block/north_"+(5-z)+"_"+y+"_"+x)
+							.var("north", "wagrapple:block/north_"+(z+5)%6+"_"+y+"_"+x)
 							.var("west", "wagrapple:block/east_"+y+"_"+z+"_"+(x+5)%6)
 							.var("east", "wagrapple:block/east_"+y+"_"+z+"_"+x)
 							.var("particle", "#up")
